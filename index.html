@@ -842,7 +842,7 @@ if (typeof APX !== 'undefined') Object.keys(APX).forEach(function (tz) { APX[tz]
 function $(id) { return document.getElementById(id); }
 var root = $('root');
 if (!root) return;
-var state = { tzo: {}, hdr: true, apn: true };
+var state = { tzo: {}, hdr: true, apn: true, tot: false };
 var tzKey = '';
 
 function ssGet(k) { try { return sessionStorage.getItem(k === 'hv2_draft' ? 'hv2_draft3' : k); } catch (e) { return null; } }
@@ -1030,6 +1030,10 @@ function arrCell(s) {
     '<td style="' + F + 'padding:0;font-size:12px;color:#102E55;white-space:nowrap">' + t + '</td>' +
     '<td width="16" style="' + F + 'width:16px;padding:0 0 0 2px;vertical-align:top;text-align:left;font-size:9.5px;line-height:1;color:#B45309;font-weight:bold;white-space:nowrap">' + dd + '</td></tr></table>';
 }
+/* Texto dentro de una celda angosta (del tamaño del contenido): evita que Gmail en el celular lo agrande. */
+function narrow(inner, align, extra) {
+  return '<table align="' + align + '" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse' + (align === 'right' ? ';margin-left:auto' : '') + '"><tr><td style="' + F + 'padding:0;text-align:' + align + ';white-space:nowrap;' + (extra || '') + '">' + inner + '</td></tr></table>';
+}
 function totLabel(lbl) { return lbl === 'Recorrido' ? 'del recorrido' : (lbl === 'Ida' || lbl === 'Vuelta' ? 'de la ' + lbl.toLowerCase() : 'del ' + lbl.toLowerCase()); }
 function tableHTML(it, calc, o) {
   o = o || {};
@@ -1053,7 +1057,7 @@ function tableHTML(it, calc, o) {
   h += '<tr>' + cols.map(function (c, i) { return '<th bgcolor="#EEF6FD"' + (i === 1 ? ' width="170"' : '') + ' style="' + ST.th + (i === 1 ? ';width:170px;min-width:170px' : '') + '">' + c + '</th>'; }).join('') + '</tr>';
   calc.journeys.forEach(function (j, ix) {
     var lbl = jLabel(calc, ix);
-    h += '<tr><td colspan="' + N + '" bgcolor="#E2F1FB" style="' + ST.grp + '"><b style="color:#0A7FC4;letter-spacing:0.6px">' + esc(lbl.toUpperCase()) + '</b> · ' + esc(U.apCity(j.from)) + ' → ' + esc(U.apCity(j.to)) + '</td></tr>';
+    h += '<tr><td colspan="' + N + '" bgcolor="#E2F1FB" style="' + ST.grp + '">' + narrow('<b style="color:#0A7FC4;letter-spacing:0.6px">' + esc(lbl.toUpperCase()) + '</b> · ' + esc(U.apCity(j.from)) + ' → ' + esc(U.apCity(j.to)), 'left', 'font-size:11.5px;color:#0B4F8A') + '</td></tr>';
     j.segs.forEach(function (s, k) {
       var a = U.alInfo(s.al), lay = k < j.layovers.length ? j.layovers[k] : null;
       var bgc = k % 2 ? '#F7FAFD' : '#FFFFFF';
@@ -1076,15 +1080,15 @@ function tableHTML(it, calc, o) {
         '<td' + tda + ' style="' + td + '">' + HV.fmtDur(s.dur) + '</td>' +
         (conn ? '<td' + tda + ' style="' + td + '">' + tr + '</td>' : '') + '</tr>';
     });
-    if (j.stops > 0) {
-      h += '<tr><td colspan="' + (N - 2) + '" bgcolor="#F1F8F4" style="' + ST.sub + ';text-align:right">Duración total ' + totLabel(lbl) + '<br><span style="font-size:10.5px;color:#5E7A6E">' + HV.fmtDur(j.flight) + ' de vuelo + ' + HV.fmtDur(j.lay) + ' de tránsito</span></td>' +
+    if (j.stops > 0 && o.tot) {
+      h += '<tr><td colspan="' + (N - 2) + '" bgcolor="#F1F8F4" style="' + ST.sub + ';text-align:right">' + narrow('Duración total ' + totLabel(lbl) + '<br><span style="font-size:10.5px;color:#5E7A6E">' + HV.fmtDur(j.flight) + ' de vuelo + ' + HV.fmtDur(j.lay) + ' de tránsito</span>', 'right', 'font-size:11.5px;color:#1F5E45;line-height:1.35') + '</td>' +
         '<td colspan="2" bgcolor="#F1F8F4" style="' + ST.sub + ';text-align:center"><b style="color:#17583F;font-size:13px">' + HV.fmtDur(j.total) + '</b></td></tr>';
     }
   });
   h += '</table></td></tr>';
   var notes = ['Horarios locales de cada ciudad.'];
   if (anyDay) notes.push('+1: llega al día siguiente.');
-  if (conn) notes.push('La duración total incluye vuelos y esperas entre conexiones.');
+  if (conn && o.tot) notes.push('La duración total incluye vuelos y esperas entre conexiones.');
   h += '<tr><td style="' + ST.ft + '">' + notes.join(' ') + '</td></tr></table>';
   return h;
 }
@@ -1101,7 +1105,7 @@ function plainText(it, calc) {
       var op = opName(s);
       L.push(dateCell(s.depD, fy).replace(',', '') + ' | ' + U.alInfo(s.al).name + ' ' + s.al + ' ' + s.fn + ' | ' + s.dep + ' ' + U.apCity(s.from) + ' (' + s.from + ') → ' + s.arr + (s.dayDiff ? ' (' + dayLabel(s.dayDiff) + ')' : '') + ' ' + U.apCity(s.to) + ' (' + s.to + ') | ' + HV.fmtDur(s.dur) + (k < j.layovers.length ? ' | Tránsito ' + HV.fmtDur(j.layovers[k].min) : ''));
     });
-    if (j.stops > 0) L.push('Duración total: ' + HV.fmtDur(j.total) + ' (' + HV.fmtDur(j.flight) + ' de vuelo + ' + HV.fmtDur(j.lay) + ' de tránsito)');
+    if (j.stops > 0 && state.tot) L.push('Duración total: ' + HV.fmtDur(j.total) + ' (' + HV.fmtDur(j.flight) + ' de vuelo + ' + HV.fmtDur(j.lay) + ' de tránsito)');
     L.push('');
   });
   L.push('Todos los horarios son locales.' + (it.advisor ? ' ' + it.advisor + ' ·' : '') + ' Hiperviajes');
@@ -1126,7 +1130,7 @@ function waText(it, calc) {
       if (k < j.layovers.length) L.push('🔁 Tránsito en ' + U.apCity(s.to) + ': ' + HV.fmtDur(j.layovers[k].min));
     });
     var tl = lbl === 'Recorrido' ? 'del recorrido' : (lbl === 'Ida' || lbl === 'Vuelta' ? 'de la ' + lbl.toLowerCase() : 'del ' + lbl.toLowerCase());
-    if (j.stops > 0) L.push('', '⌛ *Duración total ' + tl + ': ' + HV.fmtDur(j.total) + '*' + ' (' + HV.fmtDur(j.flight) + ' de vuelo + ' + HV.fmtDur(j.lay) + ' de tránsito)');
+    if (j.stops > 0 && state.tot) L.push('', '⌛ *Duración total ' + tl + ': ' + HV.fmtDur(j.total) + '*' + ' (' + HV.fmtDur(j.flight) + ' de vuelo + ' + HV.fmtDur(j.lay) + ' de tránsito)');
   });
   L.push('', '_Horarios locales de cada ciudad._');
   return L.join('\n');
@@ -1143,7 +1147,7 @@ function renderCanvas(it, calc, scale) {
   return loadScript(H2C).then(function () {
     var box = document.createElement('div');
     box.className = 'cap';
-    box.innerHTML = renderTable(it, calc, { hdr: true, apn: true });
+    box.innerHTML = renderTable(it, calc, { hdr: true, apn: true, tot: state.tot });
     document.body.appendChild(box);
     var imgs = box.querySelectorAll('img');
     return Promise.all([].map.call(imgs, function (im) { return im.complete ? 0 : new Promise(function (r) { im.onload = im.onerror = r; }); })).then(function () {
@@ -1250,7 +1254,7 @@ function updatePreview() {
     pv.innerHTML = '<div class="empty"><h2>Acá aparece la tabla</h2><p>Pegá un PNR o itinerario en el recuadro de arriba, o probá con uno de los ejemplos. Se arma una tabla única con fecha, aerolínea, vuelo, horarios, duración y tránsito.</p></div>';
   } else {
     d = '<div class="dg dg-ok"><b>' + it.segs.length + (it.segs.length === 1 ? ' vuelo detectado' : ' vuelos detectados') + '</b> · formato ' + esc(it.format) + '</div>';
-    pv.innerHTML = renderTable(it, calc, { hdr: state.hdr, apn: state.apn });
+    pv.innerHTML = renderTable(it, calc, { hdr: state.hdr, apn: state.apn, tot: state.tot });
   }
   if (it.totals && it.totals.length && calc.journeys.length === it.totals.length) {
     calc.journeys.forEach(function (j, i) {
@@ -1292,6 +1296,7 @@ function view() {
     '<div class="pc2"><div id="diag" class="diag" aria-live="polite"></div><div id="tzbox"></div>' +
     '<label for="pax">Pasajero(s) <span class="opt">opcional · uno por línea</span></label><textarea id="pax" rows="2" placeholder="Si lo dejás vacío se usan los nombres del PNR"></textarea>' +
     '<label for="adv">Asesor de viajes / contacto <span class="opt">opcional</span></label><input id="adv" type="text" autocomplete="name" placeholder="Nombre del asesor">' +
+    '<label class="chk" for="oTot" style="margin-top:14px"><input type="checkbox" id="oTot"> Mostrar duración total de cada tramo con conexiones</label>' +
     '</div>' +
     '</aside><main class="stage"><div class="copybar"><div class="cg"><span class="cgl">Para cotización o mail</span><button type="button" class="btn btn-primary" id="cprich">Copiar tabla</button></div><div class="cg"><span class="cgl">Para WhatsApp</span><button type="button" class="btn btn-wa" id="cpwa">Copiar texto WhatsApp</button><button type="button" class="btn btn-wa2" id="cpimg">Copiar imagen</button><button type="button" class="btn btn-ghost dl" id="dlpng">Descargar imagen</button><button type="button" class="btn btn-ghost dl" id="dlpdf">Descargar PDF</button></div></div><div id="preview"></div></main></div></div>';
   $('pnr').value = dr.pnr || '';
@@ -1312,7 +1317,7 @@ function view() {
     var it = currentIt(), calc = HV.compute(it);
     if (!calc.segs.length) { toast('Primero pegá un PNR con vuelos.'); return; }
     var base = imgBase();
-    copyRich(tableHTML(it, calc, { urls: base }), plainText(it, calc), !base);
+    copyRich(tableHTML(it, calc, { urls: base, tot: state.tot }), plainText(it, calc), !base);
   };
   function need() { var it = currentIt(), calc = HV.compute(it); if (!calc.segs.length) { toast('Primero pegá un PNR con vuelos.'); return null; } return { it: it, calc: calc }; }
   $('cpwa').onclick = function () { var x = need(); if (x) copyPlain(waText(x.it, x.calc), 'Texto para WhatsApp copiado'); };
@@ -1322,6 +1327,9 @@ function view() {
   var LOCAL_DL = { save: function (r) { return new Promise(function (ok, ko) { try { var url = URL.createObjectURL(r.data instanceof Blob ? r.data : new Blob([r.data])), a = document.createElement('a'); a.href = url; a.download = r.filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(url); }, 4000); ok({ status: 'saved' }); } catch (e) { ko({ code: 'unavailable' }); } }); } };
   if (window.claude && claude.use) claude.use('downloads').then(function (d) { DL = d; if (!d) [].forEach.call(document.querySelectorAll('.dl'), function (b) { b.hidden = true; }); });
   else DL = LOCAL_DL;
+  try { state.tot = localStorage.getItem('hv2_tot') === '1'; } catch (e) {}
+  $('oTot').checked = state.tot;
+  $('oTot').onchange = function () { state.tot = $('oTot').checked; try { localStorage.setItem('hv2_tot', state.tot ? '1' : '0'); } catch (e) {} updatePreview(); };
   checkImgs();
   updatePreview();
 }
