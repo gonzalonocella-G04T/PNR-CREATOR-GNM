@@ -1046,14 +1046,11 @@ function tableHTML(it, calc, o) {
   if (pax.length) who += '<span style="color:#6A7C90">' + (pax.length > 1 ? 'Pasajeros' : 'Pasajero') + ':</span> ' + esc(pax.join(', '));
   if (it.advisor) who += (who ? '<br>' : '') + '<span style="color:#6A7C90">Asesor:</span> ' + esc(it.advisor);
   /* Contenedor exterior: encabezado + línea azul + grilla + nota */
-  var h = '<table class="tt" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;margin:0;background:#ffffff">';
-  h += '<tr><td style="padding:0"><table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;width:100%"><tr>' +
+  var hdr = '<table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;width:100%"><tr>' +
     '<td style="padding:4px 6px 8px 0;vertical-align:bottom;text-align:left"><img src="' + srcHead(o) + '" alt="Tu Itinerario by Hiperviajes" width="220" height="32" style="display:block;width:220px;height:32px;border:0"></td>' +
-    '<td style="' + F + 'padding:4px 0 8px 12px;vertical-align:bottom;text-align:right;font-size:11.5px;line-height:1.45;color:#102E55">' + who + '</td></tr></table></td></tr>';
-  h += '<tr><td bgcolor="#0A9BEA" style="background:#0A9BEA;height:3px;line-height:3px;font-size:1px;padding:0">&nbsp;</td></tr>';
-  h += '<tr><td style="height:8px;line-height:8px;font-size:1px;padding:0">&nbsp;</td></tr>';
+    '<td style="' + F + 'padding:4px 0 8px 12px;vertical-align:bottom;text-align:right;font-size:11.5px;line-height:1.45;color:#102E55">' + who + '</td></tr></table>';
   /* Grilla: las líneas son el fondo de la tabla que asoma entre celdas (cellspacing=1) */
-  h += '<tr><td style="padding:0"><table cellspacing="1" cellpadding="0" border="0" bgcolor="' + GRID + '" style="border-collapse:separate;border-spacing:1px;background:' + GRID + '">';
+  var h = '<table cellspacing="1" cellpadding="0" border="0" bgcolor="' + GRID + '" style="border-collapse:separate;border-spacing:1px;background:' + GRID + '">';
   h += '<tr>' + cols.map(function (c, i) { return '<th bgcolor="#EEF6FD"' + (i === 1 ? ' width="170"' : '') + ' style="' + ST.th + (i === 1 ? ';width:170px;min-width:170px' : '') + '">' + c + '</th>'; }).join('') + '</tr>';
   calc.journeys.forEach(function (j, ix) {
     var lbl = jLabel(calc, ix);
@@ -1085,12 +1082,25 @@ function tableHTML(it, calc, o) {
         '<td colspan="2" bgcolor="#F1F8F4" style="' + ST.sub + ';text-align:center"><b style="color:#17583F;font-size:13px">' + HV.fmtDur(j.total) + '</b></td></tr>';
     }
   });
-  h += '</table></td></tr>';
+  h += '</table>';
+  var grid = h;
   var notes = ['Horarios locales de cada ciudad.'];
   if (anyDay) notes.push('+1: llega al día siguiente.');
   if (conn && o.tot) notes.push('La duración total incluye vuelos y esperas entre conexiones.');
-  h += '<tr><td style="' + ST.ft + '">' + notes.join(' ') + '</td></tr></table>';
-  return h;
+  var note = notes.join(' ');
+  if (o.flat) {
+    /* Para la imagen (html2canvas no dibuja bien tablas anidadas) */
+    return '<div class="tt" style="display:inline-block;background:#ffffff">' + hdr +
+      '<div style="height:3px;background:#0A9BEA;font-size:1px;line-height:3px">&nbsp;</div><div style="height:8px;font-size:1px;line-height:8px">&nbsp;</div>' +
+      grid + '<div style="' + ST.ft + '">' + note + '</div></div>';
+  }
+  /* Para pegar en mail: todo dentro de una tabla exterior */
+  return '<table class="tt" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;margin:0;background:#ffffff">' +
+    '<tr><td style="padding:0">' + hdr + '</td></tr>' +
+    '<tr><td bgcolor="#0A9BEA" style="background:#0A9BEA;height:3px;line-height:3px;font-size:1px;padding:0">&nbsp;</td></tr>' +
+    '<tr><td style="height:8px;line-height:8px;font-size:1px;padding:0">&nbsp;</td></tr>' +
+    '<tr><td style="padding:0">' + grid + '</td></tr>' +
+    '<tr><td style="' + ST.ft + '">' + note + '</td></tr></table>';
 }
 function renderTable(it, calc, o) { return '<div class="tv">' + tableHTML(it, calc, o || {}) + '</div>'; }
 function plainText(it, calc) {
@@ -1145,14 +1155,22 @@ var JSPDF = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js
 function fileBase(it) { var p = (it.pax || []).filter(Boolean); return 'Itinerario Hiperviajes' + (p.length ? ' - ' + p[0].replace(/[\\/:*?"<>|]/g, '') : ''); }
 function renderCanvas(it, calc, scale) {
   return loadScript(H2C).then(function () {
-    var box = document.createElement('div');
-    box.className = 'cap';
-    box.innerHTML = renderTable(it, calc, { hdr: true, apn: true, tot: state.tot });
-    document.body.appendChild(box);
-    var imgs = box.querySelectorAll('img');
+    updatePreview();
+    var el = document.querySelector('#preview .tv');
+    if (!el) throw new Error('sin tabla');
+    var t = el.querySelector('.tt');
+    var w = Math.max(el.scrollWidth, t ? t.scrollWidth : 0) + 40;
+    var imgs = el.querySelectorAll('img');
     return Promise.all([].map.call(imgs, function (im) { return im.complete ? 0 : new Promise(function (r) { im.onload = im.onerror = r; }); })).then(function () {
-      return window.html2canvas(box, { scale: scale || 2, backgroundColor: '#ffffff', logging: false });
-    }).then(function (cv) { box.remove(); return cv; }, function (e) { box.remove(); throw e; });
+      return window.html2canvas(el, {
+        scale: scale || 2, backgroundColor: '#ffffff', logging: false,
+        windowWidth: Math.max(1400, w + 200), width: w, scrollX: 0, scrollY: 0,
+        onclone: function (doc) {
+          var c = doc.querySelector('#preview .tv');
+          if (c) { c.style.maxWidth = 'none'; c.style.width = w + 'px'; c.style.overflow = 'visible'; c.style.boxShadow = 'none'; c.style.border = '0'; c.style.borderRadius = '0'; c.style.padding = '16px 20px'; }
+        }
+      });
+    });
   });
 }
 function exportFile(kind, it, calc, btn) {
