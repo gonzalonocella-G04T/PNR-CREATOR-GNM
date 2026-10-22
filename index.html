@@ -989,12 +989,23 @@ var ST = {
 };
 /* Base pública de imágenes (carpeta img/ junto a la herramienta publicada). */
 var IMG_BASE_FIXED = 'https://gonzalonocella-g04t.github.io/PNR-CREATOR-GNM/img/';
-function imgBase() {
+var IMG_OK = null;
+function hostedBase() {
   try {
-    if (location.protocol === 'https:' && !/(^|\.)claude(usercontent)?\.(ai|com)$/i.test(location.hostname) && !/claude/i.test(location.hostname)) return location.href.replace(/[#?].*$/, '').replace(/[^\/]*$/, '') + 'img/';
+    if (location.protocol === 'https:' && !/claude/i.test(location.hostname)) return location.href.replace(/[#?].*$/, '').replace(/[^\/]*$/, '') + 'img/';
   } catch (e) {}
-  return IMG_BASE_FIXED.indexOf('__') === 0 ? '' : IMG_BASE_FIXED;
+  return '';
 }
+function checkImgs() {
+  var b = hostedBase() || (IMG_BASE_FIXED.indexOf('__') === 0 ? '' : IMG_BASE_FIXED);
+  if (!b) { IMG_OK = false; return; }
+  var im = new Image();
+  im.onload = function () { IMG_OK = im.naturalWidth > 0 ? b : false; };
+  im.onerror = function () { IMG_OK = false; };
+  im.src = b + 'head.png?v=' + Date.now();
+}
+/* Solo se usan enlaces a imágenes publicadas si se confirmó que cargan; si no, van incrustadas (sirve en Outlook/Hotmail). */
+function imgBase() { return IMG_OK || ''; }
 function srcHead(o) { return o.urls ? o.urls + 'head.png' : HEAD; }
 function srcLogo(code, o) {
   var has = typeof LOGOS !== 'undefined' && LOGOS[code];
@@ -1216,7 +1227,7 @@ function copyRich(tableHtml, plain, noUrls) {
       ok = document.execCommand('copy'); sel.removeAllRanges();
     } catch (e) { ok = false; }
   }
-  if (ok) { toast(noUrls ? 'Tabla copiada. Ojo: en Gmail los logos solo se ven si usás la herramienta desde su dirección pública.' : 'Tabla copiada. Pegala en tu cotización o mail.'); return; }
+  if (ok) { toast(noUrls ? 'Tabla copiada. Los logos van incrustados: se ven en Outlook/Hotmail, no en Gmail.' : 'Tabla copiada. Pegala en tu cotización o mail.'); return; }
   try {
     navigator.clipboard.writeText(plain).then(function () { toast('La tabla no se pudo copiar en esta vista: se copió como texto.'); }, function () { toast('No se pudo copiar. Seleccioná la tabla y usá Ctrl+C.'); });
   } catch (e) { toast('No se pudo copiar. Seleccioná la tabla y usá Ctrl+C.'); }
@@ -1311,6 +1322,7 @@ function view() {
   var LOCAL_DL = { save: function (r) { return new Promise(function (ok, ko) { try { var url = URL.createObjectURL(r.data instanceof Blob ? r.data : new Blob([r.data])), a = document.createElement('a'); a.href = url; a.download = r.filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(url); }, 4000); ok({ status: 'saved' }); } catch (e) { ko({ code: 'unavailable' }); } }); } };
   if (window.claude && claude.use) claude.use('downloads').then(function (d) { DL = d; if (!d) [].forEach.call(document.querySelectorAll('.dl'), function (b) { b.hidden = true; }); });
   else DL = LOCAL_DL;
+  checkImgs();
   updatePreview();
 }
 view();
