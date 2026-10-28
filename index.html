@@ -922,9 +922,10 @@ function parseGWC(raw) {
 function sampleGWC() { return "Ida\nMONTEVIDEO (MVD)\na\nLJUBLJANA (LJU)\nDuración Total:\n33h 31m\nKLCM\nEconómica\nLight\nKL 3055\nOperado por: CM\n23 de abril de 2027\nMVD 08:19\nMONTEVIDEO - Carrasco\narrow_forward_ios\n23 de abril de 2027\n13:54 PTY\nPANAMA - Tocumen\nscheduleEspera de 04h 56m\nKL\nEconómica\nLight\nKL 0758\n23 de abril de 2027\nPTY 18:50\nPANAMA - Tocumen\narrow_forward_ios\n24 de abril de 2027(+1)\n12:10 AMS\nAMSTERDAM - Schiphol\nscheduleEspera de 08h 50m\nKL\nEconómica\nLight\nKL 1991\n24 de abril de 2027\nAMS 21:00\nAMSTERDAM - Schiphol\narrow_forward_ios\n24 de abril de 2027\n22:50 LJU\nLJUBLJANA - Joze Pucnik\nflight\nVuelta\nLJUBLJANA (LJU)\na\nMONTEVIDEO (MVD)\nDuración Total:\n45h 43m\nAFA5\nEconómica\nLight\nAF 1037\nOperado por: A5\n21 de junio de 2027\nLJU 14:35\nLJUBLJANA - Joze Pucnik\narrow_forward_ios\n21 de junio de 2027\n16:35 CDG\nPARIS - Charles de Gaulle\nscheduleEspera de 23h 10m\nAF\nEconómica\nLight\nAF 0490\n22 de junio de 2027\nCDG 15:45\nPARIS - Charles de Gaulle\narrow_forward_ios\n22 de junio de 2027\n19:45 PTY\nPANAMA - Tocumen\nscheduleEspera de 02h 18m\nAFCM\nEconómica\nLight\nAF 5526\nOperado por: CM\n22 de junio de 2027\nPTY 22:03\nPANAMA - Tocumen\narrow_forward_ios\n23 de junio de 2027(+1)\n07:18 MVD\nMONTEVIDEO - Carrasco"; }
 
 /* ---- SPRK ---- */
-var SP_MON = { ene: 1, feb: 2, mar: 3, abr: 4, may: 5, jun: 6, jul: 7, ago: 8, sep: 9, set: 9, oct: 10, nov: 11, dic: 12 };
+var SP_MON = { jan: 1, apr: 4, aug: 8, dec: 12, ene: 1, feb: 2, mar: 3, abr: 4, may: 5, jun: 6, jul: 7, ago: 8, sep: 9, set: 9, oct: 10, nov: 11, dic: 12 };
 var SP_DATE = /^[a-záéíóú]{2,3}\.?\s*(\d{1,2})\s*([a-z]{3})\.?\s*(\d{2,4})$/i;
-var SP_TIME = /^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$/;
+var SP_TIME = /^(\d{1,2}:\d{2})(?:([ap])m?(?![A-Za-z]))?\s*-\s*(\d{1,2}:\d{2})(?:([ap])m?(?![A-Za-z]))?$/i;
+function spT(t, ap) { var m = /^(\d{1,2}):(\d{2})$/.exec(t); if (!m) return t; var h = +m[1]; if (ap) { var pm = /^p/i.test(ap); h = h % 12 + (pm ? 12 : 0); } return (h < 10 ? '0' : '') + h + ':' + m[2]; }
 function isSPRK(t) { var L = t.split('\n').map(function (x) { return x.trim(); }); return L.some(function (l) { return SP_DATE.test(l); }) && L.some(function (l) { return SP_TIME.test(l); }); }
 function parseSPRK(raw) {
   var L = String(raw || '').replace(/\r/g, '').replace(/ /g, ' ').split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
@@ -936,7 +937,7 @@ function parseSPRK(raw) {
     var mo = SP_MON[d[2].toLowerCase()], y = d[3].length === 2 ? 2000 + +d[3] : +d[3];
     var s = { al: '', fn: '', cls: '', from: '', to: '', dep: '', arr: '', date: mo ? y + '-' + (mo < 10 ? '0' : '') + mo + '-' + (+d[1] < 10 ? '0' : '') + (+d[1]) : '', arrDate: '', opName: '', opCode: '', cs: false, eq: '', status: 'HK', gdur: null };
     var B = L.slice(st + 1, en).join('\n'), m;
-    if ((m = /(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/.exec(B))) { s.dep = hhmm(m[1]); s.arr = hhmm(m[2]); }
+    if ((m = /(\d{1,2}:\d{2})(?:([ap])m?(?![A-Za-z]))?\s*-\s*(\d{1,2}:\d{2})(?:([ap])m?(?![A-Za-z]))?/i.exec(B))) { s.dep = hhmm(spT(m[1], m[2])); s.arr = hhmm(spT(m[3], m[4])); }
     if ((m = /\b([A-Z]{3})\s*-\s*([A-Z]{3})\s*([A-Z0-9]{2})\s*(\d{1,4})(?:\s*([A-Z])(?![A-Za-z0-9]))?/.exec(B))) { s.from = m[1]; s.to = m[2]; s.al = m[3]; s.fn = String(+m[4]); s.cls = m[5] || ''; }
     if ((m = /(\d{1,2})\s*h\s*(\d{1,2})\s*m(?:\s*([A-Z0-9]{3}))?(?:\s*(HK|KK|TK|RR|HL|HN|UC|UN|NO|XX|HX|WK|SC))?/.exec(B))) { s.gdur = +m[1] * 60 + +m[2]; s.eq = m[3] || ''; if (m[4]) s.status = m[4]; }
     if (/^(HL|HN|UC|UN|NO|XX|HX)$/.test(s.status)) { res.warn.push('El vuelo ' + s.al + ' ' + s.fn + ' figura con estado ' + s.status + ' y no se incluyó.'); return; }
