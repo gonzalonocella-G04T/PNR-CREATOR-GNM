@@ -1177,7 +1177,7 @@ function passA(it, calc, o) {
     var dw = U.fmtDate(s.depD).split(' '), a = U.alInfo(s.al);
     var dd = s.dayDiff ? '<sup style="font-size:11px;color:#B45309;font-weight:bold;vertical-align:top;line-height:1">&nbsp;' + (s.dayDiff > 0 ? '+' : '−') + Math.abs(s.dayDiff) + '</sup>' : '';
     var dur = lab('Duración') + '<div style="' + F + 'font-size:17px;font-weight:bold;color:' + INK + ';line-height:1.25;white-space:nowrap">' + HV.fmtDur(s.dur) + '</div>';
-    if (lay) dur += '<table cellspacing="0" cellpadding="0" border="0" bgcolor="#DDEFFB" style="border-collapse:separate;background:#DDEFFB;border-radius:8px;margin-top:7px"><tr><td style="' + F + 'padding:5px 10px;font-size:12px;color:' + INK + ';white-space:nowrap">' + lab('Conexión') + '<b style="font-size:14px">' + HV.fmtDur(lay.min) + '</b>' + layInfo(lay) + '</td></tr></table>';
+    /* sin tránsito en boarding pass */
     return '<table width="803" cellspacing="0" cellpadding="0" border="0" bgcolor="#FFFFFF" style="width:803px;table-layout:fixed;border-collapse:separate;background:#FFFFFF;border:1px solid #DCE8F3;border-radius:10px"><tr>' +
       '<td width="100" style="' + F + 'width:74px;padding:12px 10px 12px 16px;vertical-align:middle;color:' + INK + '"><div style="font-size:11px;letter-spacing:0.6px;text-transform:uppercase">' + esc(dw[0]) + '</div><div style="font-size:19px;font-weight:bold;line-height:1.15;white-space:nowrap;text-transform:uppercase">' + esc(dw[1] + ' ' + dw[2]) + '</div>' + (s.depD.y !== firstYear ? '<div style="font-size:11px;color:' + MUT + '">' + s.depD.y + '</div>' : '') + '</td>' + sep +
       '<td width="158" style="width:130px;padding:10px 14px;vertical-align:middle"><table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr><td style="padding:0 7px 0 0;vertical-align:middle">' + logoAt(s.al, o, 22) + '</td><td style="' + F + 'padding:0;vertical-align:middle;font-size:11px;font-weight:bold;color:' + INK + ';text-transform:uppercase;letter-spacing:0.3px;line-height:1.2">' + esc(a.name) + '</td></tr></table>' +
@@ -1323,35 +1323,35 @@ function passC(it, calc, o) {
   var J = calc.journeys, firstYear = calc.first.depD.y;
   function pt(kind, time, code) {
     var ap = apNick(code);
-    return pbLab(kind) + '<div style="' + F + 'font-size:22px;font-weight:bold;color:' + PB.INK + ';line-height:1.15;white-space:nowrap">' + time + '</div>' +
-      '<div style="' + F + 'font-size:14px;color:' + PB.INK + ';line-height:1.3">' + esc(U.apCity(code)) + '</div>' +
+    return pbLab(kind) + '<div style="' + F + 'font-size:20px;font-weight:bold;color:' + PB.INK + ';line-height:1.15;white-space:nowrap">' + time + '</div>' +
+      '<div style="' + F + 'font-size:13px;color:' + PB.INK + ';line-height:1.3">' + esc(U.apCity(code)) + '</div>' +
       (ap ? '<div style="' + F + 'font-size:11px;color:' + PB.MUT + ';line-height:1.3">' + esc(ap) + '</div>' : '');
   }
   var body = pbWho(it), n = 0;
   J.forEach(function (j, ix) {
     var lbl = jLabel(calc, ix);
     body += '<table width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#E3F1FC" style="border-collapse:separate;background:#E3F1FC;border-radius:10px"><tr>' +
-      '<td style="padding:8px 18px"><table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr><td style="padding:0 14px 0 0;vertical-align:middle">' + pbImg('ic-plane-cyan.png', o, 28, 28) + '</td>' +
-      '<td style="' + F + 'padding:0;vertical-align:middle;font-size:19px;color:' + PB.NAVY + ';white-space:nowrap"><b style="letter-spacing:0.5px">' + esc(lbl.toUpperCase()) + '</b>&nbsp; · &nbsp;' + esc(U.apCity(j.from)) + ' → ' + esc(U.apCity(j.to)) + '</td></tr></table></td>' +
-      '<td align="right" style="padding:8px 16px;text-align:right;vertical-align:middle">' + pbImg('dots-plane.png', o, 200, 20, 'margin-left:auto') + '</td></tr></table>' +
+      '<td style="padding:8px 18px"><table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr><td style="padding:0 14px 0 0;vertical-align:middle">' + pbImg('ic-plane-cyan.png', o, 24, 24) + '</td>' +
+      '<td style="' + F + 'padding:0;vertical-align:middle;font-size:16px;color:' + PB.NAVY + ';white-space:nowrap"><b style="letter-spacing:0.5px">' + esc(lbl.toUpperCase()) + '</b>&nbsp; · &nbsp;' + esc(U.apCity(j.from)) + ' → ' + esc(U.apCity(j.to)) + '</td></tr></table></td>' +
+      '<td align="right" style="padding:8px 16px;text-align:right;vertical-align:middle">' + pbImg('dots-plane.png', o, 150, 15, 'margin-left:auto') + '</td></tr></table>' +
       '<div style="height:8px;font-size:1px;line-height:8px">&nbsp;</div>';
     j.segs.forEach(function (s, k) {
       var a = U.alInfo(s.al), lay = k < j.layovers.length ? j.layovers[k] : null, bg = n++ % 2 ? '#FFFFFF' : '#EEF6FD';
-      var info = pbIcoRow('ic-clock.png', o, pbLab('Duración', PB.NAVY) + '<b style="font-size:15px;color:' + PB.INK + '">' + HV.fmtDur(s.dur) + '</b>');
-      if (lay) { var L = pbLay(lay, o, 15); info += '<div style="height:6px;font-size:1px;line-height:6px">&nbsp;</div>' + pbIcoRow(L.ico, o, pbLab(L.t, L.c === PB.GRN ? PB.NAVY : L.c) + L.v); }
-      body += '<table width="1003" cellspacing="0" cellpadding="0" border="0" bgcolor="' + bg + '" style="width:1003px;table-layout:fixed;border-collapse:separate;background:' + bg + ';border:1px solid #DCE8F3;border-radius:10px"><tr>' +
-        '<td width="150" style="' + F + 'width:126px;padding:10px 12px;vertical-align:middle;font-size:15px;color:' + PB.INK + ';white-space:nowrap">' + esc(dateCell(s.depD, firstYear)) + '</td>' + pbSep() +
-        '<td width="196" style="width:168px;padding:10px 14px;vertical-align:middle"><table align="center" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;margin:0 auto"><tr><td style="padding:0 9px 0 0;vertical-align:middle">' + logoAt(s.al, o, 28) + '</td><td style="' + F + 'padding:0;vertical-align:middle;font-size:12.5px;font-weight:bold;color:' + PB.INK + ';text-transform:uppercase;letter-spacing:0.3px;line-height:1.2">' + esc(a.name) + '</td></tr></table></td>' + pbSep() +
-        '<td width="120" style="width:96px;padding:10px 12px;vertical-align:middle">' + pbLab('Vuelo') + '<div style="' + F + 'font-size:18px;font-weight:bold;color:' + PB.INK + ';white-space:nowrap">' + esc(s.al) + ' ' + esc(s.fn) + '</div></td>' + pbSep() +
-        '<td width="190" style="width:164px;padding:8px 12px 8px 14px;vertical-align:middle">' + pt('Salida', esc(s.dep), s.from) + '</td>' + pbSep() +
-        '<td width="190" style="width:164px;padding:8px 12px 8px 14px;vertical-align:middle">' + pt('Llegada', esc(s.arr) + pbOff(s.dayDiff), s.to) + '</td>' + pbSep() +
-        '<td width="152" style="width:124px;padding:8px 14px;vertical-align:middle">' + info + '</td></tr></table>' +
+      var info = pbIcoRow('ic-clock.png', o, pbLab('Duración', PB.NAVY) + '<b style="font-size:14px;color:' + PB.INK + '">' + HV.fmtDur(s.dur) + '</b>');
+      /* sin tránsito en boarding pass */
+      body += '<table width="801" cellspacing="0" cellpadding="0" border="0" bgcolor="' + bg + '" style="width:801px;table-layout:fixed;border-collapse:separate;background:' + bg + ';border:1px solid #DCE8F3;border-radius:10px"><tr>' +
+        '<td width="112" style="' + F + 'width:92px;padding:10px 10px;vertical-align:middle;font-size:13.5px;line-height:1.3;color:' + PB.INK + '">' + esc(dateCell(s.depD, firstYear)) + '</td>' + pbSep() +
+        '<td width="160" style="width:136px;padding:10px 12px;vertical-align:middle"><table align="center" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;margin:0 auto"><tr><td style="padding:0 9px 0 0;vertical-align:middle">' + logoAt(s.al, o, 24) + '</td><td style="' + F + 'padding:0;vertical-align:middle;font-size:11px;font-weight:bold;color:' + PB.INK + ';text-transform:uppercase;letter-spacing:0.3px;line-height:1.2">' + esc(a.name) + '</td></tr></table></td>' + pbSep() +
+        '<td width="92" style="width:72px;padding:10px 10px;vertical-align:middle">' + pbLab('Vuelo') + '<div style="' + F + 'font-size:16px;font-weight:bold;color:' + PB.INK + ';white-space:nowrap">' + esc(s.al) + ' ' + esc(s.fn) + '</div></td>' + pbSep() +
+        '<td width="148" style="width:124px;padding:8px 10px 8px 14px;vertical-align:middle">' + pt('Salida', esc(s.dep), s.from) + '</td>' + pbSep() +
+        '<td width="148" style="width:124px;padding:8px 10px 8px 14px;vertical-align:middle">' + pt('Llegada', esc(s.arr) + pbOff(s.dayDiff), s.to) + '</td>' + pbSep() +
+        '<td width="136" style="width:110px;padding:8px 12px;vertical-align:middle">' + info + '</td></tr></table>' +
         '<div style="height:7px;font-size:1px;line-height:7px">&nbsp;</div>';
     });
     body += pbTot(j, lbl, o) + '<div style="height:' + (ix < J.length - 1 ? 8 : 2) + 'px;font-size:1px;line-height:8px">&nbsp;</div>';
   });
   body += pbNote(calc, '', o);
-  return pbWrap(body, o);
+  return pbStubWrap(body, J, o);
 }
 function renderTable(it, calc, o) { return '<div class="tv">' + tableHTML(it, calc, o || {}) + '</div>'; }
 function plainText(it, calc) {
