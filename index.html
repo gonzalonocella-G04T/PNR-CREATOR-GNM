@@ -1134,9 +1134,9 @@ function simpleHTML(it, calc, o) {
   var anyDay = calc.segs.some(function (s) { return s.dayDiff; }), firstYear = calc.first.depD.y;
   var th0 = F + 'padding:4px 9px;background:#EEF6FD;color:#102E55;font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:0.3px;text-align:center;white-space:nowrap';
   var td0 = F + 'padding:4px 9px;font-size:12px;color:#102E55;text-align:center;vertical-align:middle;line-height:1.25;white-space:nowrap';
-  var cols = ['Fecha', 'Aerolínea', 'Vuelo', 'Salida', 'De', 'Llegada', 'A', 'Duración'].concat(conn ? ['Tránsito'] : []);
+  var cols = ['Fecha', 'Vuelo', 'Salida', 'De', 'Llegada', 'A', 'Duración'].concat(conn ? ['Tránsito'] : []);
   var h = '<table cellspacing="1" cellpadding="0" border="0" bgcolor="' + GRID + '" style="border-collapse:separate;border-spacing:1px;background:' + GRID + '">';
-  h += '<tr><th bgcolor="#EEF6FD" style="' + th0 + ';padding:3px 7px"><img src="' + pimg('simple-plane.png', o) + '" alt="" width="16" height="16" style="display:block;width:16px;min-width:16px;max-width:none;height:auto;border:0;margin:0 auto"></th>' +
+  h += '<tr><th bgcolor="#EEF6FD" style="' + th0 + ';text-align:left;padding-left:10px"><table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr><td style="padding:0 7px 0 0;vertical-align:middle"><img src="' + pimg('simple-plane.png', o) + '" alt="" width="14" height="14" style="display:block;width:14px;min-width:14px;max-width:none;height:auto;border:0"></td><td style="' + th0 + ';background:transparent;padding:0;vertical-align:middle">Aerolínea</td></tr></table></th>' +
     cols.map(function (c) { return '<th bgcolor="#EEF6FD" style="' + th0 + '">' + c + '</th>'; }).join('') + '</tr>';
   var n = 0;
   calc.journeys.forEach(function (j) {
@@ -1144,9 +1144,8 @@ function simpleHTML(it, calc, o) {
       var bg = n++ % 2 ? '#F6FAFD' : '#FFFFFF', lay = k < j.layovers.length ? j.layovers[k] : null;
       var td = ' bgcolor="' + bg + '" style="' + td0 + ';background:' + bg;
       var tr = lay ? '<b style="color:#1F6B4B">' + HV.fmtDur(lay.min) + '</b>' + layInfo(lay) : '<span style="color:#9AB0C2">–</span>';
-      h += '<tr><td' + td + ';padding:3px 7px">' + logoAt(s.al, o, 22) + '</td>' +
+      h += '<tr><td' + td + ';text-align:left;padding:3px 10px"><table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr><td style="padding:0 8px 0 0;vertical-align:middle">' + logoAt(s.al, o, 22) + '</td><td style="' + td0 + ';padding:0;text-align:left">' + esc(U.alInfo(s.al).name) + '</td></tr></table></td>' +
         '<td' + td + '">' + esc(dateCell(s.depD, firstYear)) + '</td>' +
-        '<td' + td + '">' + esc(U.alInfo(s.al).name) + '</td>' +
         '<td' + td + '">' + esc(s.al) + ' ' + esc(s.fn) + '</td>' +
         '<td' + td + '"><b>' + esc(s.dep) + '</b></td>' +
         '<td' + td + '">' + esc(U.apCity(s.from)) + ' (' + esc(s.from) + ')</td>' +
