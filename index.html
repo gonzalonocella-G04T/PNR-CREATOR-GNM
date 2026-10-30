@@ -1403,13 +1403,16 @@ function loadScript(src) {
 var H2C = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
 var JSPDF = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
 function fileBase(it) { var p = (it.pax || []).filter(Boolean); return 'Itinerario Hiperviajes' + (p.length ? ' - ' + p[0].replace(/[\\/:*?"<>|]/g, '') : ''); }
-function renderCanvas(it, calc, scale) {
+function renderCanvas(it, calc, scale, wa) {
   return loadScript(H2C).then(function () {
     updatePreview();
     var el = document.querySelector('#preview .tv');
     if (!el) throw new Error('sin tabla');
     var t = el.querySelector('.tt');
     var w = Math.max(el.scrollWidth, t ? t.scrollWidth : 0) + 40;
+    var h = el.scrollHeight + 40;
+    /* Para WhatsApp: tamaño final de hasta 1600 px por lado (WhatsApp no la vuelve a achicar) */
+    if (wa) scale = Math.min(2, 1600 / Math.max(w, h));
     var imgs = el.querySelectorAll('img');
     return Promise.all([].map.call(imgs, function (im) { return im.complete ? 0 : new Promise(function (r) { im.onload = im.onerror = r; }); })).then(function () {
       return window.html2canvas(el, {
@@ -1417,6 +1420,13 @@ function renderCanvas(it, calc, scale) {
         windowWidth: Math.max(1400, w + 200), width: w, scrollX: 0, scrollY: 0,
         onclone: function (doc) {
           var c = doc.querySelector('#preview .tv');
+          if (c && wa) {
+            /* textos chicos un poco más grandes, solo en la imagen */
+            [].forEach.call(c.querySelectorAll('*'), function (e) {
+              var fs = parseFloat(doc.defaultView.getComputedStyle(e).fontSize);
+              if (fs && fs < 12 && e.childNodes.length && [].some.call(e.childNodes, function (n) { return n.nodeType === 3 && n.nodeValue.trim(); })) e.style.fontSize = Math.min(12, fs * 1.18).toFixed(1) + 'px';
+            });
+          }
           if (c) { c.style.maxWidth = 'none'; c.style.width = w + 'px'; c.style.overflow = 'visible'; c.style.boxShadow = 'none'; c.style.border = '0'; c.style.borderRadius = '0'; c.style.padding = '16px 20px'; }
         }
       });
@@ -1427,7 +1437,7 @@ function exportFile(kind, it, calc, btn) {
   if (!DL) { toast('La descarga no está disponible en esta vista.'); return; }
   var label = btn.textContent; btn.disabled = true; btn.textContent = 'Generando…';
   var done = function () { btn.disabled = false; btn.textContent = label; };
-  var p = renderCanvas(it, calc);
+  var p = renderCanvas(it, calc, kind === 'png' ? 0 : 2, kind === 'png');
   if (kind === 'png') {
     p = p.then(function (cv) { return new Promise(function (r) { cv.toBlob(r, 'image/png'); }); })
       .then(function (blob) { return DL.save({ filename: fileBase(it) + '.png', data: blob }); });
@@ -1463,7 +1473,7 @@ function showImage(blob) {
 function copyImage(it, calc, btn) {
   var label = btn.textContent; btn.disabled = true; btn.textContent = 'Generando…';
   var done = function () { btn.disabled = false; btn.textContent = label; };
-  var blobP = renderCanvas(it, calc).then(function (cv) { return new Promise(function (r) { cv.toBlob(r, 'image/png'); }); });
+  var blobP = renderCanvas(it, calc, 0, true).then(function (cv) { return new Promise(function (r) { cv.toBlob(r, 'image/png'); }); });
   var tried = false;
   try {
     if (navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {
