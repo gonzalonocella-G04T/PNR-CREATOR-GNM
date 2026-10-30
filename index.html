@@ -1077,7 +1077,7 @@ function tableHTML(it, calc, o) {
       var tr = '–';
       if (lay) {
         tr = '<b style="color:#1F6B4B">' + HV.fmtDur(lay.min) + '</b>';
-        var fl = lay.flags.indexOf('overlap') >= 0 ? 'superpuesto' : (lay.flags.indexOf('short') >= 0 ? 'conexión corta' : '');
+        var fl = '';
         if (lay.flags.indexOf('change') >= 0) fl = (fl ? fl + ' · ' : '') + 'cambia aeropuerto';
         if (fl) tr += '<br><span style="font-size:10px;color:#B45309;font-weight:bold">' + fl + '</span>';
       }
@@ -1125,7 +1125,7 @@ function logoAt(code, o, sz) {
   return '<span style="display:inline-block;width:' + sz + 'px;height:' + sz + 'px;line-height:' + sz + 'px;font-size:' + Math.round(sz * 0.42) + 'px;font-weight:bold;text-align:center;background:' + a.color + ';color:' + a.fg + '">' + esc(code) + '</span>';
 }
 function layInfo(lay, col) {
-  var fl = lay.flags.indexOf('overlap') >= 0 ? 'superpuesto' : (lay.flags.indexOf('short') >= 0 ? 'conexión corta' : '');
+  var fl = '';
   if (lay.flags.indexOf('change') >= 0) fl = (fl ? fl + ' · ' : '') + 'cambia aeropuerto';
   return fl ? '<br><span style="font-size:10px;color:#B45309;font-weight:bold">' + fl + '</span>' : '';
 }
@@ -1219,7 +1219,7 @@ function pbImg(n, o, w, h, extra) { return '<img src="' + pimg(n, o) + '" alt=""
 function pbIcoRow(ico, o, inner) { return '<table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr><td style="padding:0 8px 0 0;vertical-align:middle">' + pbImg(ico, o, 20, 20) + '</td><td style="' + F + 'padding:0;vertical-align:middle;white-space:nowrap">' + inner + '</td></tr></table>'; }
 function pbOff(n) { return n ? '<sup style="font-size:11px;color:#E06A00;font-weight:bold;vertical-align:top;line-height:1">&nbsp;' + (n > 0 ? '+' : '−') + Math.abs(n) + '</sup>' : ''; }
 function pbLay(lay, o, valSize) {
-  var short = lay.flags.indexOf('short') >= 0 || lay.flags.indexOf('overlap') >= 0, chg = lay.flags.indexOf('change') >= 0;
+  var short = false, chg = lay.flags.indexOf('change') >= 0;
   var c = short ? PB.ORG : PB.GRN, t = short ? (lay.flags.indexOf('overlap') >= 0 ? 'Superpuesto' : 'Conexión corta') : 'Tránsito';
   return { ico: short ? 'ic-warn.png' : 'ic-sync.png', c: c, t: t, v: '<b style="font-size:' + valSize + 'px;color:' + c + '">' + HV.fmtDur(lay.min) + '</b>' + (chg ? '<div style="font-size:10px;color:' + PB.ORG + ';font-weight:bold">cambia aeropuerto</div>' : '') };
 }
@@ -1557,6 +1557,7 @@ function updatePreview() {
     var g = it.segs[s.i] && it.segs[s.i].gdur;
     if (g != null && Math.abs(s.dur - g) > 1) it.warn = (it.warn || []).concat('La duración calculada del vuelo ' + s.al + ' ' + s.fn + ' (' + HV.fmtDur(s.dur) + ') no coincide con la de SPRK (' + HV.fmtDur(g) + '). Revisá los horarios.');
   });
+  calc.journeys.forEach(function (j) { j.layovers.forEach(function (l) { if (l.flags.indexOf('overlap') >= 0) it.warn = (it.warn || []).concat('Hay una conexión en ' + l.city + ' donde el vuelo siguiente sale antes de que llegue el anterior. Revisá los horarios del PNR.'); }); });
   (it.warn || []).concat(calc.warn || []).forEach(function (w) { d += '<div class="dg dg-warn">' + esc(w) + '</div>'; });
   $('diag').innerHTML = d;
   var key = calc.unknown.join(',');
