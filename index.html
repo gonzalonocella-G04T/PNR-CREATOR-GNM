@@ -1299,10 +1299,10 @@ function pbStubWrap(body, J, o, compact) {
   R.pts.forEach(function (p) {
     if (p.c) route += '<div style="' + F + 'font-size:' + (many ? 12 : 13) + 'px;font-weight:bold;letter-spacing:1px;color:' + INK + ';text-transform:uppercase;line-height:1.25">' + esc(p.c) + '</div>';
     else if (p.fly) route += pbImg('pass-plane-navy.png', o, many ? 15 : 20, many ? 15 : 20, 'margin:' + (many ? 3 : 7) + 'px auto');
-    else route += '<table align="center" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;margin:3px auto"><tr><td style="border-left:2px dotted #8FA9C0;height:14px;font-size:1px;line-height:1px;padding:0">&nbsp;</td></tr></table>';
+    else route += '<div style="' + F + 'font-size:' + (many ? 16 : 18) + 'px;font-weight:bold;color:#1E88D6;letter-spacing:1px;line-height:1;margin:' + (many ? 4 : 7) + 'px auto">//</div>';
   });
   if (R.label) route += '<div style="' + F + 'font-size:9.5px;letter-spacing:2px;color:' + PB.MUT + ';margin-top:8px;white-space:nowrap">' + R.label + '</div>';
-  if (R.gap) route += '<div style="' + F + 'font-size:9.5px;color:' + PB.MUT + ';margin-top:5px;line-height:1.35">⋮ tramo no incluido<br>en este itinerario</div>';
+
   var mid = '<table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;margin-top:' + (compact ? 12 : 22) + 'px"><tr>' +
     '<td width="34" style="width:34px;min-width:34px;padding:0;font-size:1px;line-height:1px">&nbsp;</td>' +
     '<td style="padding:0;text-align:center;vertical-align:middle">' + (compact && R.pts.length > 3 ? '' : pbImg('stub-trail.png', o, 118, 38, 'margin:0 auto')) +
