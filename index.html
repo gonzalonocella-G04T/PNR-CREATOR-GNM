@@ -1259,8 +1259,8 @@ function pbStubRoute(J) {
 /* 3 a 4 vuelos: filas compactas con códigos IATA y fecha en la barra del tramo */
 function passB(it, calc, o) {
   var J = calc.journeys, firstYear = calc.first.depD.y, anyOff = false;
-  function pt(kind, code, time, off) {
-    return pbLab(kind) + '<div style="' + F + 'font-size:21px;font-weight:bold;color:' + PB.INK + ';line-height:1.1;letter-spacing:0.5px">' + esc(code) + '</div>' +
+  function pt(kind, code, time, off, dlab) {
+    return pbLab(kind + (dlab ? ' · <span style="color:#1E88D6;font-weight:bold">' + dlab + '</span>' : '')) + '<div style="' + F + 'font-size:21px;font-weight:bold;color:' + PB.INK + ';line-height:1.1;letter-spacing:0.5px">' + esc(code) + '</div>' +
       '<div style="' + F + 'font-size:11.5px;color:' + PB.MUT + ';line-height:1.35">' + esc(U.apCity(code)) + '</div>' +
       '<div style="' + F + 'font-size:19px;font-weight:bold;color:' + PB.INK + ';line-height:1.2;white-space:nowrap">' + time + pbOff(off) + '</div>';
   }
@@ -1276,23 +1276,24 @@ function passB(it, calc, o) {
     var rows = '';
     j.segs.forEach(function (s, k) {
       var a = U.alInfo(s.al), lay = k < j.layovers.length ? j.layovers[k] : null;
-      var od = U.dayNum(s.depD) - base, oa = U.dayNum(s.arrD) - base;
-      if (od || oa) anyOff = true;
+      var od = U.dayNum(s.depD) - base, oa = s.dayDiff || 0;
+      if (oa) anyOff = true;
+      var ddl = od ? esc(U.fmtDate(s.depD)) : '';
       var conn = '<div style="' + F + 'font-size:14px;color:#9AB0C2;text-align:center">–</div>';
       if (lay) { var L = pbLay(lay, o, 13); conn = pbLab(L.t, L.c) + '<div style="height:3px;font-size:1px;line-height:3px">&nbsp;</div>' + pbIcoRow(L.ico, o, L.v) + '<div style="' + F + 'font-size:11.5px;color:' + L.c + ';padding:2px 0 0 28px">en ' + esc(U.apCity(s.to)) + '</div>'; }
       if (k) rows += '<tr><td colspan="7" height="1" bgcolor="#E3ECF4" style="height:1px;background:#E3ECF4;padding:0;font-size:1px;line-height:1px">&nbsp;</td></tr>';
       rows += '<tr>' +
         '<td width="190" style="width:162px;padding:12px 14px;vertical-align:middle"><table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr><td style="padding:0 8px 0 0;vertical-align:middle">' + logoAt(s.al, o, 34) + '</td><td style="' + F + 'padding:0;vertical-align:middle;font-size:11.5px;font-weight:bold;color:' + PB.INK + ';text-transform:uppercase;letter-spacing:0.3px;line-height:1.2">' + (isWide(s.al) ? '' : esc(a.name)) + '</td></tr></table>' +
         '<div style="' + F + 'font-size:15px;color:' + PB.MUT + ';padding:5px 0 0 34px;white-space:nowrap">' + esc(s.al) + ' ' + esc(s.fn) + '</div></td>' + pbSep() +
-        '<td width="135" style="width:115px;padding:10px 4px 10px 16px;vertical-align:middle">' + pt('Salida', s.from, esc(s.dep), od) + '</td>' +
+        '<td width="135" style="width:115px;padding:10px 4px 10px 16px;vertical-align:middle">' + pt('Salida', s.from, esc(s.dep), 0, ddl) + '</td>' +
         '<td width="95" style="width:91px;padding:0 2px;vertical-align:middle">' + pbImg('pass-arrow.png', o, 66, 17, 'margin:0 auto') + '</td>' +
-        '<td width="138" style="width:126px;padding:10px 8px 10px 4px;vertical-align:middle">' + pt('Llegada', s.to, esc(s.arr), oa) + '</td>' + pbSep() +
+        '<td width="138" style="width:126px;padding:10px 8px 10px 4px;vertical-align:middle">' + pt('Llegada', s.to, esc(s.arr), oa, '') + '</td>' + pbSep() +
         '<td width="140" style="width:112px;padding:10px 14px;vertical-align:middle">' + pbLab('Duración') + '<div style="height:4px;font-size:1px;line-height:4px">&nbsp;</div>' + pbIcoRow('ic-clock.png', o, '<b style="font-size:13px;color:' + PB.INK + '">' + HV.fmtDur(s.dur) + '</b>') + '</td></tr>';
     });
     body += '<table width="700" cellspacing="0" cellpadding="0" border="0" bgcolor="#FFFFFF" style="width:700px;table-layout:fixed;border-collapse:separate;background:#FFFFFF;border:1px solid #DCE8F3;border-radius:10px">' + rows + '</table>';
     body += pbTot(j, lbl, o) + '<div style="height:' + (ix < J.length - 1 ? 14 : 10) + 'px;font-size:1px;line-height:10px">&nbsp;</div>';
   });
-  body += pbNote(calc, anyOff ? ' +1: un día después de la fecha del tramo.' : ' ', o);
+  body += pbNote(calc, anyOff ? ' +1: llega al día siguiente de su salida.' : ' ', o);
   return pbStubWrap(body, J, o);
 }
 
