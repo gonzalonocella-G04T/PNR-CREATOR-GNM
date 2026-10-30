@@ -1178,13 +1178,13 @@ function passA(it, calc, o) {
     var dur = lab('Duración') + '<div style="' + F + 'font-size:17px;font-weight:bold;color:' + INK + ';line-height:1.25;white-space:nowrap">' + HV.fmtDur(s.dur) + '</div>';
     /* sin tránsito en boarding pass */
     return '<table width="803" cellspacing="0" cellpadding="0" border="0" bgcolor="#FFFFFF" style="width:803px;table-layout:fixed;border-collapse:separate;background:#FFFFFF;border:1px solid #DCE8F3;border-radius:10px"><tr>' +
-      '<td width="100" style="' + F + 'width:74px;padding:12px 10px 12px 16px;vertical-align:middle;color:' + INK + '"><div style="font-size:11px;letter-spacing:0.6px;text-transform:uppercase">' + esc(dw[0]) + '</div><div style="font-size:19px;font-weight:bold;line-height:1.15;white-space:nowrap;text-transform:uppercase">' + esc(dw[1] + ' ' + dw[2]) + '</div>' + (s.depD.y !== firstYear ? '<div style="font-size:11px;color:' + MUT + '">' + s.depD.y + '</div>' : '') + '</td>' + sep +
-      '<td width="158" style="width:130px;padding:10px 14px;vertical-align:middle"><table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr><td style="padding:0 7px 0 0;vertical-align:middle">' + logoAt(s.al, o, 22) + '</td><td style="' + F + 'padding:0;vertical-align:middle;font-size:11px;font-weight:bold;color:' + INK + ';text-transform:uppercase;letter-spacing:0.3px;line-height:1.2">' + esc(a.name) + '</td></tr></table>' +
+      '<td width="100" style="' + F + 'width:74px;padding:18px 10px 18px 16px;vertical-align:middle;color:' + INK + '"><div style="font-size:11px;letter-spacing:0.6px;text-transform:uppercase">' + esc(dw[0]) + '</div><div style="font-size:19px;font-weight:bold;line-height:1.15;white-space:nowrap;text-transform:uppercase">' + esc(dw[1] + ' ' + dw[2]) + '</div>' + (s.depD.y !== firstYear ? '<div style="font-size:11px;color:' + MUT + '">' + s.depD.y + '</div>' : '') + '</td>' + sep +
+      '<td width="158" style="width:130px;padding:18px 14px;vertical-align:middle"><table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr><td style="padding:0 7px 0 0;vertical-align:middle">' + logoAt(s.al, o, 22) + '</td><td style="' + F + 'padding:0;vertical-align:middle;font-size:11px;font-weight:bold;color:' + INK + ';text-transform:uppercase;letter-spacing:0.3px;line-height:1.2">' + esc(a.name) + '</td></tr></table>' +
       '<div style="height:6px;font-size:1px;line-height:6px">&nbsp;</div>' + lab('Vuelo') + '<div style="' + F + 'font-size:20px;font-weight:bold;color:' + INK + ';line-height:1.15;white-space:nowrap">' + esc(s.al) + ' ' + esc(s.fn) + '</div></td>' + sep +
-      '<td width="165" style="width:145px;padding:10px 4px 10px 16px;vertical-align:middle">' + pt('Salida', esc(s.dep), s.from) + '</td>' +
+      '<td width="165" style="width:145px;padding:18px 4px 18px 16px;vertical-align:middle">' + pt('Salida', esc(s.dep), s.from) + '</td>' +
       '<td width="80" style="width:72px;padding:0 4px;vertical-align:middle;text-align:center"><img src="' + pimg('pass-arrow.png', o) + '" alt="" width="72" height="18" style="display:block;width:72px;min-width:72px;max-width:none;height:auto;border:0;margin:0 auto"></td>' +
-      '<td width="165" style="width:147px;padding:10px 14px 10px 4px;vertical-align:middle">' + pt('Llegada', esc(s.arr) + dd, s.to) + '</td>' + sep +
-      '<td width="132" style="width:104px;padding:10px 14px;vertical-align:middle">' + dur + '</td></tr></table>';
+      '<td width="165" style="width:147px;padding:18px 14px 18px 4px;vertical-align:middle">' + pt('Llegada', esc(s.arr) + dd, s.to) + '</td>' + sep +
+      '<td width="132" style="width:104px;padding:18px 14px;vertical-align:middle">' + dur + '</td></tr></table>';
   }
   var body = '';
   if (pax.length || it.advisor) {
@@ -1199,13 +1199,14 @@ function passA(it, calc, o) {
       '<td style="padding:0 10px 0 0;vertical-align:middle"><img src="' + pimg('pass-plane-white.png', o) + '" alt="" width="20" height="20" style="display:block;width:20px;min-width:20px;max-width:none;height:auto;border:0"></td>' +
       '<td style="' + F + 'padding:0;vertical-align:middle;font-size:15px;color:#FFFFFF;white-space:nowrap"><b style="letter-spacing:0.6px">' + esc(lbl.toUpperCase()) + '</b>&nbsp; · &nbsp;' + esc(U.apCity(j.from)) + ' → ' + esc(U.apCity(j.to)) + '</td></tr></table></td></tr></table>';
     j.segs.forEach(function (s, k) {
-      body += '<div style="height:8px;font-size:1px;line-height:8px">&nbsp;</div>' + card(s, k < j.layovers.length ? j.layovers[k] : null);
+      body += '<div style="height:10px;font-size:1px;line-height:10px">&nbsp;</div>' + card(s, k < j.layovers.length ? j.layovers[k] : null);
     });
     if (j.stops > 0 && o.tot) body += '<div style="' + F + 'font-size:11.5px;color:#1F5E45;text-align:right;padding:6px 4px 0">Duración total ' + totLabel(lbl) + ': <b>' + HV.fmtDur(j.total) + '</b> <span style="color:#5E7A6E">(' + HV.fmtDur(j.flight) + ' de vuelo + ' + HV.fmtDur(j.lay) + ' de tránsito)</span></div>';
     body += '<div style="height:' + (ix < J.length - 1 ? 16 : 10) + 'px;font-size:1px;line-height:10px">&nbsp;</div>';
   });
   body += '<table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr><td style="' + F + 'padding:0;font-size:11px;color:' + MUT + '">Horarios locales de cada ciudad.' + (anyDay ? ' +1: llega al día siguiente.' : '') + '</td></tr></table>';
-  return pbStubWrap(body, J, o, J.reduce(function (n, j) { return n + j.segs.length; }, 0) < 3);
+  var nseg = J.reduce(function (n, j) { return n + j.segs.length; }, 0);
+  return pbStubWrap(body, J, o, nseg === 1 ? 1 : nseg < 3);
 }
 function passHTML(it, calc, o) {
   var n = calc.segs.length;
@@ -1305,12 +1306,12 @@ function pbStubWrap(body, J, o, compact) {
 
   var mid = '<table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;margin-top:' + (compact ? 12 : 22) + 'px"><tr>' +
     '<td width="34" style="width:34px;min-width:34px;padding:0;font-size:1px;line-height:1px">&nbsp;</td>' +
-    '<td style="padding:0;text-align:center;vertical-align:middle">' + (compact && R.pts.length > 3 ? '' : pbImg('stub-trail.png', o, 118, 38, 'margin:0 auto')) +
-    (compact && R.pts.length > 3 ? '' : '<table align="center" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;margin:14px auto 16px"><tr><td width="140" height="1" bgcolor="#8FB4D3" style="width:140px;height:1px;background:#8FB4D3;font-size:1px;line-height:1px">&nbsp;</td></tr></table>') + route + '</td>' +
-    '<td width="34" style="width:26px;min-width:26px;padding:0 0 0 8px;vertical-align:middle">' + pbImg('barcode.png', o, 26, 156) + '</td></tr></table>';
+    '<td style="padding:0;text-align:center;vertical-align:middle">' + (compact && (R.pts.length > 3 || compact === 1) ? '' : pbImg('stub-trail.png', o, 118, 38, 'margin:0 auto')) +
+    (compact && (R.pts.length > 3 || compact === 1) ? '' : '<table align="center" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;margin:14px auto 16px"><tr><td width="140" height="1" bgcolor="#8FB4D3" style="width:140px;height:1px;background:#8FB4D3;font-size:1px;line-height:1px">&nbsp;</td></tr></table>') + route + '</td>' +
+    '<td width="34" style="width:26px;min-width:26px;padding:0 0 0 8px;vertical-align:middle">' + (compact === 1 ? pbImg('barcode.png', o, 18, 108) : pbImg('barcode.png', o, 26, 156)) + '</td></tr></table>';
   var stub = pbImg('pass-logo.png', o, 180, 50, 'margin:0 auto') +
     '<div style="' + F + 'font-size:' + (compact ? 15 : 17) + 'px;letter-spacing:1px;color:' + INK + ';line-height:1.3;margin-top:14px;font-weight:bold;text-align:center;white-space:nowrap">Tu próximo destino<br><span style="color:#1E88D6">empieza acá</span></div>' +
-    mid + (compact ? pbImg('lo-hacemos.png', o, 210, 46, 'margin:16px auto 0') : (R.pts.length > 3 ? '' : pbImg('stub-map.png', o, 170, 74, 'margin:22px auto 0;opacity:0.75')) +
+    mid + (compact ? pbImg('lo-hacemos.png', o, 210, 46, 'margin:' + (compact === 1 ? 10 : 16) + 'px auto 0') : (R.pts.length > 3 ? '' : pbImg('stub-map.png', o, 170, 74, 'margin:22px auto 0;opacity:0.75')) +
     pbImg('lo-hacemos.png', o, 240, 52, 'margin:' + (R.pts.length > 3 ? 22 : 14) + 'px auto 0'));
   var head = '<table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr>' +
     '<td style="padding:14px 22px;vertical-align:middle"><img src="' + pimg('pass-head.png', o) + '" alt="Tu Itinerario by Hiperviajes" width="275" height="40" style="display:block;width:275px;min-width:275px;max-width:none;height:auto;border:0"></td>' +
@@ -1319,8 +1320,8 @@ function pbStubWrap(body, J, o, compact) {
   return '<table class="tt" cellspacing="0" cellpadding="0" border="0" style="border-collapse:separate;margin:0">' +
     '<tr><td bgcolor="' + PB.NAVY + '" style="background:' + PB.NAVY + ';border-radius:16px 0 0 0;padding:0">' + head + '</td>' +
     '<td width="' + W + '" bgcolor="' + PB.NAVY + '" style="width:' + W + 'px;min-width:' + W + 'px;background:' + PB.NAVY + ';' + dash + 'border-radius:0 16px 0 0;padding:14px 26px;vertical-align:middle;text-align:center">' + pbImg('pass-plane-white.png', o, 28, 28, 'margin:0 auto') + '</td></tr>' +
-    '<tr><td valign="top" bgcolor="#F4F9FE" style="background:#F4F9FE;border:1px solid #D6E6F3;border-top:0;border-right:0;border-radius:0 0 0 16px;padding:16px 18px 12px;vertical-align:top">' + body + '</td>' +
-    '<td width="' + W + '" valign="top" bgcolor="#E4F2FC" style="width:' + W + 'px;min-width:' + W + 'px;background-color:#E4F2FC;background-image:url(\'' + sw + '\');background-repeat:no-repeat;background-position:right bottom;background-size:' + (compact ? '170px 79px' : '220px 102px') + ';border:1px solid #D6E6F3;border-top:0;' + dash + 'border-radius:0 0 16px 0;padding:' + (compact ? '18px 14px 40px' : '20px 14px 84px') + ';text-align:center;vertical-align:middle">' + stub + '</td></tr></table>';
+    '<tr><td valign="middle" bgcolor="#F4F9FE" style="background:#F4F9FE;border:1px solid #D6E6F3;border-top:0;border-right:0;border-radius:0 0 0 16px;padding:16px 18px 12px;vertical-align:middle">' + body + '</td>' +
+    '<td width="' + W + '" valign="top" bgcolor="#E4F2FC" style="width:' + W + 'px;min-width:' + W + 'px;background-color:#E4F2FC;background-image:url(\'' + sw + '\');background-repeat:no-repeat;background-position:right bottom;background-size:' + (compact ? '170px 79px' : '220px 102px') + ';border:1px solid #D6E6F3;border-top:0;' + dash + 'border-radius:0 0 16px 0;padding:' + (compact === 1 ? '16px 14px 30px' : compact ? '18px 14px 40px' : '20px 14px 84px') + ';text-align:center;vertical-align:middle">' + stub + '</td></tr></table>';
 }
 function pbWrap(body, o) {
   return '<table class="tt" cellspacing="0" cellpadding="0" border="0" style="border-collapse:separate;margin:0;background:#F4F9FE;border-radius:16px">' +
