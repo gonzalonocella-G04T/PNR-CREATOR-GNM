@@ -4,7 +4,8 @@
   var U = HV.util, PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
   var H2C = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
   var JSPDF = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-  var LOGO_HV = '__LOGOHV__';
+  var LOGO_HV = '__LOGOHV__', LOGO_G = (typeof PIMG !== 'undefined' && PIMG['pass-logo.png']) || LOGO_HV;
+  function brand(cls) { return '<div class="brand ' + (cls || '') + '"><img src="' + LOGO_G + '" alt="Hiperviajes"><div class="slogan">EL MEJOR PRECIO PARA VIAJAR</div></div>'; }
   var CABINS = ['Economy', 'Premium Economy', 'Business', 'Primera'];
   var CAB_ES = { 'Economy': 'Económica', 'Premium Economy': 'Premium Economy', 'Business': 'Business', 'Primera': 'Primera' };
   var MESC = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
@@ -143,7 +144,7 @@
     var locAl = r.airlineLocs.filter(function (a) { return a.loc && a.loc !== r.gdsLoc; });
     var h = '<div class="tv-doc">';
     // encabezado
-    h += '<div class="card head"><div class="h-top"><div class="h-logo"><img src="' + LOGO_HV + '" alt="Hiperviajes"></div>' +
+    h += '<div class="card head"><div class="h-top"><div class="h-logo">' + brand() + '</div>' +
       '<div class="h-cell"><div class="lab">' + (many ? 'PASAJEROS' : (/a$/i.test(first(P[0].edit)) ? 'PASAJERA' : 'PASAJERO')) + '</div><div class="big pax">' + P.map(function (p) { return esc(p.edit.toUpperCase()); }).join('<br>') + '</div></div>' +
       '<div class="h-cell"><div class="lab">DESTINO ' + PLANE + '</div><div class="big dest">' + esc(st.dest) + '</div></div></div>' +
       '<div class="h-bot"><div class="h-cell"><div class="lab">CÓDIGO DE RESERVA</div><div class="mid">' + esc(r.gdsLoc) + '</div>' + (locAl.length ? '<div class="sm">' + locAl.map(function (a) { return esc((a.al || a.name) + ' ' + a.loc); }).join(' · ') + '</div>' : '') + '</div>' +
@@ -174,7 +175,7 @@
     h += '</div>' + (ph.length && !perJ ? '<div class="ph-col" style="background-image:url(' + ph[0] + ')"></div>' : '') + '</div>';
     // pie
     var names = P.map(function (p) { return first(p.edit); });
-    h += '<div class="card foot"><div class="f-pl">' + PLANE + '</div><div class="f-msg">¡Muy buen viaje, ' + esc(listY(names)) + '!</div><div class="f-txt">' + (many ? 'Recuerden que cuentan' : 'Recordá que contás') + ' con nuestro respaldo antes, durante y después del viaje.</div><div class="f-logo"><img src="' + LOGO_HV + '" alt="Hiperviajes"></div></div>';
+    h += '<div class="card foot"><div class="f-pl">' + PLANE + '</div><div class="f-msg">¡Muy buen viaje, ' + esc(listY(names)) + '!</div><div class="f-txt">' + (many ? 'Recuerden que cuentan' : 'Recordá que contás') + ' con nuestro respaldo antes, durante y después del viaje.</div><div class="f-logo">' + brand('sm') + '</div></div>';
     h += '<div class="note">Horarios locales de cada ciudad.</div></div>';
     return h;
   }
@@ -328,7 +329,7 @@
 
   function view() {
     document.getElementById('root').innerHTML =
-      '<header class="top"><div class="top-in"><img src="' + LOGO_HV + '" alt="Hiperviajes" class="top-logo"><div><h1>Ticket Vintage</h1><p>Convertí el PDF del boleto en un itinerario para el pasajero.</p></div><span class="proto">Prototipo</span></div></header>' +
+      '<header class="top"><div class="top-in"><img src="' + LOGO_G + '" alt="Hiperviajes" class="top-logo"><div><h1>Ticket Vintage</h1><p>Convertí el PDF del boleto en un itinerario para el pasajero.</p></div><span class="proto">Prototipo</span></div></header>' +
       '<main class="wrap"><section id="start"><div id="drop" class="drop" tabindex="0" role="button" aria-label="Elegir PDF del boleto"><svg viewBox="0 0 24 24" class="up"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3-3 3 3"/></svg><div id="dropTxt">Arrastrá el PDF del boleto acá o tocá para elegirlo</div><div class="drop-sub">Amadeus (CheckMyTrip), Sabre, GWC o SPRK. El archivo se lee en tu navegador: no se sube a ningún lado.</div></div><input type="file" id="file" accept="application/pdf,.pdf" hidden><div id="err" class="err" hidden></div></section>' +
       '<section id="work" hidden><div class="work"><aside class="panel"><div class="panel-h"><h2>Revisá los datos</h2><button type="button" class="lnk" id="again">Cargar otro PDF</button></div><div id="review"></div></aside>' +
       '<div class="stage"><div class="bar"><div id="issues" class="issues" hidden></div><div class="btns"><button type="button" class="btn pri" id="dlpng">Descargar imagen</button><button type="button" class="btn" id="dlpdf">Descargar PDF</button></div></div><div id="preview"></div></div></div></section></main>' +

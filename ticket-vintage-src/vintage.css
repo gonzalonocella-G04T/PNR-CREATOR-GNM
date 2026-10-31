@@ -141,3 +141,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Inter",Arial
 .with-photo .mid-pl,.trip.has-ph .mid-pl{padding:0 8px 40px}
 .info .v{white-space:nowrap}
 .info .v .sn{font-weight:500;color:var(--mut);font-size:13px}
+.brand{display:inline-block;text-align:center}
+.brand img{display:block;width:200px;height:auto;margin:0 auto}
+.brand .slogan{font:600 10.5px/1 Inter,Arial,sans-serif;letter-spacing:2.4px;color:#1466E6;margin-top:7px;white-space:nowrap}
+.brand.sm img{width:175px}.brand.sm .slogan{font-size:9.5px;letter-spacing:2px}
+.h-logo .brand{display:block}.top-logo{height:34px}
