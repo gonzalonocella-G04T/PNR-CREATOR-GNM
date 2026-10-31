@@ -73,7 +73,7 @@
     st.r = r; st.sel = {}; st.photos = [];
     r.pax.forEach(function (p) { st.sel[p.name] = true; p.edit = p.display; p.tk = p.tickets.join(', '); });
     r.segs.forEach(function (s) { if (s.cabin == null) s.cabin = ''; });
-    st.dest = guessDest(r);
+    st.dest = guessDest(r); st.destAuto = st.dest; st.destCode = guessDestCode(r); st.stamp = '';
     st.mode = r.pax.length > 1 ? 'joint' : 'joint';
   }
   function journeys(segs) {
@@ -93,6 +93,24 @@
     var J = journeys(r.segs); if (!J.length) return '';
     var c0 = city(J[0].from), last = city(J[J.length - 1].to);
     return (c0 === last ? city(J[0].to) : last).toUpperCase();
+  }
+  function guessDestCode(r) {
+    var J = journeys(r.segs); if (!J.length) return '';
+    return city(J[0].from) === city(J[J.length - 1].to) ? J[0].to : J[J.length - 1].to;
+  }
+  /* sellos de ciudades: por nombre del destino (como esté escrito) y, si el destino no se editó, por aeropuerto */
+  function nrm(x) { return String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z ]/g, '').replace(/\s+/g, ' ').trim(); }
+  var SEL = typeof SELLOS !== 'undefined' ? SELLOS : [], SEL_N = {}, SEL_C = {};
+  SEL.forEach(function (e) { e.a.forEach(function (a) { if (!SEL_N[a]) SEL_N[a] = e; }); e.c.forEach(function (c) { SEL_C[c] = e; }); });
+  function autoStamp() {
+    var e = SEL_N[nrm(st.dest)];
+    if (!e && nrm(st.dest) === nrm(st.destAuto)) e = SEL_C[st.destCode] || null;
+    return e || null;
+  }
+  function curStamp() {
+    if (st.stamp === 'none') return null;
+    if (st.stamp) return SEL.filter(function (e) { return e.n === st.stamp; })[0] || null;
+    return autoStamp();
   }
   function missing() {
     var r = st.r, m = [];
@@ -128,6 +146,8 @@
     return (sq ? '<img class="al-s" src="' + sq + '" alt="">' : '') + '<span class="al-n">' + esc(a.name) + '</span>';
   }
   function stamp(dest) {
+    var e = curStamp();
+    if (e) return '<img class="stamp stamp-img" src="' + e.s + '" alt="">';
     var txt = esc(dest || 'DESTINO');
     return '<svg class="stamp" viewBox="0 0 200 200" aria-hidden="true"><defs><path id="ct" d="M100,100 m-70,0 a70,70 0 1,1 140,0"/><path id="cb" d="M100,100 m-80,0 a80,80 0 0,0 160,0"/></defs>' +
       '<g fill="none" stroke="#5E7FB5" stroke-width="2.2" opacity=".85"><circle cx="100" cy="100" r="92"/><circle cx="100" cy="100" r="58" stroke-dasharray="3 4"/></g>' +
@@ -190,7 +210,7 @@
     h += '<div class="rv-sec"><div class="rv-h">Documento leído</div><div class="rv-meta">' + esc(st.file) + ' · formato <b>' + esc(r.format) + '</b></div></div>';
     h += '<div class="rv-sec"><div class="rv-h">Reserva</div><label>Código de reserva<input data-f="gds" value="' + esc(r.gdsLoc || '') + '"></label>' +
       (r.airlineLocs.length ? '<div class="rv-meta">Localizador de aerolínea: ' + r.airlineLocs.map(function (a) { return esc((a.al || a.name) + ' ' + a.loc); }).join(' · ') + '</div>' : '') +
-      '<label>Destino (sello y encabezado)<input data-f="dest" value="' + esc(st.dest) + '"></label></div>';
+      '<label>Destino (sello y encabezado)<input data-f="dest" value="' + esc(st.dest) + '"></label>' + stampSel() + '</div>';
     h += '<div class="rv-sec"><div class="rv-h">Pasajeros</div>';
     r.pax.forEach(function (p, i) {
       h += '<div class="rv-pax"><label class="chk"><input type="checkbox" data-sel="' + i + '"' + (st.sel[p.name] ? ' checked' : '') + '> Incluir</label><label>Nombre<input data-pn="' + i + '" value="' + esc(p.edit) + '"></label><label>Boleto(s)<input data-pt="' + i + '" value="' + esc(p.tk) + '"' + (p.tk ? '' : ' class="miss" placeholder="No figura en el PDF"') + '></label>' +
@@ -210,6 +230,12 @@
       '<label class="file">Elegir foto(s)<input type="file" id="ph" accept="image/*" multiple></label>' + (st.photos.length ? ' <button type="button" class="lnk" id="phClr">Quitar fotos</button>' : '') + '</div>';
     return h;
   }
+  function stampSel() {
+    var a = autoStamp();
+    return '<label>Sello<select data-f="stamp"><option value=""' + (st.stamp ? '' : ' selected') + '>' + esc(autoLabel(a)) + '</option><option value="none"' + (st.stamp === 'none' ? ' selected' : '') + '>Genérico (sin ciudad)</option>' +
+      SEL.map(function (e) { return '<option value="' + esc(e.n) + '"' + (st.stamp === e.n ? ' selected' : '') + '>' + esc(e.n) + '</option>'; }).join('') + '</select></label>';
+  }
+  function autoLabel(a) { return 'Automático: ' + (a ? a.n : 'genérico (no hay sello para este destino)'); }
   function renderAll() {
     $('start').hidden = !!st.r; $('work').hidden = !st.r;
     if (!st.r) return;
@@ -236,7 +262,8 @@
     rv.addEventListener('input', function (e) {
       var t = e.target, r = st.r, i;
       if (t.dataset.f === 'gds') r.gdsLoc = t.value.trim().toUpperCase();
-      else if (t.dataset.f === 'dest') st.dest = t.value.toUpperCase();
+      else if (t.dataset.f === 'dest') { st.dest = t.value.toUpperCase(); var o = rv.querySelector('select[data-f="stamp"] option'); if (o) o.textContent = autoLabel(autoStamp()); }
+      else if (t.dataset.f === 'stamp') return;
       else if (t.dataset.pn != null) r.pax[+t.dataset.pn].edit = t.value;
       else if (t.dataset.pt != null) r.pax[+t.dataset.pt].tk = t.value;
       else if (t.dataset.s != null) {
@@ -248,6 +275,7 @@
     });
     rv.addEventListener('change', function (e) {
       var t = e.target;
+      if (t.dataset.f === 'stamp') { st.stamp = t.value; renderPreview(); }
       if (t.dataset.sel != null) { st.sel[st.r.pax[+t.dataset.sel].name] = t.checked; renderPreview(); }
       if (t.dataset.k === 'cabin' || t.dataset.s != null) { renderAll(); }
       if (t.id === 'ph') {
