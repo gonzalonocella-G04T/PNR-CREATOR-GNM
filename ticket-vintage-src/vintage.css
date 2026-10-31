@@ -147,3 +147,5 @@ body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Inter",Arial
 .brand .slogan{font:600 10.5px/1 Inter,Arial,sans-serif;letter-spacing:2.4px;color:#1466E6;margin-top:7px;white-space:nowrap}
 .brand.sm img{width:175px}.brand.sm .slogan{font-size:9.5px;letter-spacing:2px}
 .h-logo .brand{display:block}.top-logo{height:34px}
+
+.ph-col{position:relative}.ph-cr{position:absolute;right:8px;bottom:6px;font:500 10px Inter,Arial,sans-serif;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7)}

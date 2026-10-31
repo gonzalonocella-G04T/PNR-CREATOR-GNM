@@ -9,7 +9,7 @@
   var CABINS = ['Economy', 'Premium Economy', 'Business', 'Primera'];
   var CAB_ES = { 'Economy': 'Económica', 'Premium Economy': 'Premium Economy', 'Business': 'Business', 'Primera': 'Primera' };
   var MESC = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
-  var st = { r: null, file: '', sel: {}, mode: 'joint', dest: '', photos: [], err: '' };
+  var st = { r: null, file: '', sel: {}, mode: 'joint', dest: '', photos: [], err: '', lib: '', libData: {}, libErr: {} };
   if (typeof APX !== 'undefined') { Object.keys(HV.AP).forEach(function (c) { HV.AP[c].cur = true; }); Object.keys(APX).forEach(function (tz) { APX[tz].split(';').forEach(function (e) { var p = e.split('|'); if (!HV.AP[p[0]]) HV.AP[p[0]] = { c: p[1], n: p[2] || '', tz: tz }; }); }); }
 
   function $(id) { return document.getElementById(id); }
@@ -70,7 +70,7 @@
   /* ---------- preparación ---------- */
   function prepare(r) {
     showErr('');
-    st.r = r; st.sel = {}; st.photos = [];
+    st.r = r; st.sel = {}; st.photos = []; st.lib = '';
     r.pax.forEach(function (p) { st.sel[p.name] = true; p.edit = p.display; p.tk = p.tickets.join(', '); });
     r.segs.forEach(function (s) { if (s.cabin == null) s.cabin = ''; });
     st.dest = guessDest(r); st.destAuto = st.dest; st.destCode = guessDestCode(r); st.stamp = '';
@@ -112,6 +112,39 @@
     if (st.stamp) return SEL.filter(function (e) { return e.n === st.stamp; })[0] || null;
     return autoStamp();
   }
+  /* biblioteca de fotos de destinos (archivos aparte, se cargan al usarse) */
+  var FOT = typeof FOTOS !== 'undefined' ? FOTOS : [], FOT_N = {}, FOT_C = {};
+  FOT.forEach(function (e) { e.a.forEach(function (a) { if (!FOT_N[a]) FOT_N[a] = e; }); e.c.forEach(function (c) { FOT_C[c] = e; }); });
+  var FOT_BASE = ['tv-fotos/', 'https://raw.githubusercontent.com/gonzalonocella-G04T/PNR-CREATOR-GNM/ticket-vintage/tv-fotos/'];
+  function autoLib() {
+    var e = FOT_N[nrm(st.dest)];
+    if (!e && nrm(st.dest) === nrm(st.destAuto)) e = FOT_C[st.destCode] || null;
+    return e || null;
+  }
+  function curLib() {
+    if (st.lib === 'none') return null;
+    if (st.lib) return FOT.filter(function (e) { return e.n === st.lib; })[0] || null;
+    return autoLib();
+  }
+  function loadLib(e) {
+    if (!e || st.libData[e.f] || st.libErr[e.f] || loadLib.busy[e.f]) return;
+    loadLib.busy[e.f] = 1;
+    var tryAt = function (i) {
+      if (i >= FOT_BASE.length) { delete loadLib.busy[e.f]; st.libErr[e.f] = 1; renderAll(); return; }
+      fetch(FOT_BASE[i] + e.f).then(function (r) { if (!r.ok) throw 0; return r.blob(); }).then(function (b) {
+        var fr = new FileReader(); fr.onload = function () { delete loadLib.busy[e.f]; st.libData[e.f] = fr.result; renderPreview(); }; fr.readAsDataURL(b);
+      }).catch(function () { tryAt(i + 1); });
+    };
+    tryAt(0);
+  }
+  loadLib.busy = {};
+  function photoList() {
+    if (st.photos.length) return st.photos.filter(Boolean);
+    var e = curLib(); if (!e) return [];
+    loadLib(e);
+    return st.libData[e.f] ? [st.libData[e.f]] : [];
+  }
+  function photoCredit() { if (st.photos.length) return ''; var e = curLib(); return (e && e.cr) || ''; }
   function missing() {
     var r = st.r, m = [];
     if (!r) return m;
@@ -129,6 +162,7 @@
       if (!s.cabin) m.push('Vuelo ' + tag + ': falta la cabina.');
     });
     if (!st.dest.trim()) m.push('Falta el destino.');
+    var le = !st.photos.length && curLib(); if (le && !st.libData[le.f] && !st.libErr[le.f]) m.push('Cargando la foto de ' + le.n + '…');
     return m;
   }
   function segDur(s) { var a = utc(s.depDate, s.depTime, s.from.code), b = utc(s.arrDate, s.arrTime, s.to.code); return a != null && b != null ? b - a : s.durMin; }
@@ -171,7 +205,7 @@
       '<div class="h-cell"><div class="lab">' + (tickets.length > 1 || /,/.test(tickets[0].t) ? 'Nº DE BILLETES' : 'Nº DE BILLETE') + '</div>' + tickets.map(function (t) { return '<div class="mid tk">' + esc(t.t) + (many ? ' <span class="sm">' + esc(first(t.n)) + '</span>' : '') + '</div>'; }).join('') + '</div></div>' +
       stamp(st.dest) + '</div>';
     // tramos
-    var ph = st.photos.filter(Boolean), perJ = ph.length >= 2 && J.length === 2;
+    var ph = photoList(), perJ = ph.length >= 2 && J.length === 2;
     h += '<div class="trips' + (ph.length && !perJ ? ' with-photo' : '') + '"><div class="trip-col">';
     J.forEach(function (j, ji) {
       var d0 = j.segs[0].depDate.split('-');
@@ -192,7 +226,7 @@
       });
       h += '</div>' + (perJ ? '<div class="ph" style="background-image:url(' + ph[ji] + ')"></div>' : '') + '</div>';
     });
-    h += '</div>' + (ph.length && !perJ ? '<div class="ph-col" style="background-image:url(' + ph[0] + ')"></div>' : '') + '</div>';
+    h += '</div>' + (ph.length && !perJ ? '<div class="ph-col" style="background-image:url(' + ph[0] + ')">' + (photoCredit() ? '<span class="ph-cr">' + esc(photoCredit()) + '</span>' : '') + '</div>' : '') + '</div>';
     // pie
     var names = P.map(function (p) { return first(p.edit); });
     h += '<div class="card foot"><div class="f-pl">' + PLANE + '</div><div class="f-msg">¡Muy buen viaje, ' + esc(listY(names)) + '!</div><div class="f-txt">' + (many ? 'Recuerden que cuentan' : 'Recordá que contás') + ' con nuestro respaldo antes, durante y después del viaje.</div><div class="f-logo">' + brand('sm') + '</div></div>';
@@ -227,13 +261,21 @@
         (s.fareBrand && !s.cabin ? '<div class="rv-meta">El documento solo indica la tarifa "' + esc(s.fareBrand) + '": elegí la cabina.</div>' : '') + '</div>';
     });
     h += '</div><div class="rv-sec"><div class="rv-h">Foto del destino <span class="opt">opcional</span></div><div class="rv-meta">Una foto se muestra al costado de todos los vuelos; dos fotos (ida y vuelta) van una por tramo.</div>' +
-      '<label class="file">Elegir foto(s)<input type="file" id="ph" accept="image/*" multiple></label>' + (st.photos.length ? ' <button type="button" class="lnk" id="phClr">Quitar fotos</button>' : '') + '</div>';
+      libSel() + '<label class="file">Elegir foto(s) propia(s)<input type="file" id="ph" accept="image/*" multiple></label>' + (st.photos.length ? ' <button type="button" class="lnk" id="phClr">Quitar fotos</button>' : '') + '</div>';
     return h;
   }
   function stampSel() {
     var a = autoStamp();
     return '<label>Sello<select data-f="stamp"><option value=""' + (st.stamp ? '' : ' selected') + '>' + esc(autoLabel(a)) + '</option><option value="none"' + (st.stamp === 'none' ? ' selected' : '') + '>Genérico (sin ciudad)</option>' +
       SEL.map(function (e) { return '<option value="' + esc(e.n) + '"' + (st.stamp === e.n ? ' selected' : '') + '>' + esc(e.n) + '</option>'; }).join('') + '</select></label>';
+  }
+  function libSel() {
+    if (!FOT.length) return '';
+    var a = autoLib(), e = curLib(), err = e && st.libErr[e.f];
+    return '<label>Foto de la biblioteca<select data-f="lib"><option value=""' + (st.lib ? '' : ' selected') + '>Automática: ' + esc(a ? a.n : 'no hay foto para este destino') + '</option><option value="none"' + (st.lib === 'none' ? ' selected' : '') + '>Sin foto</option>' +
+      FOT.map(function (x) { return '<option value="' + esc(x.n) + '"' + (st.lib === x.n ? ' selected' : '') + '>' + esc(x.n) + '</option>'; }).join('') + '</select></label>' +
+      (st.photos.length ? '<div class="rv-meta">Se usan las fotos propias cargadas; la de la biblioteca queda en suspenso.</div>' : '') +
+      (err ? '<div class="rv-meta">No se pudo descargar la foto (hace falta conexión a internet).</div>' : '');
   }
   function autoLabel(a) { return 'Automático: ' + (a ? a.n : 'genérico (no hay sello para este destino)'); }
   function renderAll() {
@@ -263,7 +305,7 @@
       var t = e.target, r = st.r, i;
       if (t.dataset.f === 'gds') r.gdsLoc = t.value.trim().toUpperCase();
       else if (t.dataset.f === 'dest') { st.dest = t.value.toUpperCase(); var o = rv.querySelector('select[data-f="stamp"] option'); if (o) o.textContent = autoLabel(autoStamp()); }
-      else if (t.dataset.f === 'stamp') return;
+      else if (t.dataset.f === 'stamp' || t.dataset.f === 'lib') return;
       else if (t.dataset.pn != null) r.pax[+t.dataset.pn].edit = t.value;
       else if (t.dataset.pt != null) r.pax[+t.dataset.pt].tk = t.value;
       else if (t.dataset.s != null) {
@@ -276,6 +318,7 @@
     rv.addEventListener('change', function (e) {
       var t = e.target;
       if (t.dataset.f === 'stamp') { st.stamp = t.value; renderPreview(); }
+      if (t.dataset.f === 'lib') { st.lib = t.value; renderAll(); }
       if (t.dataset.sel != null) { st.sel[st.r.pax[+t.dataset.sel].name] = t.checked; renderPreview(); }
       if (t.dataset.k === 'cabin' || t.dataset.s != null) { renderAll(); }
       if (t.id === 'ph') {
