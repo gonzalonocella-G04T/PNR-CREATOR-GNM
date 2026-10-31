@@ -1322,13 +1322,13 @@ if (typeof module !== 'undefined') module.exports = pdfLines;
 
   /* ---------- lectura del PDF ---------- */
   function getPdfjs() {
-    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
-    return loadScript(PDFJS + 'pdf.min.js').then(function () {
+    if (window.pdfjsLib && window.pdfjsWorker) return Promise.resolve(window.pdfjsLib);
+    // Se carga también el código del "worker" en la página: así pdf.js lee el PDF en la misma página
+    // cuando el navegador o la vista previa no permiten trabajadores en segundo plano (p. ej. Safari, vistas incrustadas).
+    return loadScript(PDFJS + 'pdf.min.js').then(function () { return loadScript(PDFJS + 'pdf.worker.min.js'); }).then(function () {
       var lib = window.pdfjsLib;
-      return fetch(PDFJS + 'pdf.worker.min.js').then(function (r) { return r.text(); }).then(function (code) {
-        lib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
-        return lib;
-      }, function () { lib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js'; return lib; });
+      lib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js';
+      return lib;
     });
   }
   function readPdf(file) {
