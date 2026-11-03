@@ -991,12 +991,13 @@ function priceBlock(o) {
   var P = o && o.price, rows = pxRows(o), txt = P ? String(P.txt || '').trim() : '';
   if (!rows.length && !txt) return '';
   var h = '<div style="margin:2px 0 12px">';
+  var solo = rows.length === 1 && rows[0][0] === 'Adulto';
   if (rows.length) {
     h += '<div style="' + F + 'padding:0 0 3px;font-size:10px;letter-spacing:0.6px;color:#6A7C90;text-transform:uppercase">Tarifa por pasajero</div>' +
       '<table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse">' +
-      rows.map(function (r) { return '<tr><td style="' + F + 'padding:1px 8px 1px 0;font-size:11px;color:#40546B;white-space:nowrap">' + esc(r[0]) + ':</td><td style="' + F + 'padding:1px 0;font-size:11px;color:#102E55;text-align:left;white-space:nowrap">' + esc(r[1]) + '</td></tr>'; }).join('') + '</table>';
+      rows.map(function (r) { return '<tr>' + (solo ? '' : '<td style="' + F + 'padding:1px 8px 1px 0;font-size:11px;color:#40546B;white-space:nowrap">' + esc(r[0]) + ':</td>') + '<td style="' + F + 'padding:1px 0;font-size:11px;color:#102E55;text-align:left;white-space:nowrap">' + esc(r[1]) + '</td></tr>'; }).join('') + '</table>';
   }
-  if (txt) h += '<div style="' + F + 'padding:' + (rows.length ? 6 : 0) + 'px 0 0;font-size:11.5px;line-height:1.45;color:#40546B">' + esc(txt).replace(/\n/g, '<br>') + '</div>';
+  if (txt) h += '<div style="' + F + 'padding:' + (rows.length ? 6 : 0) + 'px 0 0;font-size:12.5px;font-weight:bold;line-height:1.45;color:#102E55">' + esc(txt).replace(/\n/g, '<br>') + '</div>';
   return h + '</div>';
 }
 /* códigos compartidos: solo si el usuario activa la opción */
@@ -1419,7 +1420,8 @@ function plainText(it, calc) {
     L.push('');
   });
   var full = state.fmt === 'full', pr = full ? pxRows({ price: state.price }) : [], ptx = full ? String(state.price.txt || '').trim() : '';
-  if (pr.length) L.push('Precio por pasajero: ' + pr.map(function (r) { return r[0] + ' ' + r[1]; }).join(' · '));
+  var solo = pr.length === 1 && pr[0][0] === 'Adulto';
+  if (pr.length) L.push('Precio por pasajero: ' + pr.map(function (r) { return (solo ? '' : r[0] + ' ') + r[1]; }).join(' · '));
   if (ptx) L.push(ptx);
   if (pr.length || ptx) L.push('');
   L.push('Todos los horarios son locales.' + (it.advisor ? ' ' + it.advisor + ' ·' : '') + ' Hiperviajes');
@@ -1447,7 +1449,8 @@ function waText(it, calc) {
     if (j.stops > 0 && state.tot) L.push('', '⌛ *Duración total ' + tl + ': ' + HV.fmtDur(j.total) + '*' + ' (' + HV.fmtDur(j.flight) + ' de vuelo + ' + HV.fmtDur(j.lay) + ' de tránsito)');
   });
   var full = state.fmt === 'full', pr = full ? pxRows({ price: state.price }) : [], ptx = full ? String(state.price.txt || '').trim() : '';
-  if (pr.length) L.push('', '💵 *Precio por pasajero*', pr.map(function (r) { return r[0] + ': *' + r[1] + '*'; }).join('\n'));
+  var solo = pr.length === 1 && pr[0][0] === 'Adulto';
+  if (pr.length) L.push('', '💵 *Precio por pasajero*', pr.map(function (r) { return (solo ? '' : r[0] + ': ') + '*' + r[1] + '*'; }).join('\n'));
   if (ptx) L.push('', 'ℹ️ ' + ptx);
   L.push('', '_Horarios locales de cada ciudad._');
   return L.join('\n');
