@@ -1000,6 +1000,17 @@ function priceBlock(o) {
   if (txt) h += '<div style="' + F + 'padding:' + (rows.length ? 6 : 0) + 'px 0 0;font-size:13px;font-weight:bold;line-height:1.45;color:#102E55">' + esc(txt).replace(/\n/g, '<br>') + '</div>';
   return h + '</div>';
 }
+/* nombres de pasajeros en columnas parejas (hasta 9 o más) */
+var PAX_ROWS = { 1: 1, 2: 2, 3: 3, 4: 2, 5: 3, 6: 3, 7: 4, 8: 4, 9: 3 };
+function paxGrid(pax, st, align, one) {
+  var n = pax.length, rows = one ? n : (PAX_ROWS[n] || 3), cols = Math.ceil(n / rows), h = '<table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse' + (align === 'right' ? ';margin-left:auto' : '') + '"><tr>';
+  for (var c = 0; c < cols; c++) {
+    h += '<td style="padding:0 0 0 ' + (c ? 18 : 0) + 'px;vertical-align:top;text-align:left">';
+    for (var r = 0; r < rows; r++) { var x = pax[c * rows + r]; if (x) h += '<div style="' + st + ';white-space:nowrap;line-height:' + (one ? 1.35 : 1.4) + '">' + esc(x) + '</div>'; }
+    h += '</td>';
+  }
+  return h + '</tr></table>';
+}
 /* códigos compartidos: solo si el usuario activa la opción */
 function csNote(s, o, fs, pl) {
   var n = o && o.cs ? opName(s) : ''; if (!n) return '';
@@ -1089,8 +1100,9 @@ function tableHTML(it, calc, o) {
   var N = conn ? 9 : 8;
   var cols = ['Fecha', 'Aerolínea', 'Vuelo', 'Salida', 'Origen', 'Llegada', 'Destino', 'Duración'].concat(conn ? ['Tránsito'] : []);
   var who = '';
-  if (pax.length) who += '<span style="color:#6A7C90">' + (pax.length > 1 ? 'Pasajeros' : 'Pasajero') + ':</span> ' + esc(pax.join(', '));
-  if (it.advisor) who += (who ? '<br>' : '') + '<span style="color:#6A7C90">Asesor:</span> ' + esc(it.advisor);
+  if (it.advisor) who += '<span style="color:#6A7C90">Asesor:</span> ' + esc(it.advisor);
+  var paxB = !pax.length ? '' : '<table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;margin:0 0 10px"><tr><td style="' + F + 'padding:1px 12px 0 0;vertical-align:top;font-size:10px;letter-spacing:0.6px;color:#6A7C90;text-transform:uppercase;white-space:nowrap">' + (pax.length > 1 ? 'Pasajeros' : 'Pasajero') + '</td><td style="padding:0;vertical-align:top">' + paxGrid(pax, F + 'font-size:11px;color:#102E55', '', pax.length <= 3) + '</td></tr></table>';
+  if (o.hdr === false) paxB = '';
   /* Contenedor exterior: encabezado + línea azul + grilla + nota */
   var hdr = '<table cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse:collapse;width:100%"><tr>' +
     '<td style="padding:4px 6px 8px 0;vertical-align:bottom;text-align:left"><img src="' + srcHead(o) + '" alt="Tu Itinerario by Hiperviajes" width="220" height="32" style="display:block;width:220px;min-width:220px;max-width:none;height:auto;border:0"></td>' +
@@ -1137,14 +1149,14 @@ function tableHTML(it, calc, o) {
   if (o.flat) {
     /* Para la imagen (html2canvas no dibuja bien tablas anidadas) */
     return '<div class="tt" style="display:inline-block;background:#ffffff">' + (o.hdr === false ? '' : hdr +
-      '<div style="height:3px;background:#0A9BEA;font-size:1px;line-height:3px">&nbsp;</div><div style="height:8px;font-size:1px;line-height:8px">&nbsp;</div>') +
+      '<div style="height:3px;background:#0A9BEA;font-size:1px;line-height:3px">&nbsp;</div><div style="height:8px;font-size:1px;line-height:8px">&nbsp;</div>') + paxB +
       priceBlock(o) + grid + '<div style="' + ST.ft + '">' + note + '</div></div>';
   }
   /* Para pegar en mail: todo dentro de una tabla exterior */
   return '<table class="tt" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;margin:0;background:#ffffff">' +
     (o.hdr === false ? '' : '<tr><td style="padding:0">' + hdr + '</td></tr>' +
     '<tr><td bgcolor="#0A9BEA" style="background:#0A9BEA;height:3px;line-height:3px;font-size:1px;padding:0">&nbsp;</td></tr>' +
-    '<tr><td style="height:8px;line-height:8px;font-size:1px;padding:0">&nbsp;</td></tr>') +
+    '<tr><td style="height:8px;line-height:8px;font-size:1px;padding:0">&nbsp;</td></tr>') + (paxB ? '<tr><td style="padding:0">' + paxB + '</td></tr>' : '') +
     (priceBlock(o) ? '<tr><td style="padding:0">' + priceBlock(o) + '</td></tr>' : '') + '<tr><td style="padding:0">' + grid + '</td></tr>' +
     '<tr><td style="' + ST.ft + '">' + note + '</td></tr></table>';
 }
@@ -1224,9 +1236,7 @@ function passA(it, calc, o) {
   var body = '';
   if (pax.length || it.advisor) {
     var w = [];
-    if (pax.length) w.push('<span style="font-size:9.5px;letter-spacing:1px;color:' + LBL + '">' + (pax.length > 1 ? 'PASAJEROS' : 'PASAJERO') + '</span>&nbsp; <b>' + esc(pax.join(', ')) + '</b>');
-    if (it.advisor) w.push('<span style="font-size:9.5px;letter-spacing:1px;color:' + LBL + '">ASESOR</span>&nbsp; <b>' + esc(it.advisor) + '</b>');
-    body += '<div style="' + F + 'font-size:12px;color:' + INK + ';padding:0 2px 12px">' + w.join(' &nbsp;&nbsp;·&nbsp;&nbsp; ') + '</div>';
+    body += pbWho(it);
   }
   J.forEach(function (j, ix) {
     var lbl = jLabel(calc, ix);
@@ -1260,10 +1270,16 @@ function pbLay(lay, o, valSize) {
   return { ico: short ? 'ic-warn.png' : 'ic-sync.png', c: c, t: t, v: '<b style="font-size:' + valSize + 'px;color:' + c + '">' + HV.fmtDur(lay.min) + '</b>' + (chg ? '<div style="font-size:10px;color:' + PB.ORG + ';font-weight:bold">cambia aeropuerto</div>' : '') };
 }
 function pbWho(it) {
-  var pax = (it.pax || []).filter(Boolean), w = [];
-  if (pax.length) w.push('<span style="font-size:9.5px;letter-spacing:1px;color:' + PB.LBL + '">' + (pax.length > 1 ? 'PASAJEROS' : 'PASAJERO') + '</span>&nbsp; <b>' + esc(pax.join(', ')) + '</b>');
-  if (it.advisor) w.push('<span style="font-size:9.5px;letter-spacing:1px;color:' + PB.LBL + '">ASESOR</span>&nbsp; <b>' + esc(it.advisor) + '</b>');
-  return w.length ? '<div style="' + F + 'font-size:12px;color:' + PB.INK + ';padding:0 2px 12px">' + w.join(' &nbsp;&nbsp;·&nbsp;&nbsp; ') + '</div>' : '';
+  var pax = (it.pax || []).filter(Boolean), lab = function (t) { return '<span style="font-size:9.5px;letter-spacing:1px;color:' + PB.LBL + '">' + t + '</span>'; };
+  if (!pax.length && !it.advisor) return '';
+  if (pax.length <= 1) {
+    var w = [];
+    if (pax.length) w.push(lab('PASAJERO') + '&nbsp; <b>' + esc(pax[0]) + '</b>');
+    if (it.advisor) w.push(lab('ASESOR') + '&nbsp; <b>' + esc(it.advisor) + '</b>');
+    return '<div style="' + F + 'font-size:12px;color:' + PB.INK + ';padding:0 2px 12px">' + w.join(' &nbsp;&nbsp;·&nbsp;&nbsp; ') + '</div>';
+  }
+  return '<table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;margin:0 2px 12px"><tr><td style="' + F + 'padding:1px 10px 0 0;vertical-align:top">' + lab('PASAJEROS') + '</td><td style="padding:0;vertical-align:top">' + paxGrid(pax, F + 'font-size:12px;font-weight:bold;color:' + PB.INK) + '</td>' +
+    (it.advisor ? '<td style="' + F + 'padding:1px 0 0 28px;vertical-align:top;font-size:12px;color:' + PB.INK + ';white-space:nowrap">' + lab('ASESOR') + '&nbsp; <b>' + esc(it.advisor) + '</b></td>' : '') + '</tr></table>';
 }
 function pbNote(calc, txt, o) {
   var anyDay = calc.segs.some(function (s) { return s.dayDiff; });
