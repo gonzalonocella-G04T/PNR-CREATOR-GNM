@@ -997,7 +997,7 @@ function priceBlock(o) {
       '<table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse">' +
       rows.map(function (r) { return '<tr>' + (solo ? '' : '<td style="' + F + 'padding:1px 8px 1px 0;font-size:11px;color:#40546B;white-space:nowrap">' + esc(r[0]) + ':</td>') + '<td style="' + F + 'padding:1px 0;font-size:11px;color:#102E55;text-align:left;white-space:nowrap">' + esc(r[1]) + '</td></tr>'; }).join('') + '</table>';
   }
-  if (txt) h += '<div style="' + F + 'padding:' + (rows.length ? 6 : 0) + 'px 0 0;font-size:12.5px;font-weight:bold;line-height:1.45;color:#102E55">' + esc(txt).replace(/\n/g, '<br>') + '</div>';
+  if (txt) h += '<div style="' + F + 'padding:' + (rows.length ? 6 : 0) + 'px 0 0;font-size:13px;font-weight:bold;line-height:1.45;color:#102E55">' + esc(txt).replace(/\n/g, '<br>') + '</div>';
   return h + '</div>';
 }
 /* códigos compartidos: solo si el usuario activa la opción */
