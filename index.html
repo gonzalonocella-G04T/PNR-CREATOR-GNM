@@ -854,7 +854,7 @@ if (typeof APX !== 'undefined') Object.keys(APX).forEach(function (tz) { APX[tz]
 function $(id) { return document.getElementById(id); }
 var root = $('root');
 if (!root) return;
-var state = { tzo: {}, hdr: true, apn: true, tot: false, fmt: 'full', cs: false };
+var state = { tzo: {}, hdr: true, apn: true, tot: false, fmt: 'full', cs: false, price: { cur: 'USD', adt: '', chd: '', inf: '', txt: '' } };
 var tzKey = '';
 
 function ssGet(k) { try { return sessionStorage.getItem(k === 'hv2_draft' ? 'hv2_draft3' : k); } catch (e) { return null; } }
@@ -973,6 +973,31 @@ function apNick(code) {
 function apLine(code, o) {
   var n = apNick(code);
   return esc(U.apCity(code)) + (n ? ' <i class="ap">' + esc(n) + '</i>' : '');
+}
+/* precio de venta por tipo de pasajero + aclaraciones (lo completa el asesor) */
+var PX_TYPES = [['adt', 'Adulto'], ['chd', 'Niño'], ['inf', 'Infante']];
+function pxFmt(v, cur) {
+  v = String(v || '').trim(); if (!v) return '';
+  var t = v.replace(/\s/g, ''), n = null;
+  if (/^\d{1,3}(\.\d{3})+(,\d{1,2})?$/.test(t)) n = parseFloat(t.replace(/\./g, '').replace(',', '.'));
+  else if (/^\d{1,3}(,\d{3})+(\.\d{1,2})?$/.test(t)) n = parseFloat(t.replace(/,/g, ''));
+  else if (/^\d+([.,]\d{1,2})?$/.test(t)) n = parseFloat(t.replace(',', '.'));
+  if (n == null || !isFinite(n)) return v;
+  var dec = Math.round(n * 100) % 100, ent = Math.floor(n + 1e-9).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return cur + ' ' + ent + (dec ? ',' + (dec < 10 ? '0' : '') + dec : '');
+}
+function pxRows(o) { var P = o && o.price; if (!P) return []; return PX_TYPES.map(function (t) { return [t[1], pxFmt(P[t[0]], P.cur)]; }).filter(function (r) { return r[1]; }); }
+function priceBlock(o) {
+  var P = o && o.price, rows = pxRows(o), txt = P ? String(P.txt || '').trim() : '';
+  if (!rows.length && !txt) return '';
+  var h = '<div style="margin:2px 0 12px">';
+  if (rows.length) {
+    h += '<div style="' + F + 'padding:0 0 3px;font-size:10px;letter-spacing:0.6px;color:#6A7C90;text-transform:uppercase">Tarifa por pasajero</div>' +
+      '<table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse">' +
+      rows.map(function (r) { return '<tr><td style="' + F + 'padding:1px 8px 1px 0;font-size:11px;color:#40546B;white-space:nowrap">' + esc(r[0]) + ':</td><td style="' + F + 'padding:1px 0;font-size:11px;color:#102E55;text-align:left;white-space:nowrap">' + esc(r[1]) + '</td></tr>'; }).join('') + '</table>';
+  }
+  if (txt) h += '<div style="' + F + 'padding:' + (rows.length ? 6 : 0) + 'px 0 0;font-size:11.5px;line-height:1.45;color:#40546B">' + esc(txt).replace(/\n/g, '<br>') + '</div>';
+  return h + '</div>';
 }
 /* códigos compartidos: solo si el usuario activa la opción */
 function csNote(s, o, fs, pl) {
@@ -1110,16 +1135,16 @@ function tableHTML(it, calc, o) {
   var note = notes.join(' ');
   if (o.flat) {
     /* Para la imagen (html2canvas no dibuja bien tablas anidadas) */
-    return '<div class="tt" style="display:inline-block;background:#ffffff">' + hdr +
-      '<div style="height:3px;background:#0A9BEA;font-size:1px;line-height:3px">&nbsp;</div><div style="height:8px;font-size:1px;line-height:8px">&nbsp;</div>' +
-      grid + '<div style="' + ST.ft + '">' + note + '</div></div>';
+    return '<div class="tt" style="display:inline-block;background:#ffffff">' + (o.hdr === false ? '' : hdr +
+      '<div style="height:3px;background:#0A9BEA;font-size:1px;line-height:3px">&nbsp;</div><div style="height:8px;font-size:1px;line-height:8px">&nbsp;</div>') +
+      priceBlock(o) + grid + '<div style="' + ST.ft + '">' + note + '</div></div>';
   }
   /* Para pegar en mail: todo dentro de una tabla exterior */
   return '<table class="tt" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;margin:0;background:#ffffff">' +
-    '<tr><td style="padding:0">' + hdr + '</td></tr>' +
+    (o.hdr === false ? '' : '<tr><td style="padding:0">' + hdr + '</td></tr>' +
     '<tr><td bgcolor="#0A9BEA" style="background:#0A9BEA;height:3px;line-height:3px;font-size:1px;padding:0">&nbsp;</td></tr>' +
-    '<tr><td style="height:8px;line-height:8px;font-size:1px;padding:0">&nbsp;</td></tr>' +
-    '<tr><td style="padding:0">' + grid + '</td></tr>' +
+    '<tr><td style="height:8px;line-height:8px;font-size:1px;padding:0">&nbsp;</td></tr>') +
+    (priceBlock(o) ? '<tr><td style="padding:0">' + priceBlock(o) + '</td></tr>' : '') + '<tr><td style="padding:0">' + grid + '</td></tr>' +
     '<tr><td style="' + ST.ft + '">' + note + '</td></tr></table>';
 }
 /* ---- formatos alternativos: Simple y Boarding pass ---- */
@@ -1393,6 +1418,10 @@ function plainText(it, calc) {
     if (j.stops > 0 && state.tot) L.push('Duración total: ' + HV.fmtDur(j.total) + ' (' + HV.fmtDur(j.flight) + ' de vuelo + ' + HV.fmtDur(j.lay) + ' de tránsito)');
     L.push('');
   });
+  var full = state.fmt === 'full', pr = full ? pxRows({ price: state.price }) : [], ptx = full ? String(state.price.txt || '').trim() : '';
+  if (pr.length) L.push('Precio por pasajero: ' + pr.map(function (r) { return r[0] + ' ' + r[1]; }).join(' · '));
+  if (ptx) L.push(ptx);
+  if (pr.length || ptx) L.push('');
   L.push('Todos los horarios son locales.' + (it.advisor ? ' ' + it.advisor + ' ·' : '') + ' Hiperviajes');
   return L.join('\n');
 }
@@ -1417,6 +1446,9 @@ function waText(it, calc) {
     var tl = lbl === 'Recorrido' ? 'del recorrido' : (lbl === 'Ida' || lbl === 'Vuelta' ? 'de la ' + lbl.toLowerCase() : 'del ' + lbl.toLowerCase());
     if (j.stops > 0 && state.tot) L.push('', '⌛ *Duración total ' + tl + ': ' + HV.fmtDur(j.total) + '*' + ' (' + HV.fmtDur(j.flight) + ' de vuelo + ' + HV.fmtDur(j.lay) + ' de tránsito)');
   });
+  var full = state.fmt === 'full', pr = full ? pxRows({ price: state.price }) : [], ptx = full ? String(state.price.txt || '').trim() : '';
+  if (pr.length) L.push('', '💵 *Precio por pasajero*', pr.map(function (r) { return r[0] + ': *' + r[1] + '*'; }).join('\n'));
+  if (ptx) L.push('', 'ℹ️ ' + ptx);
   L.push('', '_Horarios locales de cada ciudad._');
   return L.join('\n');
 }
@@ -1557,7 +1589,7 @@ function updatePreview() {
     pv.innerHTML = '<div class="empty"><h2>Acá aparece la tabla</h2><p>Pegá un PNR o itinerario en el recuadro de arriba, o probá con uno de los ejemplos. Se arma una tabla única con fecha, aerolínea, vuelo, horarios, duración y tránsito.</p></div>';
   } else {
     d = '<div class="dg dg-ok"><b>' + it.segs.length + (it.segs.length === 1 ? ' vuelo detectado' : ' vuelos detectados') + '</b> · formato ' + esc(it.format) + '</div>';
-    pv.innerHTML = renderTable(it, calc, { hdr: state.hdr, apn: state.apn, tot: state.tot, fmt: state.fmt, cs: state.cs });
+    pv.innerHTML = renderTable(it, calc, { hdr: state.hdr, apn: state.apn, tot: state.tot, fmt: state.fmt, cs: state.cs, price: state.price });
     var ncs = it.segs.filter(function (x) { return opName(x); }).length;
     $('oCsWrap').hidden = !ncs; $('oCsN').textContent = ncs ? '(' + ncs + (ncs > 1 ? ' vuelos)' : ' vuelo)') : '';
   }
@@ -1603,7 +1635,13 @@ function view() {
     '<label for="pax">Pasajero(s) <span class="opt">opcional · uno por línea</span></label><textarea id="pax" rows="2" placeholder="Si lo dejás vacío se usan los nombres del PNR"></textarea>' +
     '<label for="adv">Asesor de viajes / contacto <span class="opt">opcional</span></label><input id="adv" type="text" autocomplete="name" placeholder="Nombre del asesor">' +
     '<label class="chk" id="oTotWrap" for="oTot" style="margin-top:14px"><input type="checkbox" id="oTot"> Mostrar duración total de cada tramo con conexiones</label>' +
+    '<label class="chk" id="oHdrWrap" for="oHdr" style="margin-top:8px"><input type="checkbox" id="oHdr" checked> Mostrar logo y encabezado</label>' +
     '<label class="chk" id="oCsWrap" for="oCs" style="margin-top:8px" hidden><input type="checkbox" id="oCs"> Informar códigos compartidos <span id="oCsN" style="color:#6B7A90"></span></label>' +
+    '<details id="pxBox" style="margin-top:14px;border:1px solid #D5E1EC;border-radius:10px;padding:8px 12px"><summary style="cursor:pointer;font-weight:600;color:#102E55">Precio y aclaraciones <span class="opt">opcional</span></summary>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:8px"><label style="margin:0;flex:0 0 78px">Moneda<select id="pxCur" style="display:block;width:100%;height:44px;margin-top:4px;border:1px solid #C9D6E3;border-radius:10px;padding:0 8px;font:inherit;background:#fff"><option>USD</option><option>UYU</option><option>EUR</option></select></label>' +
+    PX_TYPES.map(function (t) { return '<label style="margin:0;flex:1 1 90px">' + t[1] + '<input id="px_' + t[0] + '" type="text" inputmode="decimal" placeholder="—"></label>'; }).join('') + '</div>' +
+    '<p class="opt" style="margin:6px 0 0">Precio de venta por pasajero, impuestos incluidos. Dejá vacío lo que no corresponda. Se muestra solo en el formato Completa.</p>' +
+    '<label for="pxTxt" style="margin-top:8px">Aclaraciones <span class="opt">equipaje, condiciones…</span></label><textarea id="pxTxt" rows="2" placeholder="Ej.: Incluye equipaje de mano de 10 kg y valija de 23 kg."></textarea></details>' +
     '</div>' +
     '</aside><main class="stage"><div class="fmtbar"><span class="cgl">Formato</span><div class="seg" role="group" aria-label="Formato del itinerario"><button type="button" data-fmt="full">Completa</button><button type="button" data-fmt="simple">Simple</button><button type="button" data-fmt="pass">Boarding pass</button></div></div><div class="copybar"><div class="cg"><span class="cgl">Para cotización o mail</span><button type="button" class="btn btn-primary" id="cprich">Copiar tabla</button></div><div class="cg"><span class="cgl">Para WhatsApp</span><button type="button" class="btn btn-wa" id="cpwa">Copiar texto WhatsApp</button><button type="button" class="btn btn-wa2" id="cpimg">Copiar imagen</button><button type="button" class="btn btn-ghost dl" id="dlpng">Descargar imagen</button><button type="button" class="btn btn-ghost dl" id="dlpdf">Descargar PDF</button></div></div><div id="preview"></div></main></div></div>';
   $('pnr').value = dr.pnr || '';
@@ -1624,7 +1662,7 @@ function view() {
     var it = currentIt(), calc = HV.compute(it);
     if (!calc.segs.length) { toast('Primero pegá un PNR con vuelos.'); return; }
     var base = imgBase();
-    copyRich(tableHTML(it, calc, { urls: base, tot: state.tot, fmt: state.fmt, cs: state.cs }), plainText(it, calc), !base);
+    copyRich(tableHTML(it, calc, { urls: base, hdr: state.hdr, tot: state.tot, fmt: state.fmt, cs: state.cs, price: state.price }), plainText(it, calc), !base);
   };
   function need() { var it = currentIt(), calc = HV.compute(it); if (!calc.segs.length) { toast('Primero pegá un PNR con vuelos.'); return null; } return { it: it, calc: calc }; }
   $('cpwa').onclick = function () { var x = need(); if (x) copyPlain(waText(x.it, x.calc), 'Texto para WhatsApp copiado'); };
@@ -1637,11 +1675,15 @@ function view() {
   try { state.tot = localStorage.getItem('hv2_tot') === '1'; } catch (e) {}
   $('oTot').checked = state.tot;
   $('oCs').checked = false;
+  $('oHdr').checked = state.hdr !== false;
+  $('oHdr').onchange = function () { state.hdr = $('oHdr').checked; updatePreview(); };
+  ['pxCur', 'px_adt', 'px_chd', 'px_inf', 'pxTxt'].forEach(function (id) { $(id).addEventListener('input', function () { var P = state.price; P.cur = $('pxCur').value; P.adt = $('px_adt').value; P.chd = $('px_chd').value; P.inf = $('px_inf').value; P.txt = $('pxTxt').value; updatePreview(); }); });
   $('oCs').onchange = function () { state.cs = $('oCs').checked; updatePreview(); };
   $('oTot').onchange = function () { state.tot = $('oTot').checked; try { localStorage.setItem('hv2_tot', state.tot ? '1' : '0'); } catch (e) {} updatePreview(); };
   try { var fm = localStorage.getItem('hv2_fmt'); if (fm === 'simple' || fm === 'pass') state.fmt = fm; } catch (e) {}
   function setFmt(f) {
     state.fmt = f; try { localStorage.setItem('hv2_fmt', f); } catch (e) {}
+    $('oHdrWrap').hidden = f !== 'full';
     [].forEach.call(document.querySelectorAll('.seg button'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-fmt') === f ? 'true' : 'false'); });
     $('oTotWrap').hidden = f === 'simple';
   }
