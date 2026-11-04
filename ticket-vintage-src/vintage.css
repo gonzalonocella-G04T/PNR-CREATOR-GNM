@@ -156,3 +156,4 @@ body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Inter",Arial
 .big.pax.cols,.tks.cols{columns:2;column-gap:28px}.tks.cols .tk{break-inside:avoid}
 .head.pax-m .tk .sm,.head.pax-l .tk .sm{font-size:10.5px}
 .big.pax .pn{white-space:nowrap;break-inside:avoid}
+.info.bag-man .v{white-space:normal;max-width:140px;line-height:1.2;font-size:13px}.seg-top .fn{white-space:nowrap}.seg-top .info{min-width:0}

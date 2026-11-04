@@ -26,6 +26,11 @@
     var f = P.map(function (p) { return first(p.edit); });
     return P.map(function (p, i) { var w = String(p.edit || '').split(' '); return f.filter(function (x) { return x === f[i]; }).length > 1 && w.length > 2 ? w[0] + ' ' + w[1] : f[i]; });
   }
+  function P0bag() {
+    var P = selPax(); if (!P.length) return '';
+    if (!P.every(showBags)) return 'No figura en el boleto: escribilo si querés mostrarlo';
+    var s = st.r.segs[0], b = s.bags[keyOf(s.bags, P[0].name)]; return 'Del boleto: ' + bagTxt(b).replace('|', ' ');
+  }
   function selPax() { return st.r ? st.r.pax.filter(function (p) { return st.sel[p.name]; }) : []; }
   function surname(n) { var w = String(n || '').trim().split(/\s+/); return w.length > 1 ? w[w.length - 1] : ''; }
   /* saludo final: con 3 o más pasajeros, por apellido de familia */
@@ -88,7 +93,7 @@
   /* ---------- preparación ---------- */
   function prepare(r) {
     showErr('');
-    st.r = r; st.sel = {}; st.photos = []; st.lib = ''; st.greet = '';
+    st.r = r; st.sel = {}; st.photos = []; st.lib = ''; st.greet = ''; st.bag = '';
     r.pax.forEach(function (p) { st.sel[p.name] = true; p.edit = p.display; p.tk = p.tickets.join(', '); });
     r.segs.forEach(function (s) { if (s.cabin == null) s.cabin = ''; });
     st.dest = guessDest(r); st.destAuto = st.dest; st.destCode = guessDestCode(r); st.stamp = '';
@@ -212,7 +217,7 @@
   function docHTML(P) {
     var r = st.r, J = journeys(r.segs), many = P.length > 1;
     var tickets = P.map(function (p) { return { n: p.edit, t: p.tk }; }), sn = shortNames(P);
-    var seatOk = P.every(showSeats), bagOk = P.every(showBags);
+    var seatOk = P.every(showSeats), bagMan = String(st.bag || '').trim(), bagOk = !bagMan && P.every(showBags);
     var locAl = r.airlineLocs.filter(function (a) { return a.loc && a.loc !== r.gdsLoc; });
     var h = '<div class="tv-doc">';
     // encabezado
@@ -235,6 +240,7 @@
         var sameBag = bagOk && P.every(function (p) { var a = s.bags[keyOf(s.bags, p.name)], b = s.bags[keyOf(s.bags, P[0].name)]; return a.pcs === b.pcs && a.kg === b.kg; });
         h += '<div class="seg"><div class="seg-top"><div class="al">' + wideLogo(s.al, 30) + '</div><div class="fn">' + esc(s.al + ' ' + s.fn) + (s.opBy && !new RegExp(s.opBy.split(' ')[0], 'i').test(U.alInfo(s.al).name) ? '<div class="op">Operado por ' + esc(s.opBy) + '</div>' : '') + '</div>' +
           '<div class="info"><div class="lab2">CABINA</div><div class="v">' + esc(CAB_ES[s.cabin] || s.cabin) + '</div></div>' +
+          (bagMan ? '<div class="info bag-man"><div class="lab2">EQUIPAJE</div><div class="v">' + esc(bagMan) + '</div></div>' : '') +
           (bagOk ? '<div class="info"><div class="lab2">EQUIPAJE</div><div class="v">' + (sameBag ? esc(bag[0]) + '<div class="v2">' + esc(bag[1]) + '</div>' : P.map(function (p) { return esc(first(p.edit)) + ': ' + esc(bagTxt(s.bags[keyOf(s.bags, p.name)]).split('|')[0]); }).join('<br>')) + '</div></div>' : '') +
           (seatOk ? '<div class="info"><div class="lab2">' + (many ? 'ASIENTOS' : 'ASIENTO') + '</div><div class="v">' + seats + '</div></div>' : '') + '</div>' +
           '<div class="seg-route"><div class="pt"><div class="code">' + esc(s.from.code) + '</div><div class="cty">' + esc(city(s.from.code).toUpperCase()) + '</div><div class="dt">' + fdate(s.depDate) + '</div><div class="tm">' + esc(s.depTime) + '</div></div>' +
@@ -263,6 +269,7 @@
     h += '<div class="rv-sec"><div class="rv-h">Reserva</div><label>Código de reserva<input data-f="gds" value="' + esc(r.gdsLoc || '') + '"></label>' +
       (r.airlineLocs.length ? '<div class="rv-meta">Localizador de aerolínea: ' + r.airlineLocs.map(function (a) { return esc((a.al || a.name) + ' ' + a.loc); }).join(' · ') + '</div>' : '') +
       '<label>Destino (sello y encabezado)<input data-f="dest" value="' + esc(st.dest) + '"></label>' + stampSel() +
+      '<label>Equipaje <span class="opt">opcional · reemplaza lo del boleto en todos los tramos</span><input data-f="bag" list="bagSug" value="' + esc(st.bag || '') + '" placeholder="' + esc(P0bag()) + '"><datalist id="bagSug"><option value="Solo equipaje de mano"><option value="Mochila o bolso de mano"><option value="Mano 10 kg + 1 valija de 23 kg"><option value="Mano 10 kg + 2 valijas de 23 kg"><option value="1 valija de 23 kg en bodega"></datalist></label>' +
       '<label>Saludo final<input data-f="greet" value="' + esc(st.greet || '') + '" placeholder="' + esc(autoGreeting(selPax())) + '"></label></div>';
     h += '<div class="rv-sec"><div class="rv-h">Pasajeros</div>';
     r.pax.forEach(function (p, i) {
@@ -325,6 +332,7 @@
       if (t.dataset.f === 'gds') r.gdsLoc = t.value.trim().toUpperCase();
       else if (t.dataset.f === 'dest') { st.dest = t.value.toUpperCase(); var o = rv.querySelector('select[data-f="stamp"] option'); if (o) o.textContent = autoLabel(autoStamp()); }
       else if (t.dataset.f === 'greet') st.greet = t.value;
+      else if (t.dataset.f === 'bag') st.bag = t.value;
       else if (t.dataset.f === 'stamp' || t.dataset.f === 'lib') return;
       else if (t.dataset.pn != null) r.pax[+t.dataset.pn].edit = t.value;
       else if (t.dataset.pt != null) r.pax[+t.dataset.pt].tk = t.value;
