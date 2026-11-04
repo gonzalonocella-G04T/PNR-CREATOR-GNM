@@ -202,11 +202,11 @@
     if (e) return '<img class="stamp stamp-img" src="' + e.s + '" alt="">';
     var txt = esc(dest || 'DESTINO');
     return '<svg class="stamp" viewBox="0 0 200 200" aria-hidden="true"><defs><path id="ct" d="M100,100 m-70,0 a70,70 0 1,1 140,0"/><path id="cb" d="M100,100 m-80,0 a80,80 0 0,0 160,0"/></defs>' +
-      '<g fill="none" stroke="#5E7FB5" stroke-width="2.2" opacity=".85"><circle cx="100" cy="100" r="92"/><circle cx="100" cy="100" r="58" stroke-dasharray="3 4"/></g>' +
-      '<text font-family="Oswald,Arial" font-size="19" letter-spacing="6" fill="#5E7FB5"><textPath href="#ct" startOffset="50%" text-anchor="middle">DESTINO</textPath></text>' +
-      '<text font-family="Oswald,Arial" font-size="' + (txt.length > 14 ? 15 : 18) + '" letter-spacing="2.5" fill="#5E7FB5"><textPath href="#cb" startOffset="50%" text-anchor="middle">' + txt + '</textPath></text>' +
-      '<g transform="translate(100 100) rotate(-35) scale(2.2) translate(-12 -12)"><path fill="#5E7FB5" d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></g>' +
-      '<g stroke="#5E7FB5" stroke-width="2" fill="none" opacity=".6"><path d="M-60 70 q15 -8 30 0 t30 0 t30 0"/><path d="M-60 85 q15 -8 30 0 t30 0 t30 0"/><path d="M-60 100 q15 -8 30 0 t30 0 t30 0"/></g></svg>';
+      '<g fill="none" stroke="#397C78" stroke-width="2.2" opacity=".85"><circle cx="100" cy="100" r="92"/><circle cx="100" cy="100" r="58" stroke-dasharray="3 4"/></g>' +
+      '<text font-family="Oswald,Arial" font-size="19" letter-spacing="6" fill="#397C78"><textPath href="#ct" startOffset="50%" text-anchor="middle">DESTINO</textPath></text>' +
+      '<text font-family="Oswald,Arial" font-size="' + (txt.length > 14 ? 15 : 18) + '" letter-spacing="2.5" fill="#397C78"><textPath href="#cb" startOffset="50%" text-anchor="middle">' + txt + '</textPath></text>' +
+      '<g transform="translate(100 100) rotate(-35) scale(2.2) translate(-12 -12)"><path fill="#397C78" d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></g>' +
+      '<g stroke="#397C78" stroke-width="2" fill="none" opacity=".6"><path d="M-60 70 q15 -8 30 0 t30 0 t30 0"/><path d="M-60 85 q15 -8 30 0 t30 0 t30 0"/><path d="M-60 100 q15 -8 30 0 t30 0 t30 0"/></g></svg>';
   }
   var PLANE = '<svg viewBox="0 0 24 24" class="pl"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" transform="rotate(90 12 12)"/></svg>';
   function docHTML(P) {
@@ -372,7 +372,7 @@
       inlineSvgs(el);
       var imgs = el.querySelectorAll('img');
       return Promise.all([].map.call(imgs, function (im) { return im.complete ? 0 : new Promise(function (r) { im.onload = im.onerror = r; }); })).then(function () {
-        return window.html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true, windowWidth: 1300 });
+        return window.html2canvas(el, { scale: 2, backgroundColor: '#FFFFFF', logging: false, useCORS: true, windowWidth: 1300 });
       }).then(function (cv) { host.innerHTML = ''; return cv; });
     });
   }
@@ -420,7 +420,7 @@
 
   function view() {
     document.getElementById('root').innerHTML =
-      '<header class="top"><div class="top-in"><img src="' + LOGO_G + '" alt="Hiperviajes" class="top-logo"><div><h1>Ticket Vintage</h1><p>Convertí el PDF del boleto en un itinerario para el pasajero.</p></div><a href="index.html" class="back" style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #C9DCEC;border-radius:999px;background:#fff;color:#0B3A78;font-weight:600;font-size:13px;text-decoration:none;white-space:nowrap">← Convertidor de PNR</a></div></header>' +
+      '<header class="top"><div class="top-in"><img src="' + LOGO_G + '" alt="Hiperviajes" class="top-logo"><div><h1>Ticket Vintage</h1><p>Convertí el PDF del boleto en un itinerario para el pasajero.</p></div><a href="index.html" class="back" style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #C9ECE8;border-radius:999px;background:#FFFFFF;color:#1B6368;font-weight:600;font-size:13px;text-decoration:none;white-space:nowrap">← Convertidor de PNR</a></div></header>' +
       '<main class="wrap"><section id="start"><div id="drop" class="drop" tabindex="0" role="button" aria-label="Elegir PDF del boleto"><svg viewBox="0 0 24 24" class="up"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3-3 3 3"/></svg><div id="dropTxt">Arrastrá el PDF del boleto acá o tocá para elegirlo</div><div class="drop-sub">Amadeus (CheckMyTrip), Sabre, GWC o SPRK. El archivo se lee en tu navegador: no se sube a ningún lado.</div></div><input type="file" id="file" accept="application/pdf,.pdf" hidden><div id="err" class="err" hidden></div></section>' +
       '<section id="work" hidden><div class="work"><aside class="panel"><div class="panel-h"><h2>Revisá los datos</h2><button type="button" class="lnk" id="again">Cargar otro PDF</button></div><div id="review"></div></aside>' +
       '<div class="stage"><div class="bar"><div id="issues" class="issues" hidden></div><div class="btns"><button type="button" class="btn pri" id="dlpng">Descargar imagen</button><button type="button" class="btn" id="dlpdf">Descargar PDF</button></div></div><div id="preview"></div></div></div></section></main>' +
