@@ -20,10 +20,15 @@
     if (m) s = m[2] + ' ' + m[1];
     return s.toLowerCase().replace(/(^|[\s\-'])([a-záéíóúñü])/g, function (a, b, c) { return b + c.toUpperCase(); }).replace(/\s+(Mr|Mrs|Ms|Miss|Mstr)$/i, '');
   }
+  var TITLES = { MR: 1, MRS: 1, MS: 1, MSTR: 1, MISS: 1, DR: 1, CHD: 1, INF: 1, ADT: 1, SR: 1, SRA: 1 };
+  function paxToks(x) { return norm(cleanName(x)).toUpperCase().split(/[\s\/,]+/).filter(function (t) { return t && !TITLES[t]; }); }
+  /* mismo pasajero: mismos nombres, o uno contenido en el otro (falta un segundo nombre). Dos personas con el mismo
+     primer nombre y apellido pero distinto segundo nombre NO son la misma (p. ej. Guillermo Christian / Guillermo Rodolfo). */
   function samePax(a, b) {
-    var A = norm(cleanName(a)).split(/[\s\/,]+/).filter(Boolean), B = norm(cleanName(b)).split(/[\s\/,]+/).filter(Boolean);
-    var hit = A.filter(function (t) { return B.indexOf(t) >= 0; }).length;
-    return hit >= Math.min(2, Math.min(A.length, B.length));
+    var A = paxToks(a), B = paxToks(b); if (!A.length || !B.length) return false;
+    var S = A.length <= B.length ? A : B, L = S === A ? B : A;
+    var all = S.every(function (t) { return L.indexOf(t) >= 0; });
+    return all && (S.length >= 2 || S.length === L.length);
   }
   /* ---- aeropuertos: texto libre -> IATA ---- */
   var ALIAS = { london: 'londres', 'panama city': 'ciudad de panama', 'sao paulo': 'sao paulo', geneva: 'ginebra', rome: 'roma', milan: 'milan', lisbon: 'lisboa', munich: 'munich', brussels: 'bruselas', copenhagen: 'copenhague', stockholm: 'estocolmo', athens: 'atenas', istanbul: 'estambul', moscow: 'moscu', cairo: 'el cairo', tokyo: 'tokio', beijing: 'pekin', 'new york': 'nueva york', 'mexico city': 'ciudad de mexico', florence: 'florencia', venice: 'venecia', naples: 'napoles', seville: 'sevilla', vienna: 'viena', prague: 'praga', warsaw: 'varsovia', 'the hague': 'la haya', amsterdam: 'amsterdam', dublin: 'dublin', zurich: 'zurich', 'rio de janeiro': 'rio de janeiro', 'santiago': 'santiago de chile', 'havana': 'la habana', 'cape town': 'ciudad del cabo', 'frankfurt': 'francfort', 'belem': 'belem', 'asuncion': 'asuncion', 'bogota': 'bogota' };

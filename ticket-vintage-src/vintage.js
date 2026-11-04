@@ -21,6 +21,24 @@
   function fdate(dIso) { if (!dIso) return ''; var p = dIso.split('-'); return p[2] + ' ' + MESC[+p[1] - 1] + ' ' + p[0]; }
   function fdur(m) { if (m == null) return ''; var h = Math.floor(m / 60), mi = m % 60; return h + ' h' + (mi ? ' ' + mi + ' min' : ''); }
   function first(n) { return String(n || '').split(' ')[0]; }
+  /* nombre corto para rotular boletos: primer nombre, o dos nombres si se repite el primero */
+  function shortNames(P) {
+    var f = P.map(function (p) { return first(p.edit); });
+    return P.map(function (p, i) { var w = String(p.edit || '').split(' '); return f.filter(function (x) { return x === f[i]; }).length > 1 && w.length > 2 ? w[0] + ' ' + w[1] : f[i]; });
+  }
+  function selPax() { return st.r ? st.r.pax.filter(function (p) { return st.sel[p.name]; }) : []; }
+  function surname(n) { var w = String(n || '').trim().split(/\s+/); return w.length > 1 ? w[w.length - 1] : ''; }
+  /* saludo final: con 3 o más pasajeros, por apellido de familia */
+  function autoGreeting(P) {
+    var names = P.map(function (p) { return first(p.edit); });
+    if (P.length < 3) return '¡Muy buen viaje, ' + listY(names) + '!';
+    var cnt = {}, ord = [];
+    P.forEach(function (p) { var s = surname(p.edit); if (!s) return; var k = s.toUpperCase(); if (!cnt[k]) { cnt[k] = { n: 0, s: s }; ord.push(k); } cnt[k].n++; });
+    var max = Math.max.apply(null, ord.map(function (k) { return cnt[k].n; }).concat([0]));
+    if (max < 2) return '¡Muy buen viaje a todos!';
+    var top = ord.filter(function (k) { return cnt[k].n === max; }).map(function (k) { return cnt[k].s; });
+    return top.length === 1 ? '¡Muy buen viaje, familia ' + top[0] + '!' : '¡Muy buen viaje, familias ' + listY(top) + '!';
+  }
   function listY(a) { return a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1]; }
 
   /* ---------- lectura del PDF ---------- */
@@ -70,7 +88,7 @@
   /* ---------- preparación ---------- */
   function prepare(r) {
     showErr('');
-    st.r = r; st.sel = {}; st.photos = []; st.lib = '';
+    st.r = r; st.sel = {}; st.photos = []; st.lib = ''; st.greet = '';
     r.pax.forEach(function (p) { st.sel[p.name] = true; p.edit = p.display; p.tk = p.tickets.join(', '); });
     r.segs.forEach(function (s) { if (s.cabin == null) s.cabin = ''; });
     st.dest = guessDest(r); st.destAuto = st.dest; st.destCode = guessDestCode(r); st.stamp = '';
@@ -193,16 +211,16 @@
   var PLANE = '<svg viewBox="0 0 24 24" class="pl"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" transform="rotate(90 12 12)"/></svg>';
   function docHTML(P) {
     var r = st.r, J = journeys(r.segs), many = P.length > 1;
-    var tickets = P.map(function (p) { return { n: p.edit, t: p.tk }; });
+    var tickets = P.map(function (p) { return { n: p.edit, t: p.tk }; }), sn = shortNames(P);
     var seatOk = P.every(showSeats), bagOk = P.every(showBags);
     var locAl = r.airlineLocs.filter(function (a) { return a.loc && a.loc !== r.gdsLoc; });
     var h = '<div class="tv-doc">';
     // encabezado
-    h += '<div class="card head"><div class="h-top"><div class="h-logo">' + brand() + '</div>' +
-      '<div class="h-cell"><div class="lab">' + (many ? 'PASAJEROS' : (/a$/i.test(first(P[0].edit)) ? 'PASAJERA' : 'PASAJERO')) + '</div><div class="big pax">' + P.map(function (p) { return esc(p.edit.toUpperCase()); }).join('<br>') + '</div></div>' +
+    h += '<div class="card head' + (P.length >= 7 ? ' pax-l' : P.length >= 4 ? ' pax-m' : '') + '"><div class="h-top"><div class="h-logo">' + brand() + '</div>' +
+      '<div class="h-cell"><div class="lab">' + (many ? 'PASAJEROS' : (/a$/i.test(first(P[0].edit)) ? 'PASAJERA' : 'PASAJERO')) + '</div><div class="big pax">' + P.map(function (p) { return '<div class="pn">' + esc(p.edit.toUpperCase()) + '</div>'; }).join('') + '</div></div>' +
       '<div class="h-cell"><div class="lab">DESTINO ' + PLANE + '</div><div class="big dest">' + esc(st.dest) + '</div></div></div>' +
       '<div class="h-bot"><div class="h-cell"><div class="lab">CÓDIGO DE RESERVA</div><div class="mid">' + esc(r.gdsLoc) + '</div>' + (locAl.length ? '<div class="sm">' + locAl.map(function (a) { return esc((a.al || a.name) + ' ' + a.loc); }).join(' · ') + '</div>' : '') + '</div>' +
-      '<div class="h-cell"><div class="lab">' + (tickets.length > 1 || /,/.test(tickets[0].t) ? 'Nº DE BILLETES' : 'Nº DE BILLETE') + '</div>' + tickets.map(function (t) { return '<div class="mid tk">' + esc(t.t) + (many ? ' <span class="sm">' + esc(first(t.n)) + '</span>' : '') + '</div>'; }).join('') + '</div></div>' +
+      '<div class="h-cell"><div class="lab">' + (tickets.length > 1 || /,/.test(tickets[0].t) ? 'Nº DE BILLETES' : 'Nº DE BILLETE') + '</div>' + '<div class="tks' + (P.length >= 7 ? ' cols' : '') + '">' + tickets.map(function (t, i) { return '<div class="mid tk">' + esc(t.t) + (many ? ' <span class="sm">' + esc(sn[i]) + '</span>' : '') + '</div>'; }).join('') + '</div></div></div>' +
       stamp(st.dest) + '</div>';
     // tramos
     var ph = photoList(), perJ = ph.length >= 2 && J.length === 2;
@@ -228,8 +246,8 @@
     });
     h += '</div>' + (ph.length && !perJ ? '<div class="ph-col" style="background-image:url(' + ph[0] + ')">' + (photoCredit() ? '<span class="ph-cr">' + esc(photoCredit()) + '</span>' : '') + '</div>' : '') + '</div>';
     // pie
-    var names = P.map(function (p) { return first(p.edit); });
-    h += '<div class="card foot"><div class="f-pl">' + PLANE + '</div><div class="f-msg">¡Muy buen viaje, ' + esc(listY(names)) + '!</div><div class="f-txt">' + (many ? 'Recuerden que cuentan' : 'Recordá que contás') + ' con nuestro respaldo antes, durante y después del viaje.</div><div class="f-logo">' + brand('sm') + '</div></div>';
+    var greet = (st.mode !== 'indiv' && String(st.greet || '').trim()) || autoGreeting(P);
+    h += '<div class="card foot"><div class="f-pl">' + PLANE + '</div><div class="f-msg">' + esc(greet) + '</div><div class="f-txt">' + (many ? 'Recuerden que cuentan' : 'Recordá que contás') + ' con nuestro respaldo antes, durante y después del viaje.</div><div class="f-logo">' + brand('sm') + '</div></div>';
     h += '<div class="note">Horarios locales de cada ciudad.</div></div>';
     return h;
   }
@@ -244,7 +262,8 @@
     h += '<div class="rv-sec"><div class="rv-h">Documento leído</div><div class="rv-meta">' + esc(st.file) + ' · formato <b>' + esc(r.format) + '</b></div></div>';
     h += '<div class="rv-sec"><div class="rv-h">Reserva</div><label>Código de reserva<input data-f="gds" value="' + esc(r.gdsLoc || '') + '"></label>' +
       (r.airlineLocs.length ? '<div class="rv-meta">Localizador de aerolínea: ' + r.airlineLocs.map(function (a) { return esc((a.al || a.name) + ' ' + a.loc); }).join(' · ') + '</div>' : '') +
-      '<label>Destino (sello y encabezado)<input data-f="dest" value="' + esc(st.dest) + '"></label>' + stampSel() + '</div>';
+      '<label>Destino (sello y encabezado)<input data-f="dest" value="' + esc(st.dest) + '"></label>' + stampSel() +
+      '<label>Saludo final<input data-f="greet" value="' + esc(st.greet || '') + '" placeholder="' + esc(autoGreeting(selPax())) + '"></label></div>';
     h += '<div class="rv-sec"><div class="rv-h">Pasajeros</div>';
     r.pax.forEach(function (p, i) {
       h += '<div class="rv-pax"><label class="chk"><input type="checkbox" data-sel="' + i + '"' + (st.sel[p.name] ? ' checked' : '') + '> Incluir</label><label>Nombre<input data-pn="' + i + '" value="' + esc(p.edit) + '"></label><label>Boleto(s)<input data-pt="' + i + '" value="' + esc(p.tk) + '"' + (p.tk ? '' : ' class="miss" placeholder="No figura en el PDF"') + '></label>' +
@@ -305,6 +324,7 @@
       var t = e.target, r = st.r, i;
       if (t.dataset.f === 'gds') r.gdsLoc = t.value.trim().toUpperCase();
       else if (t.dataset.f === 'dest') { st.dest = t.value.toUpperCase(); var o = rv.querySelector('select[data-f="stamp"] option'); if (o) o.textContent = autoLabel(autoStamp()); }
+      else if (t.dataset.f === 'greet') st.greet = t.value;
       else if (t.dataset.f === 'stamp' || t.dataset.f === 'lib') return;
       else if (t.dataset.pn != null) r.pax[+t.dataset.pn].edit = t.value;
       else if (t.dataset.pt != null) r.pax[+t.dataset.pt].tk = t.value;

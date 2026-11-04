@@ -149,3 +149,10 @@ body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Inter",Arial
 .h-logo .brand{display:block}.top-logo{height:34px}
 
 .ph-col{position:relative}.ph-cr{position:absolute;right:8px;bottom:6px;font:500 10px Inter,Arial,sans-serif;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+
+/* muchos pasajeros: letra más chica (y en dos columnas desde 7) */
+.head.pax-m .big.pax{font-size:19px;line-height:1.15}.head.pax-m .mid.tk{font-size:17px}
+.head.pax-l .big.pax{font-size:14px;line-height:1.25}.head.pax-l .mid.tk{font-size:14px;line-height:1.3}
+.big.pax.cols,.tks.cols{columns:2;column-gap:28px}.tks.cols .tk{break-inside:avoid}
+.head.pax-m .tk .sm,.head.pax-l .tk .sm{font-size:10.5px}
+.big.pax .pn{white-space:nowrap;break-inside:avoid}
