@@ -1,0 +1,103 @@
+Fotos de destinos del Ticket Vintage HV. Fuente de cada archivo:
+Unsplash (licencia Unsplash: uso comercial gratuito, sin atribución obligatoria) salvo indicación.
+
+abu-dabi.jpg	Abu Dabi	https://images.unsplash.com/photo-1584551246679-0daf3d275d0f
+amsterdam.jpg	Ámsterdam	https://images.unsplash.com/photo-1759088141412-dfb8ea003642
+aruba.jpg	Aruba	https://images.unsplash.com/photo-1609769542735-3cfa075d9b70
+atenas.jpg	Atenas	https://images.unsplash.com/photo-1629639057315-410edca4fa89
+auckland.jpg	Auckland	https://images.unsplash.com/photo-1595125989588-36d745a2a828
+bali.jpg	Bali	https://images.unsplash.com/photo-1537996194471-e657df975ab4
+bangkok.jpg	Bangkok	https://images.unsplash.com/photo-1668107710159-10fbbab2a9dd
+barcelona.jpg	Barcelona	https://images.unsplash.com/photo-1728249960363-13079cc2c6f6
+bariloche.jpg	Bariloche	https://images.unsplash.com/photo-1575819474446-a1acbd0652cf
+berlin.jpg	Berlín	https://images.unsplash.com/photo-1585321962899-e956da0b7e5a
+bogota.jpg	Bogotá	https://images.unsplash.com/photo-1731560816331-bdbb9f61323a
+boston.jpg	Boston	https://images.unsplash.com/photo-1563840111261-8b096fb63b65
+bruselas.jpg	Bruselas	https://images.unsplash.com/photo-1607179780236-b5d5eed4f6d6
+budapest.jpg	Budapest	https://images.unsplash.com/photo-1733086521509-39d0d8535e94
+buenos-aires.jpg	Buenos Aires	https://images.unsplash.com/photo-1589909202802-8f4aadce1849
+calafate.jpg	Calafate	https://images.unsplash.com/photo-1618336174403-79bfae755448
+cancun.jpg	Cancún	https://images.unsplash.com/photo-1630252452598-56d592ceec50
+cartagena.jpg	Cartagena	https://images.unsplash.com/photo-1563131896-ee67f23bbc98
+chicago.jpg	Chicago	https://images.unsplash.com/photo-1563718944-758794a56b34
+ciudad-de-mexico.jpg	Ciudad de México	https://images.unsplash.com/photo-1682916114863-ba2f7b7d39c9
+ciudad-del-cabo.jpg	Ciudad del Cabo	https://images.unsplash.com/photo-1680089163051-30f1ba264768
+copenhague.jpg	Copenhague	https://images.unsplash.com/photo-1634237338658-6cf262778c1d
+curazao.jpg	Curazao	https://images.unsplash.com/photo-1705094264181-6a35705f2dc9
+cuzco.jpg	Cuzco	https://images.unsplash.com/photo-1567597243073-2d274aabecec
+doha.jpg	Doha	https://images.unsplash.com/photo-1647252257220-b0e9118c56d5
+dubai.jpg	Dubái	https://images.unsplash.com/photo-1546412414-e1885259563a
+dublin.jpg	Dublín	https://images.unsplash.com/photo-1730234638071-e2c871f8ad86
+dubrovnik.jpg	Dubrovnik	https://images.unsplash.com/photo-1572207785266-d6cc1a7fda1f
+edimburgo.jpg	Edimburgo	https://images.unsplash.com/photo-1729205673878-dd669ce9c274
+el-cairo.jpg	El Cairo	https://images.unsplash.com/photo-1620966529504-54489961284d
+estambul.jpg	Estambul	https://images.unsplash.com/photo-1527838832700-5059252407fa
+estocolmo.jpg	Estocolmo	https://images.unsplash.com/photo-1651923234957-b2db37563fe2
+florencia.jpg	Florencia	https://images.unsplash.com/photo-1570006468502-aa2730cbb00e
+florianopolis.jpg	Florianópolis	https://images.unsplash.com/photo-1703877892944-a4e37e739de9
+francfort.jpg	Fráncfort	https://images.unsplash.com/photo-1602521879205-9e43bd841b1a
+galapagos.jpg	Galápagos	https://images.unsplash.com/photo-1676910914506-39578e3446b1
+hong-kong.jpg	Hong Kong	https://images.unsplash.com/photo-1576788369575-4ab045b9287e
+iguazu.jpg	Iguazú	https://images.unsplash.com/photo-1722760741183-18600b4bf66b
+johannesburgo.jpg	Johannesburgo	https://images.unsplash.com/photo-1678777726261-8c2fe3d43d61
+kuala-lumpur.jpg	Kuala Lumpur	https://images.unsplash.com/photo-1611924779080-d20389c1f56c
+la-habana.jpg	La Habana	https://images.unsplash.com/photo-1588614380453-69f03be5e097
+las-vegas.jpg	Las Vegas	https://images.unsplash.com/photo-1692821272364-a6fc9bb46d79
+lima.jpg	Lima	https://images.unsplash.com/photo-1739162666913-ad7e6cfbb5c1
+lisboa.jpg	Lisboa	https://images.unsplash.com/photo-1611135459835-0d49a7c56c1c
+londres.jpg	Londres	https://images.unsplash.com/photo-1569865867048-34cfce8d58fe
+los-angeles.jpg	Los Ángeles	https://images.unsplash.com/photo-1544413660-299165566b1d
+madrid.jpg	Madrid	https://images.unsplash.com/photo-1570135460230-1407222b82a2
+malaga.jpg	Málaga	https://images.unsplash.com/photo-1624361141205-e0fd424dd800
+male.jpg	Male	https://images.unsplash.com/photo-1586495985096-787fb4a54ac0
+marrakech.jpg	Marrakech	https://images.unsplash.com/photo-1653323792487-6ecc6217040b
+mauricio.jpg	Mauricio	https://images.unsplash.com/photo-1529852572069-2fcbe7599434
+medellin.jpg	Medellín	https://images.unsplash.com/photo-1671240432518-747abe186105
+melbourne.jpg	Melbourne	https://images.unsplash.com/photo-1546868762-b61266729c8a
+mendoza.jpg	Mendoza	https://images.unsplash.com/photo-1765574781860-9828db1d53c0
+miami.jpg	Miami	https://images.unsplash.com/photo-1530071291164-537d481750f4
+milan.jpg	Milán	https://images.unsplash.com/photo-1567760855784-589f09ed5dc6
+montevideo.jpg	Montevideo	https://images.unsplash.com/photo-1709675669368-6e7baeffe97d
+montreal.jpg	Montreal	https://images.unsplash.com/photo-1745868426739-9348a971a3e6
+munich.jpg	Múnich	https://images.unsplash.com/photo-1642867783877-014b35ca6c0a
+niza.jpg	Niza	https://images.unsplash.com/photo-1503696967350-ad1874122058
+nueva-delhi.jpg	Nueva Delhi	https://images.unsplash.com/photo-1678966432189-d58296e45ad2
+nueva-york.jpg	Nueva York	https://images.unsplash.com/photo-1490644658840-3f2e3f8c5625
+oporto.jpg	Oporto	https://images.unsplash.com/photo-1591028544607-57e17c55e8c9
+orlando.jpg	Orlando	https://images.unsplash.com/photo-1617409123168-8fb039dd3b39
+osaka.jpg	Osaka	https://images.unsplash.com/photo-1547647496-b2d16f4fdb69
+oslo.jpg	Oslo	https://images.unsplash.com/photo-1609793654930-1bfbefe939d7
+panama.jpg	Panamá	https://images.unsplash.com/photo-1524544187526-2b2855b65f16
+paris.jpg	París	https://images.unsplash.com/photo-1511739001486-6bfe10ce785f
+pekin.jpg	Pekín	https://images.unsplash.com/photo-1768137580619-76d7adbd8663
+phuket.jpg	Phuket	https://images.unsplash.com/photo-1686238349945-82074ce9f02f
+praga.jpg	Praga	https://images.unsplash.com/photo-1571778200037-250828fe3eee
+punta-cana.jpg	Punta Cana	https://images.unsplash.com/photo-1705507972578-78537a2dda73
+punta-del-este.jpg	Punta del Este	https://images.unsplash.com/photo-1616959312796-6ed07ba57550
+quito.jpg	Quito	https://images.unsplash.com/photo-1627697893638-d35487417944
+reikiavik.jpg	Reikiavik	https://images.unsplash.com/photo-1622809080421-6995129bf692
+rio-de-janeiro.jpg	Río de Janeiro	https://images.unsplash.com/photo-1544989164-31dc3c645987
+roma.jpg	Roma	https://images.unsplash.com/photo-1603199766980-fdd4ac568a11
+salvador-de-bahia.jpg	Salvador de Bahía	https://images.unsplash.com/photo-1603237568326-e7c5adde84ff
+san-andres.jpg	San Andrés	https://images.unsplash.com/photo-1715559501246-ffe8df3a8a5f
+san-francisco.jpg	San Francisco	https://images.unsplash.com/photo-1582310232830-64b3e74b8596
+san-jose.jpg	San José	https://images.unsplash.com/photo-1620658927695-c33df6fb8130
+san-juan.jpg	San Juan	https://images.unsplash.com/photo-1559313093-a25257adcadd
+santiago-de-chile.jpg	Santiago de Chile	https://images.unsplash.com/photo-1651046678412-1e89ec79f47e
+sao-paulo.jpg	São Paulo	https://images.unsplash.com/photo-1629984557791-110bca02b88b
+seul.jpg	Seúl	https://images.unsplash.com/photo-1599033769063-fcd3ef816810
+sevilla.jpg	Sevilla	https://images.unsplash.com/photo-1766307389561-db2f24f9283e
+shanghai.jpg	Shanghái	https://images.unsplash.com/photo-1718838533891-d52bc2707bd3
+sidney.jpg	Sídney	https://images.unsplash.com/photo-1704788623366-8cd4d7285e60
+singapur.jpg	Singapur	https://images.unsplash.com/photo-1686455746257-0210c23f7064
+tel-aviv.jpg	Tel Aviv	https://images.unsplash.com/photo-1561992022-6d47c991fdd3
+tokio.jpg	Tokio	https://images.unsplash.com/photo-1739408793023-9d09533e6d25
+toronto.jpg	Toronto	https://images.unsplash.com/photo-1588733103629-b77afe0425ce
+ushuaia.jpg	Ushuaia	https://images.unsplash.com/photo-1712921674785-9d47a9ef5c8b
+vancouver.jpg	Vancouver	https://images.unsplash.com/photo-1708922166378-f048bb0d6a51
+venecia.jpg	Venecia	https://images.unsplash.com/photo-1523906834658-6e24ef2386f9
+viena.jpg	Viena	https://images.unsplash.com/photo-1509358033937-2784de2bfed8
+washington.jpg	Washington	https://images.unsplash.com/photo-1763434679100-e6dd7858e2f0
+zanzibar.jpg	Zanzíbar	https://images.unsplash.com/photo-1733306300778-4e44fb3ff9bd
+zurich.jpg	Zúrich	https://images.unsplash.com/photo-1573137785546-9d19e4f33f87
+asuncion.jpg	Asunción	Wikimedia Commons, File:Palacio_de_Lopez_light_111037.jpg — autor Cmasi, CC BY-SA 4.0 (se muestra el crédito sobre la foto)

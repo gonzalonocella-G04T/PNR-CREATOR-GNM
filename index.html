@@ -1644,7 +1644,7 @@ function view() {
   var dr; try { dr = JSON.parse(ssGet('hv2_draft') || 'null') || {}; } catch (e) { dr = {}; }
   state.sample = sampleAma();
   state.tzo = dr.tzo || {};
-  root.innerHTML = '<header class="top"><div class="top-in"><h1 class="ttl"><img src="' + HEAD + '" alt="Tu Itinerario by Hiperviajes" width="303" height="44"></h1><p class="tsub">Pegá el PNR y copiá la tabla para tu cotización.</p></div></header>' +
+  root.innerHTML = '<header class="top"><div class="top-in"><h1 class="ttl"><img src="' + HEAD + '" alt="Tu Itinerario by Hiperviajes" width="303" height="44"></h1><p class="tsub">Pegá el PNR y copiá la tabla para tu cotización.</p><a href="ticket-vintage.html" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid #C9DCEC;border-radius:999px;background:#fff;color:#0B3A78;font-weight:600;font-size:13px;text-decoration:none;white-space:nowrap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A9BEA" stroke-width="2" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 5v14" stroke-dasharray="2 2"/></svg>Boleto para el pasajero<span style="color:#6A8090;font-weight:400">desde PDF ↗</span></a></div></header>' +
     '<div class="wrap"><div class="app"><aside class="panel"><div class="pc1"><h2>Datos del itinerario</h2>' +
     '<label for="pnr">PNR en texto plano <span class="opt">Amadeus, Sabre, GWC o SPRK</span></label>' +
     '<textarea id="pnr" rows="9" placeholder="Pegá acá los vuelos" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>' +
