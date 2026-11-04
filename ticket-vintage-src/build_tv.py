@@ -11,7 +11,7 @@ js=(open(H+'logos.js').read()+open(H+'pimg.js').read()+open(H+'apx.js',encoding=
 assert '</script' not in js.lower()
 css=open('vintage.css',encoding='utf-8').read()
 html=('<!doctype html>\n<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
- '<title>Ticket Vintage · Hiperviajes</title><link rel="icon" href="tv-fav/favicon.ico?v=1" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="tv-fav/favicon-32.png?v=1"><link rel="icon" type="image/png" sizes="192x192" href="tv-fav/icon-192.png?v=1"><link rel="apple-touch-icon" href="tv-fav/apple-touch-icon.png?v=1">'
+ '<title>Ticket Vintage · Hiperviajes</title><link rel="icon" href="tv-fav/favicon.ico?v=2" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="tv-fav/favicon-32.png?v=2"><link rel="icon" type="image/png" sizes="192x192" href="tv-fav/icon-192.png?v=2"><link rel="apple-touch-icon" href="tv-fav/apple-touch-icon.png?v=2">'
  '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
  '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap">'
  '<style>'+css+'</style></head><body><div id="root"></div><script>'+js+'</script></body></html>\n')
