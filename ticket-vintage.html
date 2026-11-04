@@ -1621,7 +1621,7 @@ if (typeof module !== 'undefined') module.exports = pdfLines;
     var m = missing();
     $('issues').innerHTML = m.length ? '<b>Para generar el documento falta completar:</b><ul>' + m.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '';
     $('issues').hidden = !m.length;
-    ['dlpng', 'dlpdf'].forEach(function (id) { $(id).disabled = !!m.length; });
+    ['cppng', 'dlpng', 'dlpdf'].forEach(function (id) { $(id).disabled = !!m.length; });
     var D = docs();
     $('preview').innerHTML = D.length ? D.map(function (P, i) { return '<div class="pv-wrap"><div class="pv" data-i="' + i + '">' + docHTML(P) + '</div></div>'; }).join('') : '';
     fitPreview();
@@ -1674,6 +1674,7 @@ if (typeof module !== 'undefined') module.exports = pdfLines;
     dp.addEventListener('drop', function (e) { onFiles(e.dataTransfer.files); });
     $('again').onclick = function () { st.r = null; renderAll(); };
     $('dlpng').onclick = function () { exportDocs('png', this); };
+    $('cppng').onclick = function () { copyDoc(this); };
     $('dlpdf').onclick = function () { exportDocs('pdf', this); };
     window.addEventListener('resize', fitPreview);
   }
@@ -1713,6 +1714,25 @@ if (typeof module !== 'undefined') module.exports = pdfLines;
   function save(blob, name) {
     var u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 5000);
   }
+  /* copia la imagen al portapapeles para pegarla en WhatsApp o en el correo (si el navegador no deja, la descarga) */
+  function copyDoc(btn) {
+    if (missing().length) return;
+    var lab = btn.textContent, n = docs().length, idx = n > 1 ? (st.cpIdx || 0) % n : 0;
+    st.cpIdx = idx + 1;
+    btn.disabled = true; btn.textContent = 'Generando…';
+    var done = function () { btn.disabled = false; btn.textContent = lab; };
+    var blobP = capture(idx).then(function (cv) { return new Promise(function (r, j) { cv.toBlob(function (b) { b ? r(b) : j(new Error('imagen vacía')); }, 'image/png'); }); });
+    var fallback = function () { blobP.then(function (b) { save(b, fname(idx, 'png')); done(); toast('Este navegador no permite copiar imágenes: se descargó para adjuntarla.'); }, function (e) { done(); toast('No se pudo generar: ' + e.message); }); };
+    try {
+      if (navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': blobP })]).then(function () {
+          done(); toast(n > 1 ? 'Copiada la imagen de ' + docs()[idx][0].edit.split(' ')[0] + ' (' + (idx + 1) + ' de ' + n + '). Pegala con Ctrl+V' + (idx + 1 < n ? ' y volvé a tocar para la siguiente.' : '.') : 'Imagen copiada. Pegala en WhatsApp o en el correo con Ctrl+V.');
+        }, fallback);
+        return;
+      }
+    } catch (e) {}
+    fallback();
+  }
   function exportDocs(kind, btn) {
     if (missing().length) return;
     var lab = btn.textContent; btn.disabled = true; btn.textContent = 'Generando…';
@@ -1737,7 +1757,7 @@ if (typeof module !== 'undefined') module.exports = pdfLines;
       '<header class="top"><div class="top-in"><img src="' + LOGO_G + '" alt="Hiperviajes" class="top-logo"><div><h1>Ticket Vintage</h1><p>Convertí el PDF del boleto en un itinerario para el pasajero.</p></div><a href="index.html" class="back" style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #C9ECE8;border-radius:999px;background:#FFFFFF;color:#1B6368;font-weight:600;font-size:13px;text-decoration:none;white-space:nowrap">← Convertidor de PNR</a></div></header>' +
       '<main class="wrap"><section id="start"><div id="drop" class="drop" tabindex="0" role="button" aria-label="Elegir PDF del boleto"><svg viewBox="0 0 24 24" class="up"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3-3 3 3"/></svg><div id="dropTxt">Arrastrá el PDF del boleto acá o tocá para elegirlo</div><div class="drop-sub">Amadeus (CheckMyTrip), Sabre, GWC o SPRK. El archivo se lee en tu navegador: no se sube a ningún lado.</div></div><input type="file" id="file" accept="application/pdf,.pdf" hidden><div id="err" class="err" hidden></div></section>' +
       '<section id="work" hidden><div class="work"><aside class="panel"><div class="panel-h"><h2>Revisá los datos</h2><button type="button" class="lnk" id="again">Cargar otro PDF</button></div><div id="review"></div></aside>' +
-      '<div class="stage"><div class="bar"><div id="issues" class="issues" hidden></div><div class="btns"><button type="button" class="btn pri" id="dlpng">Descargar imagen</button><button type="button" class="btn" id="dlpdf">Descargar PDF</button></div></div><div id="preview"></div></div></div></section></main>' +
+      '<div class="stage"><div class="bar"><div id="issues" class="issues" hidden></div><div class="btns"><button type="button" class="btn pri" id="cppng">Copiar imagen</button><button type="button" class="btn" id="dlpng">Descargar imagen</button><button type="button" class="btn" id="dlpdf">Descargar PDF</button></div></div><div id="preview"></div></div></div></section></main>' +
       '<div id="cap" class="cap" aria-hidden="true"></div><div id="toast" class="toast" role="status"></div>';
     bind(); renderAll();
   }
