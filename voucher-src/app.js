@@ -1,5 +1,10 @@
+var REMOTE='https://raw.githubusercontent.com/gonzalonocella-G04T/PNR-CREATOR-GNM/voucher-servicios/';
 var HV_LOGO='img/pass-logo.png',state={ver:'foto',v:null,opLogo:null,hvLogo:null};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function im(path,cls,alt){
+  var rel=/^(data:|blob:|https?:)/.test(path);
+  return '<img'+(cls?' class="'+cls+'"':'')+' crossorigin="anonymous" src="'+esc(path)+'" alt="'+esc(alt||'')+'"'+(rel?'':' onerror="if(!this.dataset.r){this.dataset.r=1;this.src=REMOTE+this.getAttribute(\'src\')}"')+'>';
+}
 function $(id){return document.getElementById(id);}
 function fechaHtml(f){
   if(!f)return '<div class="dt"><b>--</b><i>---</i><u>&nbsp;</u></div>';
@@ -19,15 +24,15 @@ function render(){
   var cls=state.ver==='foto'?'v-foto':'v-ink';
   var titulo=(v.destNombre||'Destino')+(v.pais?'':'' );
   var lug='<span contenteditable>'+esc((v.destNombre||'').toUpperCase())+'</span>'+(v.pais?' – <span contenteditable>'+esc(v.pais.toUpperCase())+'</span>':'');
-  var head='<div class="hd"><img class="lg" src="'+esc(hv)+'" alt="Hiperviajes">'+(op?'<img class="lg" src="'+esc(op)+'" alt="Operador">':'<span></span>')+'</div>';
-  var stamp=sel?'<img class="st" src="sellos/'+esc(sel.f)+'" alt="">':'';
+  var head='<div class="hd">'+im(hv,'lg','Hiperviajes')+(op?im(op,'lg','Operador'):'<span></span>')+'</div>';
+  var stamp=sel?im('sellos/'+sel.f,'st',''):'';
   var hero,intro;
   if(state.ver==='foto'){
-    hero='<div class="hero" style="'+(foto?'background-image:url(\''+foto+'\')':'')+'"><div class="tt"><small>VOUCHER DE SERVICIOS</small><b>'+esc((v.destNombre||'').toUpperCase())+'</b><span>'+esc(v.pais)+'</span></div>'+stamp+'</div>';
+    hero='<div class="hero">'+(foto?im(foto,'ph',''):'')+'<div class="tt"><small>VOUCHER DE SERVICIOS</small><b>'+esc((v.destNombre||'').toUpperCase())+'</b><span>'+esc(v.pais)+'</span></div>'+stamp+'</div>';
     intro='';
   }else{
     hero='';
-    intro='<div class="ti0"><div><small>VOUCHER DE SERVICIOS</small><b>'+esc((v.destNombre||'').toUpperCase())+'</b><span>'+esc(v.pais)+'</span></div>'+(sel?'<img src="sellos/'+esc(sel.f)+'" alt="">':'')+'</div>';
+    intro='<div class="band"><div class="tt"><small>VOUCHER DE SERVICIOS</small><b>'+esc((v.destNombre||'').toUpperCase())+'</b><span>'+esc(v.pais)+'</span></div>'+(sel?im('sellos/'+sel.f,'st',''):'')+'</div>';
   }
   var pax='<div class="pax"><span class="k">Pasajeros</span><span class="v" contenteditable>'+esc(v.pax.join('  |  '))+'</span><span class="n">'+v.npax+' pax</span></div>';
   var obs=$('obs').value.trim();

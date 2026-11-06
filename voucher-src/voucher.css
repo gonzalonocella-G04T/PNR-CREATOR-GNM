@@ -57,27 +57,29 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .obs{margin-top:4mm;font:400 3.6mm/1.4 Inter,sans-serif;border-left:1mm solid var(--sky2);padding:1mm 0 1mm 3mm;color:#33595c}
 .obs:empty{display:none}
 .ft{padding:4mm 12mm;background:var(--navy);color:#fff;display:flex;justify-content:space-between;font:500 3.2mm Inter,sans-serif;letter-spacing:.04em}
-/* ---------- versión para imprimir (poca tinta) ---------- */
-.v-ink{font-family:Inter,sans-serif;color:#222}
-.v-ink .hd{display:flex;align-items:center;justify-content:space-between;padding:9mm 14mm 4mm;border-bottom:.4mm solid #222;margin:0 14mm;padding-left:0;padding-right:0;gap:8mm}
-.v-ink .hd .lg{height:12mm;max-width:50mm;object-fit:contain;filter:grayscale(1) contrast(1.1)}
-.v-ink .ti0{display:flex;align-items:center;justify-content:space-between;padding:6mm 14mm 2mm;gap:6mm}
-.v-ink .ti0 small{display:block;font:600 3mm Oswald,sans-serif;letter-spacing:.3em;color:#555}
-.v-ink .ti0 b{display:block;font:600 8mm/1.1 Oswald,sans-serif;text-transform:uppercase;color:#222}
-.v-ink .ti0 span{font:500 3.8mm Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#555}
-.v-ink .ti0 img{height:26mm;filter:grayscale(1) contrast(1.15) brightness(1.05);opacity:.85}
-.v-ink .body{padding:3mm 14mm 6mm;flex:1}
-.v-ink .pax{background:#fff;border:.3mm solid #999;border-radius:0}
-.v-ink .pax .k{color:#555}.v-ink .pax .n{color:#555}
-.v-ink .sv{border-top:.3mm dashed #999}
-.v-ink .sv .dt{background:#fff;color:#222;border:.4mm solid #222;border-radius:0}
-.v-ink .sv .ti{color:#111}
-.v-ink .sv .rt em{color:#222}
-.v-ink .sv .fl{background:#fff;border:.3mm solid #777;border-radius:0;color:#222}
-.v-ink .sv .fl i{color:#222}
-.v-ink .obs{border-left:.6mm solid #777;color:#333}
-.v-ink .ft{background:#fff;color:#444;border-top:.4mm solid #222;margin:0 14mm;padding:3mm 0}
-.v-ink .hero,.v-ink .hero *{display:none}
+/* ---------- versión para imprimir (sin fotos; verdes oscuros que se leen bien en impresora B/N) ---------- */
+.v-foto .hero .ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.v-ink{--g:#0A4F46;--g2:#0D6B5E;--tint:#E3F2EF}
+.v-ink .hd{display:flex;align-items:center;justify-content:space-between;gap:8mm;padding:7mm 12mm 5mm;border-bottom:.8mm solid var(--g)}
+.v-ink .hd .lg{height:15mm;max-width:58mm;object-fit:contain;filter:contrast(1.25) saturate(1.2)}
+.v-ink .band{position:relative;height:36mm;background:var(--tint);border-bottom:.8mm solid var(--g);border-left:3mm solid var(--g)}
+.v-ink .band .tt{position:absolute;left:9mm;top:50%;transform:translateY(-50%);right:50mm}
+.v-ink .band small{display:block;font:600 3.3mm Oswald,sans-serif;letter-spacing:.35em;color:var(--g2)}
+.v-ink .band b{display:block;font:600 11mm/1.05 Oswald,sans-serif;text-transform:uppercase;color:var(--g);margin-top:1mm}
+.v-ink .band span{font:600 4.2mm Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--g2)}
+.v-ink .band .st{position:absolute;right:10mm;top:50%;height:30mm;transform:translateY(-50%) rotate(-6deg);filter:contrast(1.3) saturate(1.3)}
+.v-ink .body{padding:7mm 12mm 6mm;flex:1}
+.v-ink .pax{background:var(--tint);border:.5mm solid var(--g);border-radius:3mm}
+.v-ink .pax .k{color:var(--g)}.v-ink .pax .v{color:#0b2f2a}.v-ink .pax .n{color:var(--g2)}
+.v-ink .sv{border-top:.4mm solid var(--g2)}
+.v-ink .sv:first-of-type{border-top:0}
+.v-ink .sv .dt{background:var(--g);color:#fff;border-radius:2.5mm}
+.v-ink .sv .ti{color:var(--g)}
+.v-ink .sv .rt em{color:var(--g)}
+.v-ink .sv .fl{background:var(--tint);border:.4mm solid var(--g);border-radius:5mm;color:#0b2f2a}
+.v-ink .sv .fl i{color:var(--g)}
+.v-ink .obs{border-left:1mm solid var(--g);color:#0b2f2a}
+.v-ink .ft{background:#fff;color:var(--g);border-top:.8mm solid var(--g);margin:0 12mm;padding:3mm 0;font-weight:600}
 @media print{
  @page{size:A4;margin:0}
  html,body{background:#fff}
