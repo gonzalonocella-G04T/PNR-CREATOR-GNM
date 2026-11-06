@@ -1,0 +1,20 @@
+<header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><a href="index.html">← Volver a Tu Itinerario</a></header>
+<div class="wrap"><aside class="panel">
+<label for="serv">Solicitud / confirmación de servicios</label>
+<textarea id="serv" placeholder="Traslado regular in + out El Calafate&#10;Nombre Apellido x2&#10;Llegada: Aeropuerto … - Hotel …  dd/mm/aaaa&#10;Salida: Hotel … - Aeropuerto …  dd/mm/aaaa&#10;&#10;Excursión … dd/mm/aaaa"></textarea>
+<label for="vue">Pasajeros y vuelos (pegado del PNR)</label>
+<textarea id="vue" placeholder=" 1.APELLIDO/NOMBRE&#10;  4  AR1850 T 19JAN 2*AEPFTE HK2  1615 1935 …"></textarea>
+<label for="op">Operador</label><select id="op"></select>
+<p class="hint">Los logos viven en la carpeta <b>operadores/</b>. Si no está, subí uno suelto:</p>
+<input id="opf" type="file" accept="image/*" style="font-size:12px">
+<label for="dest">Destino (foto y sello)</label><select id="dest"></select>
+<label for="obs">Observaciones (opcional, se imprime si lo completás)</label>
+<input id="obs" type="text" placeholder="Ej.: indicaciones de punto de encuentro, contacto del operador…">
+<label>Logo Hiperviajes (opcional, por defecto el de la web)</label><input id="hvf" type="file" accept="image/*" style="font-size:12px">
+<div class="btns"><button class="p" id="go">Generar voucher</button></div>
+<label>Versión</label>
+<div class="seg"><button data-v="foto" class="on">Con fotos</button><button data-v="ink">Para imprimir</button></div>
+<div class="btns"><button class="s" id="prn">Imprimir / PDF</button><button class="s" id="png">Bajar PNG</button></div>
+<p class="hint">Después de generar, podés hacer clic sobre cualquier texto del voucher para corregirlo.</p>
+<ul class="warns" id="warns"></ul>
+</aside><main class="stage" id="stage"></main></div>

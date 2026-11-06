@@ -1,0 +1,10 @@
+[
+ {
+  "id": "prestigio",
+  "nombre": "Prestigio Operadores Receptivos",
+  "logo": "operadores/prestigio.png",
+  "destinos": [
+   "El Calafate"
+  ]
+ }
+]

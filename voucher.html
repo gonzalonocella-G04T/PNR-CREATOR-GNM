@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Voucher de servicios · Hiperviajes</title><link rel="icon" href="tv-fav/favicon.ico?v=2" sizes="any"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap"><style>:root{--navy:#174B4F;--sky:#148D7E;--sky2:#19C0AA;--ink:#1A474B;--line:#D9EEEC;--bg:#F3FBFA}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.top h1{margin:0;font-family:Oswald,sans-serif;font-weight:600;font-size:22px;letter-spacing:.5px;color:var(--navy)}
+.top a{margin-left:auto;font-size:13px;color:#1B6368;text-decoration:none;font-weight:600}
+.wrap{display:grid;grid-template-columns:minmax(300px,400px) 1fr;gap:20px;padding:20px;max-width:1280px;margin:0 auto}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;align-self:start}
+.panel label{display:block;font-size:12px;font-weight:600;margin:12px 0 4px;color:var(--navy)}
+.panel label:first-child{margin-top:0}
+.panel textarea,.panel select,.panel input[type=text]{width:100%;border:1px solid #C9ECE8;border-radius:8px;padding:8px;font:13px/1.4 ui-monospace,Menlo,monospace;background:#fff;color:var(--ink)}
+.panel select,.panel input[type=text]{font-family:Inter,sans-serif}
+.panel textarea{min-height:120px;resize:vertical}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+button{font:600 13px Inter,sans-serif;border-radius:8px;padding:9px 14px;border:1px solid var(--sky);cursor:pointer}
+button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--sky)}
+.seg{display:flex;border:1px solid var(--sky);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:#fff;color:var(--sky);flex:1}
+.seg button.on{background:var(--sky);color:#fff}
+.hint{font-size:12px;color:#465F5C;margin:6px 0 0}
+.warns{margin:12px 0 0;padding:0;list-style:none}
+.warns li{font-size:12px;background:#FFF6E0;border:1px solid #F0D79A;color:#6B4E00;border-radius:8px;padding:6px 9px;margin-top:6px}
+.warns li.ok{background:#E9F8F4;border-color:#BFE8DF;color:#0B6B5C}
+.stage{overflow:auto;padding-bottom:30px}
+.sheet{width:210mm;min-height:297mm;background:#fff;margin:0 auto;box-shadow:0 2px 14px rgba(23,75,79,.18);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.sheet [contenteditable]{outline:none}
+.sheet [contenteditable]:hover{background:rgba(25,192,170,.10)}
+.sheet [contenteditable]:focus{background:rgba(25,192,170,.18)}
+/* ---------- versión con fotos ---------- */
+.v-foto .hd{display:flex;align-items:center;justify-content:space-between;padding:7mm 12mm 5mm;gap:8mm}
+.v-foto .hd .lg{height:15mm;max-width:58mm;object-fit:contain}
+.v-foto .hero{position:relative;height:62mm;background:#9bd3cb center/cover no-repeat}
+.v-foto .hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,75,79,.05) 30%,rgba(23,75,79,.78))}
+.v-foto .hero .tt{position:absolute;left:12mm;bottom:7mm;right:50mm;color:#fff;z-index:2}
+.v-foto .hero .tt small{display:block;font:600 3.3mm Oswald,sans-serif;letter-spacing:.35em;opacity:.9}
+.v-foto .hero .tt b{display:block;font:600 11mm/1.05 Oswald,sans-serif;text-transform:uppercase;margin-top:1mm}
+.v-foto .hero .tt span{font:500 4.2mm Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase}
+.v-foto .hero .st{position:absolute;right:10mm;bottom:5mm;height:34mm;z-index:2;transform:rotate(-6deg);filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+.v-foto .body{padding:7mm 12mm 6mm;flex:1}
+.pax{border:.3mm solid var(--line);background:var(--bg);border-radius:3mm;padding:3.5mm 5mm;margin-bottom:6mm;display:flex;gap:6mm;align-items:baseline}
+.pax .k{font:600 3mm Oswald,sans-serif;letter-spacing:.2em;color:var(--sky);text-transform:uppercase}
+.pax .v{font:600 4.4mm Inter,sans-serif}
+.pax .n{margin-left:auto;font:500 3.6mm Inter,sans-serif;color:#465F5C;white-space:nowrap}
+.sv{display:flex;gap:5mm;padding:4.5mm 0;border-top:.3mm solid var(--line);break-inside:avoid}
+.sv:first-of-type{border-top:0}
+.sv .dt{flex:0 0 22mm;text-align:center;background:var(--navy);color:#fff;border-radius:2.5mm;padding:2.5mm 0;align-self:flex-start}
+.sv .dt b{display:block;font:600 9mm/1 Oswald,sans-serif}
+.sv .dt i{display:block;font:500 3.4mm Oswald,sans-serif;letter-spacing:.2em;font-style:normal}
+.sv .dt u{display:block;font:500 3mm Inter,sans-serif;text-decoration:none;opacity:.85}
+.sv .tx{flex:1;min-width:0}
+.sv .ti{font:600 5mm/1.2 Inter,sans-serif;color:var(--navy)}
+.sv .rt{margin-top:1.5mm;font:400 4mm/1.35 Inter,sans-serif}
+.sv .rt em{font-style:normal;color:var(--sky);font-weight:700;padding:0 1.5mm}
+.sv .fl{margin-top:2mm;display:inline-flex;gap:2.5mm;align-items:center;font:600 3.5mm Inter,sans-serif;background:var(--bg);border:.3mm solid var(--line);border-radius:5mm;padding:1.2mm 3.5mm;color:var(--ink)}
+.sv .fl i{font-style:normal;color:var(--sky)}
+.obs{margin-top:4mm;font:400 3.6mm/1.4 Inter,sans-serif;border-left:1mm solid var(--sky2);padding:1mm 0 1mm 3mm;color:#33595c}
+.obs:empty{display:none}
+.ft{padding:4mm 12mm;background:var(--navy);color:#fff;display:flex;justify-content:space-between;font:500 3.2mm Inter,sans-serif;letter-spacing:.04em}
+/* ---------- versión para imprimir (poca tinta) ---------- */
+.v-ink{font-family:Inter,sans-serif;color:#222}
+.v-ink .hd{display:flex;align-items:center;justify-content:space-between;padding:9mm 14mm 4mm;border-bottom:.4mm solid #222;margin:0 14mm;padding-left:0;padding-right:0;gap:8mm}
+.v-ink .hd .lg{height:12mm;max-width:50mm;object-fit:contain;filter:grayscale(1) contrast(1.1)}
+.v-ink .ti0{display:flex;align-items:center;justify-content:space-between;padding:6mm 14mm 2mm;gap:6mm}
+.v-ink .ti0 small{display:block;font:600 3mm Oswald,sans-serif;letter-spacing:.3em;color:#555}
+.v-ink .ti0 b{display:block;font:600 8mm/1.1 Oswald,sans-serif;text-transform:uppercase;color:#222}
+.v-ink .ti0 span{font:500 3.8mm Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#555}
+.v-ink .ti0 img{height:26mm;filter:grayscale(1) contrast(1.15) brightness(1.05);opacity:.85}
+.v-ink .body{padding:3mm 14mm 6mm;flex:1}
+.v-ink .pax{background:#fff;border:.3mm solid #999;border-radius:0}
+.v-ink .pax .k{color:#555}.v-ink .pax .n{color:#555}
+.v-ink .sv{border-top:.3mm dashed #999}
+.v-ink .sv .dt{background:#fff;color:#222;border:.4mm solid #222;border-radius:0}
+.v-ink .sv .ti{color:#111}
+.v-ink .sv .rt em{color:#222}
+.v-ink .sv .fl{background:#fff;border:.3mm solid #777;border-radius:0;color:#222}
+.v-ink .sv .fl i{color:#222}
+.v-ink .obs{border-left:.6mm solid #777;color:#333}
+.v-ink .ft{background:#fff;color:#444;border-top:.4mm solid #222;margin:0 14mm;padding:3mm 0}
+.v-ink .hero,.v-ink .hero *{display:none}
+@media print{
+ @page{size:A4;margin:0}
+ html,body{background:#fff}
+ .top,.panel,.hint{display:none!important}
+ .wrap{display:block;padding:0;max-width:none}
+ .stage{overflow:visible;padding:0}
+ .sheet{box-shadow:none;margin:0;width:210mm;min-height:297mm}
+ .sheet [contenteditable]:hover{background:none}
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><a href="index.html">← Volver a Tu Itinerario</a></header>
+<div class="wrap"><aside class="panel">
+<label for="serv">Solicitud / confirmación de servicios</label>
+<textarea id="serv" placeholder="Traslado regular in + out El Calafate&#10;Nombre Apellido x2&#10;Llegada: Aeropuerto … - Hotel …  dd/mm/aaaa&#10;Salida: Hotel … - Aeropuerto …  dd/mm/aaaa&#10;&#10;Excursión … dd/mm/aaaa"></textarea>
+<label for="vue">Pasajeros y vuelos (pegado del PNR)</label>
+<textarea id="vue" placeholder=" 1.APELLIDO/NOMBRE&#10;  4  AR1850 T 19JAN 2*AEPFTE HK2  1615 1935 …"></textarea>
+<label for="op">Operador</label><select id="op"></select>
+<p class="hint">Los logos viven en la carpeta <b>operadores/</b>. Si no está, subí uno suelto:</p>
+<input id="opf" type="file" accept="image/*" style="font-size:12px">
+<label for="dest">Destino (foto y sello)</label><select id="dest"></select>
+<label for="obs">Observaciones (opcional, se imprime si lo completás)</label>
+<input id="obs" type="text" placeholder="Ej.: indicaciones de punto de encuentro, contacto del operador…">
+<label>Logo Hiperviajes (opcional, por defecto el de la web)</label><input id="hvf" type="file" accept="image/*" style="font-size:12px">
+<div class="btns"><button class="p" id="go">Generar voucher</button></div>
+<label>Versión</label>
+<div class="seg"><button data-v="foto" class="on">Con fotos</button><button data-v="ink">Para imprimir</button></div>
+<div class="btns"><button class="s" id="prn">Imprimir / PDF</button><button class="s" id="png">Bajar PNG</button></div>
+<p class="hint">Después de generar, podés hacer clic sobre cualquier texto del voucher para corregirlo.</p>
+<ul class="warns" id="warns"></ul>
+</aside><main class="stage" id="stage"></main></div>
+<script>var FOTOS=[{"n":"Buenos Aires","c":["EZE","AEP","BUE"],"a":["BUENOS AIRES"],"f":"buenos-aires.jpg"},{"n":"Montevideo","c":["MVD"],"a":["MONTEVIDEO"],"f":"montevideo.jpg"},{"n":"Punta del Este","c":["PDP"],"a":["MALDONADO","PUNTA DEL ESTE"],"f":"punta-del-este.jpg"},{"n":"Río de Janeiro","c":["GIG","SDU","RIO"],"a":["RIO","RIO DE JANEIRO"],"f":"rio-de-janeiro.jpg"},{"n":"São Paulo","c":["GRU","CGH","VCP","SAO"],"a":["SAN PABLO","SAO PAULO"],"f":"sao-paulo.jpg"},{"n":"Salvador de Bahía","c":["SSA"],"a":["BAHIA","SALVADOR","SALVADOR DE BAHIA"],"f":"salvador-de-bahia.jpg"},{"n":"Florianópolis","c":["FLN"],"a":["FLORIANOPOLIS","FLORIPA"],"f":"florianopolis.jpg"},{"n":"Santiago de Chile","c":["SCL"],"a":["SANTIAGO","SANTIAGO DE CHILE"],"f":"santiago-de-chile.jpg"},{"n":"Lima","c":["LIM"],"a":["LIMA"],"f":"lima.jpg"},{"n":"Cuzco","c":["CUZ"],"a":["CUSCO","CUZCO"],"f":"cuzco.jpg"},{"n":"Bogotá","c":["BOG"],"a":["BOGOTA"],"f":"bogota.jpg"},{"n":"Cartagena","c":["CTG"],"a":["CARTAGENA","CARTAGENA DE INDIAS"],"f":"cartagena.jpg"},{"n":"Medellín","c":["MDE","EOH"],"a":["MEDELLIN","RIONEGRO"],"f":"medellin.jpg"},{"n":"Ciudad de México","c":["MEX","NLU"],"a":["CDMX","CIUDAD DE MEXICO","MEXICO","MEXICO CITY","MEXICO DF"],"f":"ciudad-de-mexico.jpg"},{"n":"Cancún","c":["CUN"],"a":["CANCUN"],"f":"cancun.jpg"},{"n":"Punta Cana","c":["PUJ"],"a":["PUNTA CANA"],"f":"punta-cana.jpg"},{"n":"La Habana","c":["HAV"],"a":["HABANA","HAVANA","LA HABANA"],"f":"la-habana.jpg"},{"n":"Panamá","c":["PTY"],"a":["CIUDAD DE PANAMA","PANAMA","PANAMA CITY"],"f":"panama.jpg"},{"n":"San José","c":["LIR","SJO"],"a":["SAN JOSE","SAN JOSE DE COSTA RICA"],"f":"san-jose.jpg"},{"n":"Aruba","c":["AUA"],"a":["ARUBA","ORANJESTAD"],"f":"aruba.jpg"},{"n":"Curazao","c":["CUR"],"a":["CURACAO","CURAZAO","WILLEMSTAD"],"f":"curazao.jpg"},{"n":"Bariloche","c":["BRC"],"a":["BARILOCHE","SAN CARLOS DE BARILOCHE"],"f":"bariloche.jpg"},{"n":"Mendoza","c":["MDZ"],"a":["MENDOZA"],"f":"mendoza.jpg"},{"n":"Iguazú","c":["IGR","IGU"],"a":["CATARATAS DEL IGUAZU","FOZ DE IGUAZU","FOZ DO IGUACU","IGUAZU","PUERTO IGUAZU"],"f":"iguazu.jpg"},{"n":"Ushuaia","c":["USH"],"a":["USHUAIA"],"f":"ushuaia.jpg"},{"n":"Calafate","c":["FTE"],"a":["CALAFATE","EL CALAFATE"],"f":"calafate.jpg"},{"n":"Asunción","c":["ASU"],"a":["ASUNCION"],"f":"asuncion.jpg","cr":"Foto: Cmasi · CC BY-SA 4.0"},{"n":"Quito","c":["UIO"],"a":["QUITO"],"f":"quito.jpg"},{"n":"Galápagos","c":["GPS","SCY"],"a":["BALTRA","GALAPAGOS","SAN CRISTOBAL"],"f":"galapagos.jpg"},{"n":"San Andrés","c":["ADZ"],"a":["ISLA DE SAN ANDRES","SAN ANDRES"],"f":"san-andres.jpg"},{"n":"Nueva York","c":["JFK","EWR","LGA","NYC"],"a":["NEW YORK","NUEVA YORK"],"f":"nueva-york.jpg"},{"n":"Miami","c":["MIA"],"a":["MIAMI"],"f":"miami.jpg"},{"n":"Orlando","c":["MCO"],"a":["ORLANDO"],"f":"orlando.jpg"},{"n":"Los Ángeles","c":["LAX"],"a":["LOS ANGELES"],"f":"los-angeles.jpg"},{"n":"San Francisco","c":["SFO"],"a":["SAN FRANCISCO"],"f":"san-francisco.jpg"},{"n":"Las Vegas","c":["LAS"],"a":["LAS VEGAS"],"f":"las-vegas.jpg"},{"n":"Chicago","c":["ORD","MDW","CHI"],"a":["CHICAGO"],"f":"chicago.jpg"},{"n":"Washington","c":["IAD","DCA","WAS"],"a":["WASHINGTON","WASHINGTON D C","WASHINGTON DC"],"f":"washington.jpg"},{"n":"Boston","c":["BOS"],"a":["BOSTON"],"f":"boston.jpg"},{"n":"Toronto","c":["YYZ","YTZ","YTO"],"a":["TORONTO"],"f":"toronto.jpg"},{"n":"Montreal","c":["YUL","YMQ"],"a":["MONTREAL"],"f":"montreal.jpg"},{"n":"Vancouver","c":["YVR"],"a":["VANCOUVER"],"f":"vancouver.jpg"},{"n":"San Juan","c":["SJU"],"a":["SAN JUAN","SAN JUAN DE PUERTO RICO"],"f":"san-juan.jpg"},{"n":"Madrid","c":["MAD"],"a":["MADRID"],"f":"madrid.jpg"},{"n":"Barcelona","c":["BCN"],"a":["BARCELONA"],"f":"barcelona.jpg"},{"n":"Sevilla","c":["SVQ"],"a":["SEVILLA","SEVILLE"],"f":"sevilla.jpg"},{"n":"Málaga","c":["AGP"],"a":["MALAGA"],"f":"malaga.jpg"},{"n":"Lisboa","c":["LIS"],"a":["LISBOA","LISBON"],"f":"lisboa.jpg"},{"n":"Oporto","c":["OPO"],"a":["OPORTO","PORTO"],"f":"oporto.jpg"},{"n":"París","c":["CDG","ORY","BVA","PAR"],"a":["PARIS"],"f":"paris.jpg"},{"n":"Niza","c":["NCE"],"a":["NICE","NIZA"],"f":"niza.jpg"},{"n":"Londres","c":["LHR","LGW","STN","LTN","LCY","SEN","LON"],"a":["LONDON","LONDRES"],"f":"londres.jpg"},{"n":"Dublín","c":["DUB"],"a":["DUBLIN"],"f":"dublin.jpg"},{"n":"Ámsterdam","c":["AMS"],"a":["AMSTERDAM"],"f":"amsterdam.jpg"},{"n":"Bruselas","c":["BRU","CRL"],"a":["BRUSELAS","BRUSSEL","BRUSSELS","BRUXELLES"],"f":"bruselas.jpg"},{"n":"Berlín","c":["BER","TXL","SXF"],"a":["BERLIN"],"f":"berlin.jpg"},{"n":"Múnich","c":["MUC"],"a":["MUNCHEN","MUNICH"],"f":"munich.jpg"},{"n":"Fráncfort","c":["FRA","HHN"],"a":["FRANCFORT","FRANKFURT"],"f":"francfort.jpg"},{"n":"Viena","c":["VIE"],"a":["VIENA","VIENNA","WIEN"],"f":"viena.jpg"},{"n":"Praga","c":["PRG"],"a":["PRAGA","PRAGUE","PRAHA"],"f":"praga.jpg"},{"n":"Budapest","c":["BUD"],"a":["BUDAPEST"],"f":"budapest.jpg"},{"n":"Zúrich","c":["ZRH"],"a":["ZURICH"],"f":"zurich.jpg"},{"n":"Roma","c":["FCO","CIA","ROM"],"a":["ROMA","ROME"],"f":"roma.jpg"},{"n":"Milán","c":["MXP","LIN","BGY","MIL"],"a":["MILAN","MILANO"],"f":"milan.jpg"},{"n":"Venecia","c":["VCE","TSF"],"a":["VENECIA","VENEZIA","VENICE"],"f":"venecia.jpg"},{"n":"Florencia","c":["FLR"],"a":["FIRENZE","FLORENCE","FLORENCIA"],"f":"florencia.jpg"},{"n":"Atenas","c":["ATH"],"a":["ATENAS","ATHENS","ATHINA"],"f":"atenas.jpg"},{"n":"Estambul","c":["IST","SAW","ISL"],"a":["ESTAMBUL","ISTANBUL"],"f":"estambul.jpg"},{"n":"Copenhague","c":["CPH"],"a":["COPENHAGEN","COPENHAGUE","KOBENHAVN"],"f":"copenhague.jpg"},{"n":"Estocolmo","c":["ARN","BMA","NYO","STO"],"a":["ESTOCOLMO","STOCKHOLM"],"f":"estocolmo.jpg"},{"n":"Oslo","c":["OSL","TRF"],"a":["OSLO"],"f":"oslo.jpg"},{"n":"Reikiavik","c":["KEF","RKV","REK"],"a":["KEFLAVIK","REIKIAVIK","REYKJAVIK"],"f":"reikiavik.jpg"},{"n":"Dubrovnik","c":["DBV"],"a":["DUBROVNIK"],"f":"dubrovnik.jpg"},{"n":"Dubái","c":["DXB","DWC"],"a":["DUBAI"],"f":"dubai.jpg"},{"n":"Abu Dabi","c":["AUH"],"a":["ABU DABI","ABU DHABI"],"f":"abu-dabi.jpg"},{"n":"Doha","c":["DOH"],"a":["DOHA"],"f":"doha.jpg"},{"n":"Tel Aviv","c":["TLV"],"a":["TEL AVIV","TEL AVIV YAFO","TEL AVIVYAFO"],"f":"tel-aviv.jpg"},{"n":"El Cairo","c":["CAI","SPX"],"a":["CAIRO","EL CAIRO"],"f":"el-cairo.jpg"},{"n":"Marrakech","c":["RAK"],"a":["MARRAKECH","MARRAKESH","MARRAQUECH"],"f":"marrakech.jpg"},{"n":"Ciudad del Cabo","c":["CPT"],"a":["CAPE TOWN","CIUDAD DEL CABO"],"f":"ciudad-del-cabo.jpg"},{"n":"Johannesburgo","c":["JNB"],"a":["JOHANNESBURG","JOHANNESBURGO"],"f":"johannesburgo.jpg"},{"n":"Zanzíbar","c":["ZNZ"],"a":["ZANZIBAR"],"f":"zanzibar.jpg"},{"n":"Mauricio","c":["MRU"],"a":["ISLA MAURICIO","MAURICIO","MAURITIUS","PORT LOUIS"],"f":"mauricio.jpg"},{"n":"Tokio","c":["NRT","HND","TYO"],"a":["TOKIO","TOKYO"],"f":"tokio.jpg"},{"n":"Osaka","c":["ITM","KIX","OSA"],"a":["OSAKA"],"f":"osaka.jpg"},{"n":"Seúl","c":["ICN","GMP","SEL"],"a":["SEOUL","SEUL"],"f":"seul.jpg"},{"n":"Pekín","c":["PEK","PKX","BJS"],"a":["BEIJING","PEKIN"],"f":"pekin.jpg"},{"n":"Shanghái","c":["PVG","SHA"],"a":["SHANGHAI"],"f":"shanghai.jpg"},{"n":"Hong Kong","c":["HKG"],"a":["HONG KONG"],"f":"hong-kong.jpg"},{"n":"Singapur","c":["SIN"],"a":["SINGAPORE","SINGAPUR"],"f":"singapur.jpg"},{"n":"Bangkok","c":["BKK","DMK"],"a":["BANGKOK"],"f":"bangkok.jpg"},{"n":"Phuket","c":["HKT"],"a":["PHUKET"],"f":"phuket.jpg"},{"n":"Bali","c":["DPS"],"a":["BALI","DENPASAR"],"f":"bali.jpg"},{"n":"Kuala Lumpur","c":["KUL","SZB"],"a":["KUALA LUMPUR"],"f":"kuala-lumpur.jpg"},{"n":"Nueva Delhi","c":["DEL"],"a":["DELHI","NEW DELHI","NUEVA DELHI"],"f":"nueva-delhi.jpg"},{"n":"Male","c":["MLE"],"a":["MALDIVAS","MALDIVES","MALE"],"f":"male.jpg"},{"n":"Sídney","c":["SYD"],"a":["SIDNEY","SYDNEY"],"f":"sidney.jpg"},{"n":"Melbourne","c":["MEL"],"a":["MELBOURNE"],"f":"melbourne.jpg"},{"n":"Auckland","c":["AKL"],"a":["AUCKLAND"],"f":"auckland.jpg"},{"n":"Edimburgo","c":["EDI"],"a":["EDIMBURGO","EDINBURGH"],"f":"edimburgo.jpg"}];
+
+var SELLOS=[{"n":"A Coruña","c":["LCG"],"a":["A CORUNA","CORUNA","LA CORUNA"],"f":"a-coruna.webp","w":188,"h":182},{"n":"Abu Dabi","c":["AUH"],"a":["ABU DABI","ABU DHABI"],"f":"abu-dabi.webp","w":153,"h":148},{"n":"Addis Abeba","c":["ADD"],"a":["ADDIS ABABA","ADDIS ABEBA"],"f":"addis-abeba.webp","w":153,"h":148},{"n":"Almaty","c":["ALA"],"a":["ALMA ATA","ALMATY"],"f":"almaty.webp","w":154,"h":149},{"n":"Amán","c":["AMM"],"a":["AMAN","AMMAN"],"f":"aman.webp","w":149,"h":146},{"n":"Ámsterdam","c":["AMS"],"a":["AMSTERDAM"],"f":"amsterdam.webp","w":192,"h":184},{"n":"Antananarivo","c":["TNR"],"a":["ANTANANARIVO"],"f":"antananarivo.webp","w":151,"h":150},{"n":"Arequipa","c":["AQP"],"a":["AREQUIPA"],"f":"arequipa.webp","w":226,"h":209},{"n":"Argel","c":["ALG"],"a":["ALGER","ALGIERS","ARGEL"],"f":"argel.webp","w":154,"h":149},{"n":"Aruba","c":["AUA"],"a":["ARUBA","ORANJESTAD"],"f":"aruba.webp","w":257,"h":253},{"n":"Astaná","c":["NQZ","TSE"],"a":["ASTANA","NUR SULTAN","NURSULTAN"],"f":"astana.webp","w":153,"h":150},{"n":"Asunción","c":["ASU"],"a":["ASUNCION"],"f":"asuncion.webp","w":191,"h":188},{"n":"Atenas","c":["ATH"],"a":["ATENAS","ATHENS","ATHINA"],"f":"atenas.webp","w":192,"h":188},{"n":"Atlanta","c":["ATL"],"a":["ATLANTA"],"f":"atlanta.webp","w":189,"h":180},{"n":"Auckland","c":["AKL"],"a":["AUCKLAND"],"f":"auckland.webp","w":157,"h":151},{"n":"Bakú","c":["GYD"],"a":["BAKU"],"f":"baku.webp","w":152,"h":149},{"n":"Bali","c":["DPS"],"a":["BALI","DENPASAR"],"f":"bali.webp","w":155,"h":149},{"n":"Bangalore","c":["BLR"],"a":["BANGALORE","BENGALURU"],"f":"bangalore.webp","w":153,"h":151},{"n":"Bangkok","c":["BKK","DMK"],"a":["BANGKOK"],"f":"bangkok.webp","w":152,"h":147},{"n":"Barcelona","c":["BCN"],"a":["BARCELONA"],"f":"barcelona.webp","w":252,"h":250},{"n":"Bariloche","c":["BRC"],"a":["BARILOCHE","SAN CARLOS DE BARILOCHE"],"f":"bariloche.webp","w":259,"h":247},{"n":"Barranquilla","c":["BAQ"],"a":["BARRANQUILLA"],"f":"barranquilla.webp","w":189,"h":191},{"n":"Belfast","c":["BFS","BHD"],"a":["BELFAST"],"f":"belfast.webp","w":269,"h":240},{"n":"Belgrado","c":["BEG"],"a":["BELGRADE","BELGRADO","BEOGRAD"],"f":"belgrado.webp","w":274,"h":245},{"n":"Belo Horizonte","c":["CNF","PLU"],"a":["BELO HORIZONTE"],"f":"belo-horizonte.webp","w":193,"h":188},{"n":"Berlín","c":["BER","TXL","SXF"],"a":["BERLIN"],"f":"berlin.webp","w":192,"h":186},{"n":"Bilbao","c":["BIO"],"a":["BILBAO"],"f":"bilbao.webp","w":188,"h":181},{"n":"Biskek","c":["FRU"],"a":["BISHKEK","BISKEK"],"f":"biskek.webp","w":153,"h":151},{"n":"Bogotá","c":["BOG"],"a":["BOGOTA"],"f":"bogota.webp","w":195,"h":188},{"n":"Bombay","c":["BOM"],"a":["BOMBAY","MUMBAI"],"f":"bombay.webp","w":154,"h":152},{"n":"Boston","c":["BOS"],"a":["BOSTON"],"f":"boston.webp","w":185,"h":178},{"n":"Bratislava","c":["BTS"],"a":["BRATISLAVA"],"f":"bratislava.webp","w":272,"h":237},{"n":"Bridgetown","c":["BGI"],"a":["BARBADOS","BRIDGETOWN"],"f":"bridgetown.webp","w":216,"h":209},{"n":"Bristol","c":["BRS"],"a":["BRISTOL"],"f":"bristol.webp","w":151,"h":145},{"n":"Bruselas","c":["BRU","CRL"],"a":["BRUSELAS","BRUSSEL","BRUSSELS","BRUXELLES"],"f":"bruselas.webp","w":188,"h":185},{"n":"Bucarest","c":["OTP","BBU","BUH"],"a":["BUCAREST","BUCHAREST","BUCURESTI"],"f":"bucarest.webp","w":191,"h":187},{"n":"Budapest","c":["BUD"],"a":["BUDAPEST"],"f":"budapest.webp","w":190,"h":188},{"n":"Buenos Aires","c":["EZE","AEP","BUE"],"a":["BUENOS AIRES"],"f":"buenos-aires.webp","w":250,"h":245},{"n":"Calafate","c":["FTE"],"a":["CALAFATE","EL CALAFATE"],"f":"calafate.webp","w":246,"h":242},{"n":"Calama","c":["CJC"],"a":["CALAMA"],"f":"calama.webp","w":193,"h":185},{"n":"Cali","c":["CLO"],"a":["CALI"],"f":"cali.webp","w":189,"h":194},{"n":"Cancún","c":["CUN"],"a":["CANCUN"],"f":"cancun.webp","w":259,"h":252},{"n":"Caracas","c":["CCS"],"a":["CARACAS"],"f":"caracas.webp","w":193,"h":187},{"n":"Cartagena","c":["CTG"],"a":["CARTAGENA","CARTAGENA DE INDIAS"],"f":"cartagena.webp","w":194,"h":197},{"n":"Casablanca","c":["CMN","CAS"],"a":["CASABLANCA"],"f":"casablanca.webp","w":156,"h":151},{"n":"Cebú","c":["CEB"],"a":["CEBU"],"f":"cebu.webp","w":154,"h":150},{"n":"Charlotte","c":["CLT"],"a":["CHARLOTTE"],"f":"charlotte.webp","w":186,"h":183},{"n":"Chennai","c":["MAA"],"a":["CHENNAI","MADRAS"],"f":"chennai.webp","w":154,"h":150},{"n":"Chiang Mai","c":["CNX"],"a":["CHIANG MAI"],"f":"chiang-mai.webp","w":154,"h":152},{"n":"Chicago","c":["ORD","MDW","CHI"],"a":["CHICAGO"],"f":"chicago.webp","w":184,"h":180},{"n":"Ciudad de México","c":["MEX","NLU"],"a":["CDMX","CIUDAD DE MEXICO","MEXICO","MEXICO CITY","MEXICO DF"],"f":"ciudad-de-mexico.webp","w":189,"h":184},{"n":"Ciudad del Cabo","c":["CPT"],"a":["CAPE TOWN","CIUDAD DEL CABO"],"f":"ciudad-del-cabo.webp","w":154,"h":152},{"n":"Colombo","c":["CMB"],"a":["COLOMBO"],"f":"colombo.webp","w":152,"h":150},{"n":"Colonia","c":["CGN"],"a":["COLOGNE","COLOGNE BONN","COLONIA","COLONIA BONN","KOLN"],"f":"colonia.webp","w":188,"h":184},{"n":"Copenhague","c":["CPH"],"a":["COPENHAGEN","COPENHAGUE","KOBENHAVN"],"f":"copenhague.webp","w":263,"h":241},{"n":"Córdoba","c":["COR"],"a":["CORDOBA"],"f":"cordoba.webp","w":190,"h":184},{"n":"Curazao","c":["CUR"],"a":["CURACAO","CURAZAO","WILLEMSTAD"],"f":"curazao.webp","w":221,"h":207},{"n":"Cuzco","c":["CUZ"],"a":["CUSCO","CUZCO"],"f":"cuzco.webp","w":192,"h":186},{"n":"Dallas","c":["DFW","DAL"],"a":["DALLAS","DALLAS FORT WORTH"],"f":"dallas.webp","w":187,"h":182},{"n":"Dar es Salaam","c":["DAR"],"a":["DAR ES SALAAM"],"f":"dar-es-salaam.webp","w":150,"h":147},{"n":"Denver","c":["DEN"],"a":["DENVER"],"f":"denver.webp","w":188,"h":181},{"n":"Detroit","c":["DTW"],"a":["DETROIT"],"f":"detroit.webp","w":192,"h":183},{"n":"Doha","c":["DOH"],"a":["DOHA"],"f":"doha.webp","w":153,"h":148},{"n":"Dubái","c":["DXB","DWC"],"a":["DUBAI"],"f":"dubai.webp","w":150,"h":146},{"n":"Dublín","c":["DUB"],"a":["DUBLIN"],"f":"dublin.webp","w":269,"h":238},{"n":"Dubrovnik","c":["DBV"],"a":["DUBROVNIK"],"f":"dubrovnik.webp","w":190,"h":186},{"n":"Durban","c":["DUR"],"a":["DURBAN"],"f":"durban.webp","w":151,"h":148},{"n":"Dusambé","c":["DYU"],"a":["DUSAMBE","DUSHANBE"],"f":"dusambe.webp","w":155,"h":153},{"n":"Düsseldorf","c":["DUS"],"a":["DUSSELDORF"],"f":"dusseldorf.webp","w":188,"h":184},{"n":"Edimburgo","c":["EDI"],"a":["EDIMBURGO","EDINBURGH"],"f":"edimburgo.webp","w":277,"h":242},{"n":"El Cairo","c":["CAI","SPX"],"a":["CAIRO","EL CAIRO"],"f":"el-cairo.webp","w":152,"h":147},{"n":"Entebe","c":["EBB"],"a":["ENTEBBE","ENTEBE","KAMPALA"],"f":"entebe.webp","w":153,"h":148},{"n":"Estambul","c":["IST","SAW","ISL"],"a":["ESTAMBUL","ISTANBUL"],"f":"estambul.webp","w":407,"h":380},{"n":"Estocolmo","c":["ARN","BMA","NYO","STO"],"a":["ESTOCOLMO","STOCKHOLM"],"f":"estocolmo.webp","w":268,"h":241},{"n":"Filadelfia","c":["PHL"],"a":["FILADELFIA","PHILADELPHIA"],"f":"filadelfia.webp","w":186,"h":180},{"n":"Florencia","c":["FLR"],"a":["FIRENZE","FLORENCE","FLORENCIA"],"f":"florencia.webp","w":191,"h":185},{"n":"Fort Lauderdale","c":["FLL"],"a":["FORT LAUDERDALE","FT LAUDERDALE"],"f":"fort-lauderdale.webp","w":187,"h":181},{"n":"Fráncfort","c":["FRA","HHN"],"a":["FRANCFORT","FRANKFURT"],"f":"francfort.webp","w":193,"h":186},{"n":"Galápagos","c":["GPS","SCY"],"a":["BALTRA","GALAPAGOS","SAN CRISTOBAL"],"f":"galapagos.webp","w":189,"h":194},{"n":"Ginebra","c":["GVA"],"a":["GENEVA","GENEVE","GENF","GINEBRA"],"f":"ginebra.webp","w":192,"h":185},{"n":"Glasgow","c":["GLA","PIK"],"a":["GLASGOW"],"f":"glasgow.webp","w":268,"h":234},{"n":"Gotemburgo","c":["GOT"],"a":["GOTEBORG","GOTEMBURGO","GOTHENBURG"],"f":"gotemburgo.webp","w":253,"h":238},{"n":"Granada","c":["GRX"],"a":["GRANADA"],"f":"granada.webp","w":189,"h":183},{"n":"Guadalajara","c":["GDL"],"a":["GUADALAJARA"],"f":"guadalajara.webp","w":189,"h":182},{"n":"Guangzhou","c":["CAN"],"a":["CANTON","GUANGZHOU"],"f":"guangzhou.webp","w":152,"h":150},{"n":"Guatemala","c":["GUA"],"a":["CIUDAD DE GUATEMALA","GUATEMALA","GUATEMALA CITY"],"f":"guatemala.webp","w":188,"h":183},{"n":"Guayaquil","c":["GYE"],"a":["GUAYAQUIL"],"f":"guayaquil.webp","w":193,"h":189},{"n":"Hamburgo","c":["HAM"],"a":["HAMBURG","HAMBURGO"],"f":"hamburgo.webp","w":192,"h":184},{"n":"Hanoi","c":["HAN"],"a":["HANOI"],"f":"hanoi.webp","w":149,"h":150},{"n":"Helsinki","c":["HEL"],"a":["HELSINKI"],"f":"helsinki.webp","w":258,"h":240},{"n":"Ho Chi Minh","c":["SGN"],"a":["CIUDAD HO CHI MINH","HO CHI MINH","HO CHI MINH CITY","SAIGON"],"f":"ho-chi-minh.webp","w":154,"h":150},{"n":"Hong Kong","c":["HKG"],"a":["HONG KONG"],"f":"hong-kong.webp","w":154,"h":151},{"n":"Houston","c":["IAH","HOU"],"a":["HOUSTON"],"f":"houston.webp","w":195,"h":184},{"n":"Hurghada","c":["HRG"],"a":["HURGHADA"],"f":"hurghada.webp","w":150,"h":146},{"n":"Isla de Pascua","c":["IPC"],"a":["EASTER ISLAND","HANGA ROA","ISLA DE PASCUA","RAPA NUI"],"f":"isla-de-pascua.webp","w":196,"h":198},{"n":"Johannesburgo","c":["JNB"],"a":["JOHANNESBURG","JOHANNESBURGO"],"f":"johannesburgo.webp","w":158,"h":152},{"n":"Jujuy","c":["JUJ"],"a":["JUJUY","SAN SALVADOR DE JUJUY"],"f":"jujuy.webp","w":192,"h":186},{"n":"Katmandú","c":["KTM"],"a":["KATHMANDU","KATMANDU"],"f":"katmandu.webp","w":153,"h":150},{"n":"Kigali","c":["KGL"],"a":["KIGALI"],"f":"kigali.webp","w":150,"h":147},{"n":"Kingston","c":["KIN"],"a":["KINGSTON"],"f":"kingston.webp","w":206,"h":201},{"n":"Kuala Lumpur","c":["KUL","SZB"],"a":["KUALA LUMPUR"],"f":"kuala-lumpur.webp","w":150,"h":149},{"n":"La Habana","c":["HAV"],"a":["HABANA","HAVANA","LA HABANA"],"f":"la-habana.webp","w":220,"h":209},{"n":"Lárnaca","c":["LCA"],"a":["LARNACA","LARNAKA"],"f":"larnaca.webp","w":154,"h":147},{"n":"Las Vegas","c":["LAS"],"a":["LAS VEGAS"],"f":"las-vegas.webp","w":187,"h":178},{"n":"Lima","c":["LIM"],"a":["LIMA"],"f":"lima.webp","w":192,"h":184},{"n":"Lisboa","c":["LIS"],"a":["LISBOA","LISBON"],"f":"lisboa.webp","w":189,"h":182},{"n":"Liubliana","c":["LJU"],"a":["LIUBLIANA","LJUBLJANA"],"f":"liubliana.webp","w":152,"h":150},{"n":"Londres","c":["LHR","LGW","STN","LTN","LCY","SEN","LON"],"a":["LONDON","LONDRES"],"f":"londres.webp","w":270,"h":231},{"n":"Los Ángeles","c":["LAX"],"a":["LOS ANGELES"],"f":"los-angeles.webp","w":186,"h":177},{"n":"Los Cabos","c":["SJD"],"a":["CABO SAN LUCAS","LOS CABOS","SAN JOSE DEL CABO"],"f":"los-cabos.webp","w":190,"h":185},{"n":"Luanda","c":["LAD"],"a":["LUANDA"],"f":"luanda.webp","w":153,"h":148},{"n":"Luxemburgo","c":["LUX"],"a":["LUXEMBOURG","LUXEMBURGO"],"f":"luxemburgo.webp","w":186,"h":181},{"n":"Luxor","c":["LXR"],"a":["LUXOR"],"f":"luxor.webp","w":151,"h":147},{"n":"Lyon","c":["LYS"],"a":["LYON","LYONS"],"f":"lyon.webp","w":190,"h":182},{"n":"Maceió","c":["MCZ"],"a":["MACEIO"],"f":"maceio.webp","w":249,"h":241},{"n":"Madrid","c":["MAD"],"a":["MADRID"],"f":"madrid.webp","w":254,"h":253},{"n":"Málaga","c":["AGP"],"a":["MALAGA"],"f":"malaga.webp","w":187,"h":181},{"n":"Male","c":["MLE"],"a":["MALDIVAS","MALDIVES","MALE"],"f":"male.webp","w":155,"h":149},{"n":"Manchester","c":["MAN"],"a":["MANCHESTER"],"f":"manchester.webp","w":269,"h":234},{"n":"Manila","c":["MNL"],"a":["MANILA"],"f":"manila.webp","w":151,"h":148},{"n":"Maputo","c":["MPM"],"a":["MAPUTO"],"f":"maputo.webp","w":151,"h":150},{"n":"Marrakech","c":["RAK"],"a":["MARRAKECH","MARRAKESH","MARRAQUECH"],"f":"marrakech.webp","w":152,"h":148},{"n":"Marsella","c":["MRS"],"a":["MARSEILLE","MARSELLA"],"f":"marsella.webp","w":190,"h":183},{"n":"Mauricio","c":["MRU"],"a":["ISLA MAURICIO","MAURICIO","MAURITIUS","PORT LOUIS"],"f":"mauricio.webp","w":152,"h":149},{"n":"Medellín","c":["MDE","EOH"],"a":["MEDELLIN","RIONEGRO"],"f":"medellin.webp","w":191,"h":190},{"n":"Melbourne","c":["MEL"],"a":["MELBOURNE"],"f":"melbourne.webp","w":154,"h":151},{"n":"Mendoza","c":["MDZ"],"a":["MENDOZA"],"f":"mendoza.webp","w":194,"h":186},{"n":"Miami","c":["MIA"],"a":["MIAMI"],"f":"miami.webp","w":271,"h":243},{"n":"Milán","c":["MXP","LIN","BGY","MIL"],"a":["MILAN","MILANO"],"f":"milan.webp","w":195,"h":186},{"n":"Montego Bay","c":["MBJ"],"a":["MONTEGO BAY"],"f":"montego-bay.webp","w":205,"h":202},{"n":"Monterrey","c":["MTY"],"a":["MONTERREY"],"f":"monterrey.webp","w":190,"h":183},{"n":"Montevideo","c":["MVD"],"a":["MONTEVIDEO"],"f":"montevideo.webp","w":225,"h":209},{"n":"Montreal","c":["YUL","YMQ"],"a":["MONTREAL"],"f":"montreal.webp","w":185,"h":179},{"n":"Moscú","c":["SVO","DME","VKO","MOW"],"a":["MOSCOW","MOSCU","MOSKVA"],"f":"moscu.webp","w":257,"h":241},{"n":"Múnich","c":["MUC"],"a":["MUNCHEN","MUNICH"],"f":"munich.webp","w":188,"h":183},{"n":"Nairobi","c":["NBO"],"a":["NAIROBI"],"f":"nairobi.webp","w":152,"h":151},{"n":"Nápoles","c":["NAP"],"a":["NAPLES","NAPOLES","NAPOLI"],"f":"napoles.webp","w":190,"h":184},{"n":"Nassau","c":["NAS"],"a":["NASSAU"],"f":"nassau.webp","w":222,"h":208},{"n":"Natal","c":["NAT"],"a":["NATAL"],"f":"natal.webp","w":249,"h":241},{"n":"Niza","c":["NCE"],"a":["NICE","NIZA"],"f":"niza.webp","w":188,"h":181},{"n":"Nueva Delhi","c":["DEL"],"a":["DELHI","NEW DELHI","NUEVA DELHI"],"f":"nueva-delhi.webp","w":151,"h":150},{"n":"Nueva York","c":["JFK","EWR","LGA","NYC"],"a":["NEW YORK","NUEVA YORK"],"f":"nueva-york.webp","w":248,"h":246},{"n":"Oporto","c":["OPO"],"a":["OPORTO","PORTO"],"f":"oporto.webp","w":186,"h":179},{"n":"Orlando","c":["MCO"],"a":["ORLANDO"],"f":"orlando.webp","w":186,"h":179},{"n":"Oslo","c":["OSL","TRF"],"a":["OSLO"],"f":"oslo.webp","w":395,"h":380},{"n":"Panamá","c":["PTY"],"a":["CIUDAD DE PANAMA","PANAMA","PANAMA CITY"],"f":"panama.webp","w":185,"h":183},{"n":"París","c":["CDG","ORY","BVA","PAR"],"a":["PARIS"],"f":"paris.webp","w":184,"h":176},{"n":"Pekín","c":["PEK","PKX","BJS"],"a":["BEIJING","PEKIN"],"f":"pekin.webp","w":152,"h":150},{"n":"Phnom Penh","c":["PNH","KTI"],"a":["PHNOM PENH"],"f":"phnom-penh.webp","w":155,"h":151},{"n":"Phoenix","c":["PHX"],"a":["PHOENIX"],"f":"phoenix.webp","w":188,"h":182},{"n":"Phuket","c":["HKT"],"a":["PHUKET"],"f":"phuket.webp","w":155,"h":151},{"n":"Piura","c":["PIU"],"a":["PIURA"],"f":"piura.webp","w":225,"h":212},{"n":"Porlamar","c":["PMV"],"a":["ISLA MARGARITA","MARGARITA","PORLAMAR"],"f":"porlamar.webp","w":191,"h":186},{"n":"Portland","c":["PDX"],"a":["PORTLAND"],"f":"portland.webp","w":185,"h":180},{"n":"Praga","c":["PRG"],"a":["PRAGA","PRAGUE","PRAHA"],"f":"praga.webp","w":188,"h":185},{"n":"Puerto Montt","c":["PMC"],"a":["PUERTO MONTT"],"f":"puerto-montt.webp","w":196,"h":190},{"n":"Punta Cana","c":["PUJ"],"a":["PUNTA CANA"],"f":"punta-cana.webp","w":251,"h":241},{"n":"Punta del Este","c":["PDP"],"a":["MALDONADO","PUNTA DEL ESTE"],"f":"punta-del-este.webp","w":227,"h":213},{"n":"Quito","c":["UIO"],"a":["QUITO"],"f":"quito.webp","w":189,"h":189},{"n":"Recife","c":["REC"],"a":["RECIFE"],"f":"recife.webp","w":247,"h":241},{"n":"Reikiavik","c":["KEF","RKV","REK"],"a":["KEFLAVIK","REIKIAVIK","REYKJAVIK"],"f":"reikiavik.webp","w":266,"h":241},{"n":"Riad","c":["RUH"],"a":["RIAD","RIYAD","RIYADH"],"f":"riad.webp","w":150,"h":148},{"n":"Riga","c":["RIX"],"a":["RIGA"],"f":"riga.webp","w":244,"h":233},{"n":"Río de Janeiro","c":["GIG","SDU","RIO"],"a":["RIO","RIO DE JANEIRO"],"f":"rio-de-janeiro.webp","w":249,"h":242},{"n":"Roma","c":["FCO","CIA","ROM"],"a":["ROMA","ROME"],"f":"roma.webp","w":185,"h":180},{"n":"Salt Lake City","c":["SLC"],"a":["SALT LAKE CITY"],"f":"salt-lake-city.webp","w":194,"h":181},{"n":"Salta","c":["SLA"],"a":["SALTA"],"f":"salta.webp","w":192,"h":186},{"n":"Salvador de Bahía","c":["SSA"],"a":["BAHIA","SALVADOR","SALVADOR DE BAHIA"],"f":"salvador-de-bahia.webp","w":250,"h":241},{"n":"San Andrés","c":["ADZ"],"a":["ISLA DE SAN ANDRES","SAN ANDRES"],"f":"san-andres.webp","w":185,"h":193},{"n":"San Diego","c":["SAN"],"a":["SAN DIEGO"],"f":"san-diego.webp","w":186,"h":181},{"n":"San Francisco","c":["SFO"],"a":["SAN FRANCISCO"],"f":"san-francisco.webp","w":189,"h":178},{"n":"San José","c":["SJO"],"a":["SAN JOSE","SAN JOSE DE COSTA RICA"],"f":"san-jose.webp","w":194,"h":185},{"n":"San Juan","c":["SJU"],"a":["SAN JUAN","SAN JUAN DE PUERTO RICO"],"f":"san-juan.webp","w":217,"h":207},{"n":"San Petersburgo","c":["LED"],"a":["SAINT PETERSBURG","SAN PETERSBURGO","SANKT PETERBURG","ST PETERSBURG"],"f":"san-petersburgo.webp","w":261,"h":239},{"n":"San Salvador","c":["SAL"],"a":["SAN SALVADOR"],"f":"san-salvador.webp","w":191,"h":184},{"n":"San Sebastián","c":["EAS"],"a":["DONOSTIA","SAN SEBASTIAN"],"f":"san-sebastian.webp","w":190,"h":183},{"n":"Santa Cruz de la Sierra","c":["VVI"],"a":["SANTA CRUZ","SANTA CRUZ DE LA SIERRA"],"f":"santa-cruz-de-la-sierra.webp","w":195,"h":189},{"n":"Santa Marta","c":["SMR"],"a":["SANTA MARTA"],"f":"santa-marta.webp","w":190,"h":194},{"n":"Santander","c":["SDR"],"a":["SANTANDER"],"f":"santander.webp","w":187,"h":181},{"n":"Santiago de Chile","c":["SCL"],"a":["SANTIAGO","SANTIAGO DE CHILE"],"f":"santiago-de-chile.webp","w":256,"h":254},{"n":"Santiago de Compostela","c":["SCQ"],"a":["COMPOSTELA","SANTIAGO DE COMPOSTELA"],"f":"santiago-de-compostela.webp","w":190,"h":182},{"n":"São Paulo","c":["GRU","CGH","VCP","SAO"],"a":["SAN PABLO","SAO PAULO"],"f":"sao-paulo.webp","w":243,"h":237},{"n":"Sarajevo","c":["SJJ"],"a":["SARAJEVO"],"f":"sarajevo.webp","w":273,"h":243},{"n":"Seattle","c":["SEA"],"a":["SEATTLE"],"f":"seattle.webp","w":187,"h":181},{"n":"Seúl","c":["ICN","GMP","SEL"],"a":["SEOUL","SEUL"],"f":"seul.webp","w":150,"h":147},{"n":"Sevilla","c":["SVQ"],"a":["SEVILLA","SEVILLE"],"f":"sevilla.webp","w":188,"h":182},{"n":"Seychelles","c":["SEZ"],"a":["MAHE","SEYCHELLES"],"f":"seychelles.webp","w":152,"h":148},{"n":"Shanghái","c":["PVG","SHA"],"a":["SHANGHAI"],"f":"shanghai.webp","w":159,"h":151},{"n":"Sharm el Sheikh","c":["SSH"],"a":["SHARM","SHARM EL SHEIJ","SHARM EL SHEIKH"],"f":"sharm-el-sheikh.webp","w":152,"h":147},{"n":"Shenzhen","c":["SZX"],"a":["SHENZHEN"],"f":"shenzhen.webp","w":152,"h":150},{"n":"Sídney","c":["SYD"],"a":["SIDNEY","SYDNEY"],"f":"sidney.webp","w":152,"h":150},{"n":"Siem Reap","c":["REP","SAI"],"a":["SIEM REAP"],"f":"siem-reap.webp","w":152,"h":149},{"n":"Singapur","c":["SIN"],"a":["SINGAPORE","SINGAPUR"],"f":"singapur.webp","w":152,"h":150},{"n":"Skopie","c":["SKP"],"a":["SKOPIE","SKOPJE"],"f":"skopie.webp","w":156,"h":150},{"n":"Sofía","c":["SOF"],"a":["SOFIA"],"f":"sofia.webp","w":405,"h":380},{"n":"Split","c":["SPU"],"a":["SPLIT"],"f":"split.webp","w":196,"h":189},{"n":"Taipéi","c":["TPE","TSA"],"a":["TAIPEI"],"f":"taipei.webp","w":157,"h":151},{"n":"Tallin","c":["TLL"],"a":["TALIN","TALLIN","TALLINN"],"f":"tallin.webp","w":258,"h":238},{"n":"Tampa","c":["TPA"],"a":["TAMPA"],"f":"tampa.webp","w":189,"h":183},{"n":"Taskent","c":["TAS"],"a":["TASHKENT","TASKENT","TOSHKENT"],"f":"taskent.webp","w":152,"h":149},{"n":"Tel Aviv","c":["TLV"],"a":["TEL AVIV","TEL AVIV YAFO","TEL AVIVYAFO"],"f":"tel-aviv.webp","w":150,"h":146},{"n":"Tiflis","c":["TBS"],"a":["TBILISI","TIFLIS"],"f":"tiflis.webp","w":156,"h":148},{"n":"Tirana","c":["TIA"],"a":["TIRANA"],"f":"tirana.webp","w":267,"h":242},{"n":"Tokio","c":["NRT","HND","TYO"],"a":["TOKIO","TOKYO"],"f":"tokio.webp","w":152,"h":151},{"n":"Toronto","c":["YYZ","YTZ","YTO"],"a":["TORONTO"],"f":"toronto.webp","w":187,"h":178},{"n":"Trípoli","c":["TIP","MJI"],"a":["TRIPOLI"],"f":"tripoli.webp","w":152,"h":149},{"n":"Túnez","c":["TUN"],"a":["TUNEZ","TUNIS"],"f":"tunez.webp","w":153,"h":148},{"n":"Ulán Bator","c":["UBN","ULN"],"a":["ULAANBAATAR","ULAN BATOR"],"f":"ulan-bator.webp","w":155,"h":151},{"n":"Urumchi","c":["URC"],"a":["URUMCHI","URUMQI"],"f":"urumchi.webp","w":151,"h":149},{"n":"Ushuaia","c":["USH"],"a":["USHUAIA"],"f":"ushuaia.webp","w":254,"h":245},{"n":"Valencia","c":["VLC"],"a":["VALENCIA"],"f":"valencia.webp","w":192,"h":183},{"n":"Vancouver","c":["YVR"],"a":["VANCOUVER"],"f":"vancouver.webp","w":187,"h":179},{"n":"Varsovia","c":["WAW","WMI"],"a":["VARSOVIA","WARSAW","WARSZAWA"],"f":"varsovia.webp","w":260,"h":242},{"n":"Venecia","c":["VCE","TSF"],"a":["VENECIA","VENEZIA","VENICE"],"f":"venecia.webp","w":190,"h":183},{"n":"Viena","c":["VIE"],"a":["VIENA","VIENNA","WIEN"],"f":"viena.webp","w":191,"h":185},{"n":"Vigo","c":["VGO"],"a":["VIGO"],"f":"vigo.webp","w":191,"h":183},{"n":"Vilankulo","c":["VNX"],"a":["VILANCULOS","VILANKULO"],"f":"vilankulo.webp","w":152,"h":150},{"n":"Vilna","c":["VNO"],"a":["VILNA","VILNIUS"],"f":"vilna.webp","w":249,"h":236},{"n":"Washington","c":["IAD","DCA","WAS"],"a":["WASHINGTON","WASHINGTON D C","WASHINGTON DC"],"f":"washington.webp","w":187,"h":183},{"n":"Windhoek","c":["WDH"],"a":["WINDHOEK"],"f":"windhoek.webp","w":154,"h":148},{"n":"Xi'an","c":["XIY"],"a":["XIAN"],"f":"xi-an.webp","w":150,"h":150},{"n":"Yakarta","c":["CGK","HLP"],"a":["JAKARTA","YAKARTA"],"f":"yakarta.webp","w":150,"h":149},{"n":"Yangón","c":["RGN"],"a":["RANGOON","RANGUN","YANGON"],"f":"yangon.webp","w":157,"h":154},{"n":"Zagreb","c":["ZAG"],"a":["ZAGREB"],"f":"zagreb.webp","w":190,"h":188},{"n":"Zanzíbar","c":["ZNZ"],"a":["ZANZIBAR"],"f":"zanzibar.webp","w":152,"h":150},{"n":"Zúrich","c":["ZRH"],"a":["ZURICH"],"f":"zurich.webp","w":194,"h":187}];
+var OPERADORES=[{"id": "prestigio", "nombre": "Prestigio Operadores Receptivos", "logo": "operadores/prestigio.png", "destinos": ["El Calafate"]}];
+var PAISES={"Buenos Aires": "Argentina", "Bariloche": "Argentina", "Mendoza": "Argentina", "Iguazú": "Argentina", "Ushuaia": "Argentina", "Calafate": "Argentina", "Montevideo": "Uruguay", "Punta del Este": "Uruguay", "Río de Janeiro": "Brasil", "São Paulo": "Brasil", "Salvador de Bahía": "Brasil", "Florianópolis": "Brasil", "Santiago de Chile": "Chile", "Lima": "Perú", "Cuzco": "Perú", "Bogotá": "Colombia", "Cartagena": "Colombia", "Medellín": "Colombia", "San Andrés": "Colombia", "Ciudad de México": "México", "Cancún": "México", "Punta Cana": "República Dominicana", "La Habana": "Cuba", "Panamá": "Panamá", "San José": "Costa Rica", "Aruba": "Aruba", "Curazao": "Curazao", "Asunción": "Paraguay", "Quito": "Ecuador", "Galápagos": "Ecuador", "Nueva York": "Estados Unidos", "Miami": "Estados Unidos", "Orlando": "Estados Unidos", "Los Ángeles": "Estados Unidos", "San Francisco": "Estados Unidos", "Las Vegas": "Estados Unidos", "Chicago": "Estados Unidos", "Washington": "Estados Unidos", "Boston": "Estados Unidos", "Toronto": "Canadá", "Montreal": "Canadá", "Vancouver": "Canadá", "San Juan": "Puerto Rico", "Madrid": "España", "Barcelona": "España", "Sevilla": "España", "Málaga": "España", "Lisboa": "Portugal", "Oporto": "Portugal", "París": "Francia", "Niza": "Francia", "Londres": "Reino Unido", "Edimburgo": "Reino Unido", "Dublín": "Irlanda", "Ámsterdam": "Países Bajos", "Bruselas": "Bélgica", "Berlín": "Alemania", "Múnich": "Alemania", "Fráncfort": "Alemania", "Viena": "Austria", "Praga": "República Checa", "Budapest": "Hungría", "Zúrich": "Suiza", "Roma": "Italia", "Milán": "Italia", "Venecia": "Italia", "Florencia": "Italia", "Atenas": "Grecia", "Estambul": "Turquía", "Copenhague": "Dinamarca", "Estocolmo": "Suecia", "Oslo": "Noruega", "Reikiavik": "Islandia", "Dubrovnik": "Croacia", "Dubái": "Emiratos Árabes Unidos", "Abu Dabi": "Emiratos Árabes Unidos", "Doha": "Catar", "Tel Aviv": "Israel", "El Cairo": "Egipto", "Marrakech": "Marruecos", "Ciudad del Cabo": "Sudáfrica", "Johannesburgo": "Sudáfrica", "Zanzíbar": "Tanzania", "Mauricio": "Mauricio", "Tokio": "Japón", "Osaka": "Japón", "Seúl": "Corea del Sur", "Pekín": "China", "Shanghái": "China", "Hong Kong": "Hong Kong", "Singapur": "Singapur", "Bangkok": "Tailandia", "Phuket": "Tailandia", "Bali": "Indonesia", "Kuala Lumpur": "Malasia", "Nueva Delhi": "India", "Male": "Maldivas", "Sídney": "Australia", "Melbourne": "Australia", "Auckland": "Nueva Zelanda"};
+/* Parser de solicitud de servicios + líneas de vuelo Amadeus. Sin dependencias de DOM. */
+var MESES=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+var MESES_EN=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+var SMALL={de:1,del:1,la:1,las:1,los:1,el:1,al:1,y:1,en:1,a:1,e:1,con:1,por:1,para:1,'+':1};
+function norm(s){return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase().replace(/\s+/g,' ').trim();}
+function titleCase(s){
+  return String(s).toLowerCase().replace(/\s+/g,' ').trim().split(' ').map(function(w,i){
+    if(i>0&&SMALL[w])return w;
+    return w.replace(/(^|[-\/(])([a-záéíóúñü])/g,function(m,p,c){return p+c.toUpperCase();});
+  }).join(' ');
+}
+/* Reglas para pasar la jerga del pedido a texto de voucher (se aplican sobre texto ya en Title Case). */
+var GLOSARIO=[
+  [/\bFull Day\b/gi,'Full Day'],[/\bHalf Day\b/gi,'Half Day'],
+  [/\bExcursion\b/gi,'Excursión'],[/\bTraslado\b/gi,'Traslado'],
+  [/(^|\s)(?:Glaciar )?Moreno\b/g,function(m,p,o,full){return /Perito\s*$/.test(full.slice(0,o+p.length))?m:p+'Glaciar Perito Moreno';}],
+  [/\bEntrada (?!al\b|a\b)(?=Parque)/g,'Entrada al '],
+  [/\bParque Nacional (los|las|el|la|del|de)\b/g,function(m,a){return 'Parque Nacional '+a.charAt(0).toUpperCase()+a.slice(1);}],
+  [/\bAeropuerto\b/g,'Aeropuerto']
+];
+function aplicarGlosario(t){
+  GLOSARIO.forEach(function(r){t=t.replace(r[0],r[1]);});
+  return t.replace(/Perito Perito/g,'Perito').replace(/Glaciar Glaciar/g,'Glaciar');
+}
+function destinoPorTexto(txt){
+  var T=' '+norm(txt)+' ',best=null,len=0;
+  FOTOS.forEach(function(f){
+    f.a.forEach(function(a){
+      var A=' '+norm(a)+' ';
+      if(T.indexOf(A)>=0&&a.length>len){best=f;len=a.length;}
+    });
+  });
+  return best;
+}
+function nombreDestino(f){var a=f.a.slice().sort(function(x,y){return y.length-x.length;})[0];return titleCase(a||f.n);}
+function paisDe(f){return PAISES[f.n]||'';}
+function selloDe(f){
+  var s=null;
+  SELLOS.forEach(function(x){
+    if(s)return;
+    if(x.c&&f.c.some(function(c){return x.c.indexOf(c)>=0;}))s=x;
+  });
+  if(!s){var n=norm(f.n);SELLOS.forEach(function(x){if(!s&&norm(x.n)===n)s=x;});}
+  return s;
+}
+function fechaDe(txt,anioRef){
+  var m=txt.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
+  if(!m)return null;
+  var y=m[3]?+m[3]:(anioRef||new Date().getFullYear());if(y<100)y+=2000;
+  return {d:+m[1],m:+m[2],y:y,raw:m[0]};
+}
+function iso(f){return f.y*10000+f.m*100+f.d;}
+function diaSemana(f){var d=new Date(Date.UTC(f.y,f.m-1,f.d));return ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][d.getUTCDay()];}
+
+/* ---- Vuelos y pasajeros (Amadeus) ---- */
+function parseVuelos(txt){
+  var out=[],pax=[],warns=[];
+  var re=/^\s*\d+\s+([A-Z0-9]{2})\s*(\d{1,4})\s+[A-Z]\s+(\d{2})([A-Z]{3})\s+\d?\*?\s*([A-Z]{3})([A-Z]{3})\s+[A-Z]{2}\d+\s+(\d{4})\s+(\d{4})(?:\s+(\d{2})([A-Z]{3}))?/;
+  txt.split(/\r?\n/).forEach(function(l){
+    var m=l.match(re);
+    if(m){
+      var mes=MESES_EN.indexOf(m[4])+1;
+      if(mes<1){warns.push('Mes no reconocido en: '+l.trim());return;}
+      out.push({aero:m[1],num:m[2],d:+m[3],m:mes,from:m[5],to:m[6],dep:m[7].slice(0,2)+':'+m[7].slice(2),arr:m[8].slice(0,2)+':'+m[8].slice(2),
+        arrD:m[9]?+m[9]:null,arrM:m[10]?MESES_EN.indexOf(m[10])+1:null});
+      return;
+    }
+    var pm,pr=/(\d+)\.\s*([A-ZÁÉÍÓÚÑ'\-]+)\/([A-ZÁÉÍÓÚÑ'\- ]+?)(?=\s{2,}|\s+\d+\.|$)/g;
+    while((pm=pr.exec(l))){pax.push(titleCase(pm[3].replace(/\s+(MR|MRS|MS|MISS|MSTR|CHD|INF)\b/,''))+' '+titleCase(pm[2]));}
+  });
+  return {vuelos:out,pax:pax,warns:warns};
+}
+
+/* ---- Solicitud de servicios ---- */
+function parseServicios(txt){
+  var warns=[],lines=txt.split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean);
+  var dest=destinoPorTexto(txt),svs=[],paxTxt=null,paxN=null,kind='regular',hdrDest=null;
+  var anio=null;(txt.match(/\d{1,2}\/\d{1,2}\/(\d{2,4})/)||[])[1]&&(anio=+RegExp.$1);if(anio&&anio<100)anio+=2000;
+  lines.forEach(function(l){
+    var low=norm(l);
+    var mp=l.match(/^(.+?)\s*[xX]\s*(\d+)\s*$/);
+    if(mp&&!/\d\/\d/.test(l)){paxTxt=titleCase(mp[1]);paxN=+mp[2];return;}
+    var ml=l.match(/^(llegada|salida|in|out|ida|regreso)\s*:\s*(.+)$/i);
+    if(ml){
+      var f=fechaDe(ml[2],anio),cuerpo=ml[2].replace(/\s*\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\s*$/,'').trim();
+      var partes=cuerpo.split(/\s+[-–>→]+\s+/);
+      if(partes.length<2){warns.push('No pude separar origen y destino en: "'+l+'"');return;}
+      var esIn=/^(llegada|in|ida)/i.test(ml[1]);
+      svs.push({tipo:esIn?'in':'out',kind:kind,from:partes[0],to:partes.slice(1).join(' - '),f:f,raw:l});
+      if(!f)warns.push('Servicio sin fecha: "'+l+'"');
+      return;
+    }
+    if(/^traslado/i.test(low)){
+      kind=/PRIVAD/.test(low)?'privado':(/REGULAR|COMPARTID/.test(low)?'regular':'');
+      var d=destinoPorTexto(l);if(d)hdrDest=d;
+      var f2=fechaDe(l,anio);
+      if(f2){ // traslado suelto con fecha en la misma línea
+        var cu=l.replace(/\s*\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\s*$/,'');
+        var pp=cu.split(/\s+[-–>→]+\s+/);
+        if(pp.length>=2){var esAero=/aeropuerto/i.test(pp[0].replace(/^traslado\s+\w*\s*/i,''));
+          svs.push({tipo:esAero?'in':'out',kind:kind,from:pp[0].replace(/^traslado\s+(regular|privado)?\s*/i,''),to:pp.slice(1).join(' - '),f:f2,raw:l});}
+      }
+      return;
+    }
+    if(/^(excursi|tour|paseo|entrada|city tour|visita|full day|half day)/i.test(low)){
+      var f3=fechaDe(l,anio),t=l.replace(/\s*\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\s*$/,'').trim();
+      svs.push({tipo:'exc',titulo:aplicarGlosario(titleCase(t)),f:f3,raw:l});
+      if(!f3)warns.push('Excursión sin fecha: "'+l+'"');
+      return;
+    }
+  });
+  if(!dest&&hdrDest)dest=hdrDest;
+  return {dest:dest,svs:svs,paxTxt:paxTxt,paxN:paxN,warns:warns,anio:anio};
+}
+
+function lugar(t,dest){
+  var s=t.trim();
+  if(/^aeropuerto\b/i.test(s)){
+    var resto=s.replace(/^aeropuerto\s*/i,'');
+    var d=destinoPorTexto(resto)||dest;
+    if(d&&norm(resto)===norm(d.n)||(d&&d.a.some(function(a){return norm(a)===norm(resto);})))return 'Aeropuerto '+nombreDestino(d);
+    return 'Aeropuerto '+titleCase(resto);
+  }
+  return titleCase(s);
+}
+
+/* ---- Armado del voucher ---- */
+function armarVoucher(txtServ,txtVuelos){
+  var S=parseServicios(txtServ),V=parseVuelos(txtVuelos||''),warns=S.warns.concat(V.warns),dest=S.dest;
+  if(!dest)warns.push('No reconocí el destino: elegilo manualmente o revisá el texto.');
+  var codes=dest?dest.c:[];
+  var items=[];
+  S.svs.forEach(function(s){
+    var it={f:s.f,tipo:s.tipo};
+    if(s.tipo==='exc'){it.titulo=s.titulo;items.push(it);return;}
+    var k=s.kind==='privado'?'Privado':(s.kind==='regular'?'Regular':'');
+    it.titulo=('Traslado '+k).trim()+' – '+(s.tipo==='in'?'IN':'OUT');
+    it.from=lugar(s.from,dest);it.to=lugar(s.to,dest);
+    // vuelo asociado
+    if(s.f&&V.vuelos.length){
+      var cand=V.vuelos.filter(function(v){
+        if(s.tipo==='in'){var dd=v.arrD||v.d,mm=v.arrM||v.m;return dd===s.f.d&&mm===s.f.m&&codes.indexOf(v.to)>=0;}
+        return v.d===s.f.d&&v.m===s.f.m&&codes.indexOf(v.from)>=0;
+      });
+      if(cand.length===1){var v=cand[0];it.vuelo={n:v.aero+v.num,from:v.from,to:v.to,dep:v.dep,arr:v.arr,sig:!!(v.arrD&&v.arrD!==v.d)};}
+      else if(cand.length>1)warns.push('Más de un vuelo coincide con el '+s.f.d+'/'+s.f.m+' ('+s.tipo.toUpperCase()+'): revisá a mano.');
+      else warns.push('No encontré vuelo para el traslado '+s.tipo.toUpperCase()+' del '+s.f.d+'/'+s.f.m+'.');
+    }
+    items.push(it);
+  });
+  items.sort(function(a,b){return (a.f?iso(a.f):0)-(b.f?iso(b.f):0)||(a.tipo==='in'?-1:b.tipo==='in'?1:0);});
+  // pasajeros
+  var pax=V.pax.length?V.pax:(S.paxTxt?[S.paxTxt]:[]);
+  if(S.paxN&&pax.length!==S.paxN)warns.push('La solicitud dice x'+S.paxN+' pero hay '+pax.length+' nombre(s) en el PNR/solicitud.');
+  if(S.paxTxt&&V.pax.length&&!V.pax.some(function(p){return norm(p)===norm(S.paxTxt);}))warns.push('El pasajero de la solicitud ("'+S.paxTxt+'") no figura en el PNR.');
+  var n=S.paxN||pax.length;
+  if(!items.length)warns.push('No detecté ningún servicio.');
+  return {dest:dest,destNombre:dest?nombreDestino(dest):'',pais:dest?paisDe(dest):'',pax:pax,npax:n,items:items,warns:warns};
+}
+var HV_LOGO='img/pass-logo.png',state={ver:'foto',v:null,opLogo:null,hvLogo:null};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function $(id){return document.getElementById(id);}
+function fechaHtml(f){
+  if(!f)return '<div class="dt"><b>--</b><i>---</i><u>&nbsp;</u></div>';
+  return '<div class="dt"><b>'+String(f.d).padStart(2,'0')+'</b><i>'+MESES[f.m-1]+'</i><u>'+f.y+'</u></div>';
+}
+function itemHtml(it){
+  var h='<div class="sv">'+fechaHtml(it.f)+'<div class="tx"><div class="ti" contenteditable>'+esc(it.titulo)+'</div>';
+  if(it.from)h+='<div class="rt"><span contenteditable>'+esc(it.from)+'</span><em>→</em><span contenteditable>'+esc(it.to)+'</span></div>';
+  if(it.vuelo){var v=it.vuelo;h+='<div class="fl"><span contenteditable>'+esc(v.n)+'</span><i>|</i><span contenteditable>'+v.from+' → '+v.to+'</span><i>|</i><span contenteditable>'+v.dep+' – '+v.arr+(v.sig?' (+1)':'')+'</span></div>';}
+  return h+'</div></div>';
+}
+function render(){
+  var v=state.v,st=$('stage');
+  if(!v){st.innerHTML='<p class="hint" style="text-align:center;margin-top:60px">Pegá la solicitud y las líneas de vuelo, y tocá “Generar voucher”.</p>';return;}
+  var dest=v.dest,foto=dest?'tv-fotos/'+dest.f:'',sel=dest?selloDe(dest):null;
+  var hv=state.hvLogo||HV_LOGO,op=state.opLogo;
+  var cls=state.ver==='foto'?'v-foto':'v-ink';
+  var titulo=(v.destNombre||'Destino')+(v.pais?'':'' );
+  var lug='<span contenteditable>'+esc((v.destNombre||'').toUpperCase())+'</span>'+(v.pais?' – <span contenteditable>'+esc(v.pais.toUpperCase())+'</span>':'');
+  var head='<div class="hd"><img class="lg" src="'+esc(hv)+'" alt="Hiperviajes">'+(op?'<img class="lg" src="'+esc(op)+'" alt="Operador">':'<span></span>')+'</div>';
+  var stamp=sel?'<img class="st" src="sellos/'+esc(sel.f)+'" alt="">':'';
+  var hero,intro;
+  if(state.ver==='foto'){
+    hero='<div class="hero" style="'+(foto?'background-image:url(\''+foto+'\')':'')+'"><div class="tt"><small>VOUCHER DE SERVICIOS</small><b>'+esc((v.destNombre||'').toUpperCase())+'</b><span>'+esc(v.pais)+'</span></div>'+stamp+'</div>';
+    intro='';
+  }else{
+    hero='';
+    intro='<div class="ti0"><div><small>VOUCHER DE SERVICIOS</small><b>'+esc((v.destNombre||'').toUpperCase())+'</b><span>'+esc(v.pais)+'</span></div>'+(sel?'<img src="sellos/'+esc(sel.f)+'" alt="">':'')+'</div>';
+  }
+  var pax='<div class="pax"><span class="k">Pasajeros</span><span class="v" contenteditable>'+esc(v.pax.join('  |  '))+'</span><span class="n">'+v.npax+' pax</span></div>';
+  var obs=$('obs').value.trim();
+  var html='<div class="sheet '+cls+'" id="sheet">'+head+hero+intro+'<div class="body">'+pax+v.items.map(itemHtml).join('')+
+    '<div class="obs" contenteditable>'+esc(obs)+'</div></div><div class="ft"><span>Hiperviajes</span><span>Voucher de servicios</span></div></div>';
+  st.innerHTML=html;
+  document.querySelectorAll('.seg button').forEach(function(b){b.classList.toggle('on',b.dataset.v===state.ver);});
+}
+function mostrarWarns(){
+  var w=state.v?state.v.warns:[],ul=$('warns');
+  ul.innerHTML=!state.v?'':(w.length?w.map(function(x){return '<li>⚠ '+esc(x)+'</li>';}).join(''):'<li class="ok">Todo coincide: fechas, vuelos y pasajeros.</li>');
+}
+function generar(){
+  var v=armarVoucher($('serv').value,$('vue').value);
+  var forced=$('dest').value;
+  if(forced){var f=FOTOS.filter(function(x){return x.n===forced;})[0];v.dest=f;v.destNombre=nombreDestino(f);v.pais=paisDe(f);v.warns=v.warns.filter(function(w){return w.indexOf('destino')<0;});}
+  state.v=v;
+  var op=OPERADORES.filter(function(o){return o.id===$('op').value;})[0];
+  if(op&&!state.opUpload)state.opLogo=op.logo;
+  mostrarWarns();render();
+}
+function cargarLogo(inp,key,upKey){
+  var f=inp.files[0];if(!f)return;
+  var r=new FileReader();r.onload=function(){state[key]=r.result;state[upKey]=true;render();};r.readAsDataURL(f);
+}
+function exportarPNG(){
+  var s=$('sheet');if(!s)return;
+  function go(){
+    window.html2canvas(s,{scale:2,useCORS:true,backgroundColor:'#fff'}).then(function(c){
+      var a=document.createElement('a');a.download='voucher-'+(state.v.destNombre||'servicios').replace(/\s+/g,'-').toLowerCase()+'-'+state.ver+'.png';a.href=c.toDataURL('image/png');a.click();
+    }).catch(function(){alert('No se pudo exportar PNG (si abriste el archivo desde tu compu, probá desde la web publicada o usá Imprimir → Guardar como PDF).');});
+  }
+  if(window.html2canvas)return go();
+  var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=go;sc.onerror=function(){alert('No pude cargar la librería de exportación.');};document.head.appendChild(sc);
+}
+function init(){
+  $('op').innerHTML=OPERADORES.map(function(o){return '<option value="'+esc(o.id)+'">'+esc(o.nombre)+'</option>';}).join('')+'<option value="">(sin logo de operador)</option>';
+  $('dest').innerHTML='<option value="">Detectar automáticamente</option>'+FOTOS.map(function(f){return '<option>'+esc(f.n)+'</option>';}).join('');
+  $('go').onclick=generar;
+  $('op').onchange=function(){state.opUpload=false;var o=OPERADORES.filter(function(x){return x.id===$('op').value;})[0];state.opLogo=o?o.logo:null;if(state.v)render();};
+  $('opf').onchange=function(){cargarLogo(this,'opLogo','opUpload');};
+  $('hvf').onchange=function(){cargarLogo(this,'hvLogo','hvUpload');};
+  $('obs').oninput=function(){if(state.v)render();};
+  document.querySelectorAll('.seg button').forEach(function(b){b.onclick=function(){state.ver=b.dataset.v;if(state.v)render();else document.querySelectorAll('.seg button').forEach(function(x){x.classList.toggle('on',x.dataset.v===state.ver);});};});
+  $('prn').onclick=function(){window.print();};
+  $('png').onclick=exportarPNG;
+  if(OPERADORES[0])state.opLogo=OPERADORES[0].logo;
+  render();
+}
+document.addEventListener('DOMContentLoaded',init);
+</script></body></html>
