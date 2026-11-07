@@ -36,6 +36,11 @@ function iconKey(it){
   var t=it.titulo||'';for(var i=0;i<ICMAP.length;i++)if(ICMAP[i][0].test(t))return ICMAP[i][1];return 'brujula';
 }
 function iconSvg(it){return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+IC[iconKey(it)]+'</svg>';}
+function excFoto(t){
+  var T=norm(t),port=fotoDe();
+  for(var k=0;k<EXC_FOTOS.length;k++){var ks=EXC_FOTOS[k].k.split('|');for(var m=0;m<ks.length;m++)if(T.indexOf(norm(ks[m]))>=0){var f=EXC_FOTOS[k].f;return f===port?'':f;}}
+  return '';
+}
 function fotoDe(){var d=state.v&&state.v.dest;return d?(d.p||(d.f?'tv-fotos/'+d.f:'')):'';}
 function $(id){return document.getElementById(id);}
 function fechaHtml(f){
@@ -43,8 +48,8 @@ function fechaHtml(f){
   return '<div class="dt"><b>'+String(f.d).padStart(2,'0')+'</b><i>'+MESES[f.m-1]+'</i><u>'+f.y+'</u></div>';
 }
 function itemHtml(it){
-  var fo=(it.tipo==='exc'&&state.ver==='foto')?fotoDe():'';
-  var h='<div class="sv'+(it.tipo==='exc'?' exc':'')+'">'+(fo?'<div class="strip" style="background-image:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.55) 38%,rgba(255,255,255,0) 75%),url(\''+fo+'\')"></div>':'')+fechaHtml(it.f)+'<div class="tx"><div class="ti"><span class="icw">'+iconSvg(it)+'</span><span contenteditable>'+esc(it.titulo)+'</span></div>';
+  var fo=(it.tipo==='exc'&&state.ver==='foto')?excFoto(it.titulo||''):'';
+  var h='<div class="sv'+(fo?' exc':'')+'">'+(fo?'<div class="strip">'+im(fo,'','')+'<div class="fade"></div></div>':'')+fechaHtml(it.f)+'<div class="tx"><div class="ti"><span class="icw">'+iconSvg(it)+'</span><span contenteditable>'+esc(it.titulo)+'</span></div>';
   if(it.from)h+='<div class="rt"><span contenteditable>'+esc(it.from)+'</span><em>→</em><span contenteditable>'+esc(it.to)+'</span></div>';
   if(it.vuelo){var v=it.vuelo;h+='<div class="fl"><span contenteditable>'+esc(v.n)+'</span><i>|</i><span contenteditable>'+v.from+' → '+v.to+'</span><i>|</i><span contenteditable>'+v.dep+' – '+v.arr+(v.sig?' (+1)':'')+'</span></div>';}
   return h+'</div></div>';
@@ -78,7 +83,6 @@ function render(){
     var PEOPLE='<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="16.5" cy="9" r="2.6"/><path d="M15.5 14.2c3 .1 5.5 2.2 5.5 5.8"/>';
     var PIN='<path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0113 0c0 4.8-6.5 11-6.5 11z" fill="currentColor" stroke="none"/><circle cx="12" cy="10" r="2.4" fill="#fff" stroke="none"/>';
     var TICKET='<g transform="rotate(-35 12 12)"><path d="M2.5 8h19v2.6a1.6 1.6 0 000 2.8V16h-19v-2.6a1.6 1.6 0 000-2.8z"/><path d="M15 8.5v7" stroke-dasharray="1.4 1.6"/></g>';
-    function excFoto(t){var T=norm(t);for(var k=0;k<EXC_FOTOS.length;k++){var ks=EXC_FOTOS[k].k.split('|');for(var m=0;m<ks.length;m++)if(T.indexOf(norm(ks[m]))>=0)return EXC_FOTOS[k].f;}return foto;}
     var rows=v.items.map(function(it,idx){
       var t=n>1?idx/(n-1):1,bg='linear-gradient(135deg,'+mix('#B4E3DA','#2A9384',t)+','+mix('#93D3C7','#17786C',t)+')',fg=t<0.34?'#123f3c':'#fff';
       var fch=it.f?'<b>'+it.f.d+' '+MESES[it.f.m-1]+'</b><span>'+it.f.y+'</span>':'<b>—</b>';
@@ -90,7 +94,7 @@ function render(){
         (sub?'<div class="sub" contenteditable>'+esc(sub)+'</div>':'')+'</div></div>';
       if(it.vuelo){var q=it.vuelo;body+='<div class="fl">'+SV(PLANE,'pl')+'<span contenteditable>'+esc(q.n)+'</span><i>|</i><span contenteditable>'+q.from+' → '+q.to+'</span><i>|</i><b contenteditable>'+q.dep+' – '+q.arr+(q.sig?' (+1)':'')+'</b></div>';}
       var fo=it.tipo==='exc'?excFoto(tit):'';
-      return '<div class="r'+(it.tipo==='exc'?' exc':'')+'">'+(fo?'<div class="strip">'+im(fo,'','')+'<div class="fade"></div></div>':'')+chip+'<div class="vl"></div><div class="bd">'+body+'</div></div>';
+      return '<div class="r'+(fo?' exc':'')+'">'+(fo?'<div class="strip">'+im(fo,'','')+'<div class="fade"></div></div>':'')+chip+'<div class="vl"></div><div class="bd">'+body+'</div></div>';
     }).join('');
     var ob=$('obs').value.trim();
     st.innerHTML='<div class="sheet v-dig2" id="sheet">'+

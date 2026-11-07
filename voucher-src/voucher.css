@@ -66,9 +66,11 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .ic{width:1.15em;height:1.15em;flex:none}
 .icw{display:inline-flex;vertical-align:-.2em;margin-right:.4em;color:var(--sky)}
 .sv{position:relative}
-.sv .strip{position:absolute;right:0;top:3mm;bottom:3mm;width:58%;background-size:cover;background-position:center;border-radius:2.5mm;z-index:0}
+.sv .strip{position:absolute;right:0;top:3mm;bottom:3mm;width:42mm;border-radius:0 2.5mm 2.5mm 0;overflow:hidden;z-index:0}
+.sv .strip img{width:100%;height:100%;object-fit:cover;opacity:.8}
+.sv .strip .fade{position:absolute;inset:0;background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.85) 22%,rgba(255,255,255,.35) 55%,rgba(255,255,255,.05) 100%)}
 .sv>.dt,.sv>.tx{position:relative;z-index:1}
-.sv.exc .ti{max-width:62%}
+.sv.exc .tx{padding-right:46mm}
 .v-dig .r{position:relative}
 .v-dig .r .strip{position:absolute;right:0;top:6px;bottom:6px;width:62%;background-size:cover;background-position:center;border-radius:12px;z-index:0}
 .v-dig .r>.d,.v-dig .r>.x{position:relative;z-index:1}
@@ -169,10 +171,10 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-dig2 .fl i{font-style:normal;color:#8aa9a5}
 .v-dig2 .fl b{font-weight:700}
 .v-dig2 .pl{width:14px;height:14px;color:#12403d}
-.v-dig2 .r.exc .x{max-width:60%}
-.v-dig2 .strip{position:absolute;right:-8px;top:5px;bottom:5px;width:42%;border-radius:8px;overflow:hidden;z-index:0}
-.v-dig2 .strip img{width:100%;height:100%;object-fit:cover;object-position:center}
-.v-dig2 .strip .fade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,1) 0%,rgba(255,255,255,.8) 30%,rgba(255,255,255,.25) 60%,rgba(255,255,255,0) 85%)}
+.v-dig2 .r.exc .bd{padding-right:142px}
+.v-dig2 .strip{position:absolute;right:-8px;top:6px;bottom:6px;width:150px;border-radius:0 8px 8px 0;overflow:hidden;z-index:0}
+.v-dig2 .strip img{width:100%;height:100%;object-fit:cover;object-position:center;opacity:.8}
+.v-dig2 .strip .fade{position:absolute;inset:0;background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.85) 22%,rgba(255,255,255,.35) 55%,rgba(255,255,255,.05) 100%)}
 .v-dig2 .px{margin:12px 24px 0;background:linear-gradient(90deg,#e4f2ef,#ecf6f4);border-radius:12px;padding:12px 18px;display:flex;align-items:center;justify-content:center;gap:14px}
 .v-dig2 .pp{width:26px;height:26px;color:#1f8f82}
 .v-dig2 .px .k{font:600 11px Montserrat,sans-serif;letter-spacing:.32em;color:#1d3f3c}
