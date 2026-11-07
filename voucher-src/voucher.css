@@ -92,7 +92,10 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-ink .pax .k{color:var(--g)}.v-ink .pax .v{color:#0b2f2a}.v-ink .pax .n{color:var(--g2)}
 .v-ink .sv{border-top:.4mm solid var(--g2)}
 .v-ink .sv:first-of-type{border-top:0}
-.v-ink .sv .dt{background:var(--g);color:#fff;border-radius:2.5mm}
+.v-ink .sv .dt{background:#EAF4F2;color:#0A3F38;border:.35mm solid #B9D8D2;border-radius:2.5mm}
+.v-ink .sv .dt b{color:#082F2A}
+.v-ink .sv .dt i{color:#0A3F38;font-weight:600}
+.v-ink .sv .dt u{color:#2E524D;opacity:1}
 .v-ink .sv .ti{color:var(--g)}
 .v-ink .icw{color:var(--g)}
 .v-ink .ic{width:1.35em;height:1.35em}
