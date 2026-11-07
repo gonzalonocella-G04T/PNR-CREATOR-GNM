@@ -764,7 +764,8 @@
 "LIMA"
 ],
 "s": "Lima",
-"f": "lima.jpg"
+"f": "lima.jpg",
+"y": 0.12
 },
 {
 "n": "Cuzco",
@@ -777,7 +778,8 @@
 "CUZCO"
 ],
 "s": "Cuzco",
-"f": "cuzco.jpg"
+"f": "cuzco.jpg",
+"y": 0.2
 },
 {
 "n": "Machu Picchu",

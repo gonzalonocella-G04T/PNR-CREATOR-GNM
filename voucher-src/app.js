@@ -137,7 +137,7 @@ function render(){
     }).join('');
     var ob=$('obs').value.trim();
     st.innerHTML='<div class="sheet v-dig2" id="sheet">'+
-      '<div class="hero">'+(foto?im(foto,'ph',''):'')+(abajo?'':'<div class="veil"></div><div class="logos">'+LOGOS+'</div>')+
+      '<div class="hero">'+(foto?im(foto,'ph','').replace('<img','<img style="object-position:center '+(state.fotoUp||!dest||dest.y==null?40:Math.round(dest.y*100))+'%"'):'')+(abajo?'':'<div class="veil"></div><div class="logos">'+LOGOS+'</div>')+
       '<svg class="wave" viewBox="0 0 610 70" preserveAspectRatio="none"><path d="M0 18C120 52 230 62 340 44S520 4 610 22V70H0Z" fill="#cfeee7" opacity=".85"/><path d="M0 40C140 66 260 70 360 56S520 26 610 40V70H0Z" fill="#f4fbfa"/></svg></div>'+
       (abajo?'<div class="logos-below">'+LOGOS+'</div>':'')+'<div class="mid"><svg class="deco" viewBox="0 0 610 300" preserveAspectRatio="none"><path d="M0 40C60 70 90 140 40 200S0 280 0 300Z" fill="#d7efea" opacity=".7"/><path d="M610 20C540 60 520 120 570 170S610 250 610 300Z" fill="#d7efea" opacity=".7"/></svg>'+
       '<div class="tit"><div class="kick"><i></i><span>VOUCHER DE SERVICIOS</span><i></i></div><b contenteditable style="font-size:'+((v.destNombre||'').length>18?34:(v.destNombre||'').length>14?40:(v.destNombre||'').length>11?44:49)+'px">'+esc((v.destNombre||'').toUpperCase())+'</b>'+
@@ -177,7 +177,7 @@ function medirArriba(ph,hero,posY){
 function ajustarLogos(){
   var sh=$('sheet');if(!sh)return;var hero=sh.querySelector('.hero'),veil=sh.querySelector('.hero .veil'),hvI=sh.querySelector('.hvlogo'),opI=sh.querySelector('.oplogo');
   if(!hero||!veil)return;
-  var mode=state.logoPos,ph=hero.querySelector('img.ph'),posY=state.ver==='dig'?.4:.5;
+  var mode=state.logoPos,ph=hero.querySelector('img.ph'),posY=(state.v&&state.v.dest&&state.v.dest.y!=null&&!state.fotoUp)?state.v.dest.y:(state.ver==='dig'?.4:.5);
   function setHv(f){if(hvI&&!state.hvUpload)hvI.src=f;}
   if(mode==='oscuro'){
     veil.style.background='linear-gradient(180deg,rgba(6,35,33,.74) 0%,rgba(6,35,33,.5) 45%,rgba(6,35,33,0) 92%)';

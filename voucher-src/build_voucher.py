@@ -17,6 +17,7 @@ try: _old=json.loads(fotos[fotos.index('['):fotos.rindex(']')+1])
 except Exception: _old=[]
 for l in lug:
     e={'n':l['n'],'c':l['c'],'a':l['a'],'s':l['s'],'x':1}
+    if 'y' in l: e['y']=l['y']
     if os.path.exists(os.path.join(root,'destinos',l['f'])):
         e['p']='destinos/'+l['f']; e['cr']=cred.get(l['f'],'')
     else:
