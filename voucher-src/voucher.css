@@ -95,6 +95,8 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-ink .sv .dt{background:var(--g);color:#fff;border-radius:2.5mm}
 .v-ink .sv .ti{color:var(--g)}
 .v-ink .icw{color:var(--g)}
+.v-ink .ic{width:1.35em;height:1.35em}
+.v-ink .sv .strip,.v-ink .hero{display:none!important}
 .v-ink .sv .strip{display:none}
 .v-ink .sv .rt em{color:var(--g)}
 .v-ink .sv .fl{background:var(--tint);border:.4mm solid var(--g);border-radius:5mm;color:#0b2f2a}
