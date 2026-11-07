@@ -491,7 +491,7 @@ function armarVoucher(txtServ,txtVuelos){
   if(opTxt)warns.push('Operador detectado: "'+opTxt+'". No tiene logo cargado; se muestra el nombre. Podés subir el logo.');
   return {dest:dest,destNombre:dest?nombreDestino(dest):'',pais:dest?paisDe(dest):'',pax:pax,npax:n,items:items,warns:warns,op:opDet,opTxt:opTxt};
 }
-var REMOTE='https://raw.githubusercontent.com/gonzalonocella-G04T/PNR-CREATOR-GNM/voucher-servicios/';
+var REMOTE='https://raw.githubusercontent.com/gonzalonocella-G04T/PNR-CREATOR-GNM/main/';
 var HV_LOGO='img/hiperviajes-slogan-teal.png',state={logoPos:'auto',ver:'foto',v:null,opLogo:null,hvLogo:null};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function im(path,cls,alt){

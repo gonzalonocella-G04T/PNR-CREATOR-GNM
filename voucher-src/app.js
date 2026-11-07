@@ -1,4 +1,4 @@
-var REMOTE='https://raw.githubusercontent.com/gonzalonocella-G04T/PNR-CREATOR-GNM/voucher-servicios/';
+var REMOTE='https://raw.githubusercontent.com/gonzalonocella-G04T/PNR-CREATOR-GNM/main/';
 var HV_LOGO='img/hiperviajes-slogan-teal.png',state={logoPos:'auto',ver:'foto',v:null,opLogo:null,hvLogo:null};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function im(path,cls,alt){
