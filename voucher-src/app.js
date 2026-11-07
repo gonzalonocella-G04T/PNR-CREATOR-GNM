@@ -86,10 +86,14 @@ function render(){
   if(!v){st.innerHTML='<p class="hint" style="text-align:center;margin-top:60px">Pegá la solicitud y las líneas de vuelo, y tocá “Generar voucher”.</p>';return;}
   var dest=v.dest,foto=dest?(dest.p||(dest.f?'tv-fotos/'+dest.f:'')):'',sel=dest?selloDe(dest):null;
   var hv=state.hvLogo||HV_LOGO,op=state.opLogo;
+  var abajo=state.logoPos==='abajo'||state.autoAbajo;
+  function opHtml(cls){if(op)return opImg(op,cls);if(state.opTxt)return '<span class="optxt '+cls+'" contenteditable>'+esc(state.opTxt)+'</span>';return '';}
+  var hasOp=!!(op||state.opTxt);
+  var LOGOS=im(hv,'lg hvlogo','Hiperviajes')+(hasOp?'<i></i>'+opHtml('lg2 oplogo'):'');
   var cls={foto:'v-foto',ink:'v-ink',dig:'v-dig2'}[state.ver];
   var titulo=(v.destNombre||'Destino')+(v.pais?'':'' );
   var lug='<span contenteditable>'+esc((v.destNombre||'').toUpperCase())+'</span>'+(v.pais?' – <span contenteditable>'+esc(v.pais.toUpperCase())+'</span>':'');
-  var head=((state.ver==='foto'&&!abajo)||state.ver==='ink')?'':'<div class="hd">'+im(hv,'lg','Hiperviajes')+(op?im(op,'lg','Operador'):'<span></span>')+'</div>';
+  var head=((state.ver==='foto'&&!abajo)||state.ver==='ink')?'':'<div class="hd">'+LOGOS+'</div>';
   var stamp=sel?im('sellos/'+sel.f,'st',''):'';
   var hero,intro;
   if(state.ver==='foto'){
@@ -97,15 +101,13 @@ function render(){
     intro='';
   }else{
     hero='';
-    intro='<div class="ihd"><div class="lgs">'+im(state.hvUpload?hv:'img/hiperviajes-slogan-dark.png','lg','Hiperviajes')+(op?'<i></i>'+opImg(op,'lg2'):'')+'</div>'+
+    intro='<div class="ihd"><div class="lgs">'+im(state.hvUpload?hv:'img/hiperviajes-slogan-dark.png','lg','Hiperviajes')+(hasOp?'<i></i>'+opHtml('lg2'):'')+'</div>'+
       '<div class="row"><div class="tt"><small><i></i>VOUCHER DE SERVICIOS<i></i></small><b contenteditable>'+esc(titleCase(v.destNombre||''))+'</b>'+
       '<svg class="sw" viewBox="0 0 300 16" preserveAspectRatio="none"><path d="M6 12C80 3 210 1 294 8" fill="none" stroke="url(#swg)" stroke-width="3.2" stroke-linecap="round"/><defs><linearGradient id="swg" x1="0" x2="1"><stop offset="0" stop-color="#0D6B5E"/><stop offset="1" stop-color="#3FA37C"/></linearGradient></defs></svg>'+
       (v.pais?'<span><svg viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0113 0c0 4.8-6.5 11-6.5 11z" fill="currentColor"/><circle cx="12" cy="10" r="2.4" fill="#fff"/></svg><em contenteditable>'+esc(v.pais.toUpperCase())+'</em></span>':'')+'</div>'+
       (sel?im('sellos/'+sel.f,'st duo',''):'')+'</div>'+
       '<svg class="iw" viewBox="0 0 600 24" preserveAspectRatio="none"><path d="M0 14C100 2 200 2 300 12S500 24 600 8" fill="none" stroke="#0D6B5E" stroke-width="1.2" opacity=".55"/><path d="M0 19C110 9 210 9 310 17S500 26 600 14" fill="none" stroke="#0D6B5E" stroke-width=".8" opacity=".35"/></svg></div>';
   }
-  var abajo=state.logoPos==='abajo'||state.autoAbajo;
-  var LOGOS=im(hv,'lg hvlogo','Hiperviajes')+(op?'<i></i>'+opImg(op,'lg2 oplogo'):'');
   if(state.ver==='dig'){
     var n=v.items.length;
     function mix(c1,c2,t){var a=parseInt(c1.slice(1),16),b=parseInt(c2.slice(1),16);function ch(s){return Math.round(((a>>s)&255)*(1-t)+((b>>s)&255)*t);}return 'rgb('+ch(16)+','+ch(8)+','+ch(0)+')';}
@@ -136,7 +138,7 @@ function render(){
       '<div class="tit"><div class="kick"><i></i><span>VOUCHER DE SERVICIOS</span><i></i></div><b contenteditable style="font-size:'+((v.destNombre||'').length>18?34:(v.destNombre||'').length>14?40:(v.destNombre||'').length>11?44:49)+'px">'+esc((v.destNombre||'').toUpperCase())+'</b>'+
       (v.pais?'<div class="ctry">'+SV(PIN,'pin')+'<span contenteditable>'+esc(v.pais.toUpperCase())+'</span></div>':'')+'</div>'+
       '<div class="card">'+rows+'</div>'+
-      '<div class="px">'+SV(PEOPLE,'pp')+'<span class="k">PASAJEROS</span><i></i><div class="nm" contenteditable>'+v.pax.map(esc).join('<em>|</em>')+'</div></div>'+
+      '<div class="px">'+SV(PEOPLE,'pp')+'<span class="k">PASAJEROS</span><i></i><div class="nm" contenteditable>'+(v.pax.length?v.pax.map(esc).join('<em>|</em>'):'<span class="ph">Nombre y apellido</span>')+'</div>'+(v.npax&&v.npax!==v.pax.length?'<span class="cnt">'+v.npax+' PAX</span>':'')+'</div>'+
       (ob?'<div class="ob" contenteditable>'+esc(ob)+'</div>':'')+'</div>'+
       '<div class="foot"><svg viewBox="0 0 610 90" preserveAspectRatio="none"><path d="M0 22C150 2 300 4 420 16S560 34 610 20V90H0Z" fill="#bfe6de"/><path d="M0 40C140 20 290 22 420 34S560 50 610 36V90H0Z" fill="url(#fg)"/><defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2aa192"/><stop offset="1" stop-color="#14766b"/></linearGradient></defs></svg>'+
       '<div class="vft"><i></i>'+SV(TICKET,'tk')+'<span>VOUCHER DE SERVICIO</span><i></i></div></div>'+
@@ -145,7 +147,7 @@ function render(){
     ajustarLogos();
     return;
   }
-  var pax='<div class="pax"><span class="k">Pasajeros</span><span class="v" contenteditable>'+esc(v.pax.join('  |  '))+'</span><span class="n">'+v.npax+' pax</span></div>';
+  var pax='<div class="pax"><span class="k">Pasajeros</span><span class="v" contenteditable>'+(v.pax.length?esc(v.pax.join('  |  ')):'<span class="ph">Nombre y apellido</span>')+'</span><span class="n">'+v.npax+' pax</span></div>';
   var obs=$('obs').value.trim();
   var html='<div class="sheet '+cls+'" id="sheet">'+head+hero+intro+'<div class="body">'+pax+v.items.map(itemHtml).join('')+
     '<div class="obs" contenteditable>'+esc(obs)+'</div></div><div class="ft"><span>Hiperviajes</span><span>Voucher de servicios</span></div></div>';
@@ -207,8 +209,9 @@ function generar(){
   var forced=$('dest').value;
   if(forced){var f=FOTOS.filter(function(x){return x.n===forced;})[0];v.dest=f;v.destNombre=nombreDestino(f);v.pais=paisDe(f);v.warns=v.warns.filter(function(w){return w.indexOf('destino')<0;});}
   state.v=v;
-  var op=OPERADORES.filter(function(o){return o.id===$('op').value;})[0];
-  if(op&&!state.opUpload)state.opLogo=op.logo;
+  if(v.op&&!state.opUpload){$('op').value=v.op.id;state.opLogo=v.op.logo;state.opTxt='';}
+  else if(v.opTxt&&!state.opUpload){$('op').value='';state.opLogo=null;state.opTxt=v.opTxt;}
+  else{state.opTxt='';var op=OPERADORES.filter(function(o){return o.id===$('op').value;})[0];if(op&&!state.opUpload)state.opLogo=op.logo;}
   mostrarWarns();render();
 }
 function cargarLogo(inp,key,upKey){
@@ -229,7 +232,7 @@ function init(){
   $('op').innerHTML=OPERADORES.map(function(o){return '<option value="'+esc(o.id)+'">'+esc(o.nombre)+'</option>';}).join('')+'<option value="">(sin logo de operador)</option>';
   $('dest').innerHTML='<option value="">Detectar automáticamente</option>'+FOTOS.map(function(f){return '<option>'+esc(f.n)+'</option>';}).join('');
   $('go').onclick=generar;
-  $('op').onchange=function(){state.opUpload=false;var o=OPERADORES.filter(function(x){return x.id===$('op').value;})[0];state.opLogo=o?o.logo:null;if(state.v)render();};
+  $('op').onchange=function(){state.opUpload=false;state.opTxt='';var o=OPERADORES.filter(function(x){return x.id===$('op').value;})[0];state.opLogo=o?o.logo:null;if(state.v)render();};
   $('opf').onchange=function(){cargarLogo(this,'opLogo','opUpload');};
   $('hvf').onchange=function(){cargarLogo(this,'hvLogo','hvUpload');};
   $('obs').oninput=function(){if(state.v)render();};

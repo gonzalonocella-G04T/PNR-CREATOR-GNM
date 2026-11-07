@@ -210,6 +210,10 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-dig2 .vft i{width:56px;height:1px;background:rgba(255,255,255,.75)}
 .v-dig2 .tk{width:22px;height:22px}
 .v-dig2 .cr{position:absolute;right:8px;bottom:3px;font:400 7px Inter,sans-serif;color:rgba(255,255,255,.7)}
+.optxt{display:inline-flex;align-items:center;font:800 7mm/1.05 Montserrat,Inter,sans-serif;color:#12403d;letter-spacing:.01em;height:auto!important;max-width:60mm;text-align:left}
+.v-dig2 .optxt{font-size:26px;max-width:220px}
+.sheet .ph{color:#9bb5b1;font-weight:500;font-style:italic}
+.v-dig2 .cnt{margin-left:8px;font:700 12px Montserrat,sans-serif;letter-spacing:.12em;color:#1f8f82;background:#fff;border-radius:20px;padding:4px 10px}
 @media print{
  @page{size:A4;margin:0}
  html,body{background:#fff}
