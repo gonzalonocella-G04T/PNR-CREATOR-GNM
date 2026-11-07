@@ -32,7 +32,7 @@ function destinoPorTexto(txt){
   });
   return best;
 }
-function nombreDestino(f){var a=f.a.slice().sort(function(x,y){return y.length-x.length;})[0];return titleCase(a||f.n);}
+function nombreDestino(f){if(f.x)return f.n;var a=f.a.slice().sort(function(x,y){return y.length-x.length;})[0];return titleCase(a||f.n);}
 function paisDe(f){return PAISES[f.n]||'';}
 function selloDe(f){
   var s=null,key=f.s||f.n;
@@ -120,6 +120,7 @@ function parseTabla(txt,kindDef){
         last={tipo:tp,kind:kd,rawFrom:fr,rawTo:to,f:f,city:city,hora:hora,ready:true};svs.push(last);return;
       }
     }
+    var dm=destinoPorTexto(t);if(dm&&ciudades.indexOf(dm)<0&&(!ciudades.length||paisDe(dm)===paisDe(ciudades[0])))ciudades.push(dm);
     var ti=aplicarGlosario(titleCase(t)).replace(/^Embarque en (Tren .+?) con Destino (?:al Pueblo de |a la Ciudad de |al |a )(.+)$/,'$1 a $2');
     last={tipo:'exc',titulo:ti,f:f,city:city,det:hora,raw:t};svs.push(last);
   }
@@ -237,7 +238,8 @@ function parseServicios(txt){
   var destTitulo='';
   if(TB){svs=TB.svs;warns=warns.concat(TB.warns);
     if(TB.ciudades.length){dest=TB.ciudades.filter(function(c){return c.p||c.f;})[0]||TB.ciudades[0];
-      if(TB.ciudades.length>1)destTitulo=TB.ciudades.slice(0,3).map(nombreDestino).join(' · ');}
+      var nm=[];TB.ciudades.forEach(function(c){var n=nombreDestino(c);if(nm.indexOf(n)<0)nm.push(n);});
+      if(nm.length>1)destTitulo=nm.length===2?nm.join(' y '):nm.slice(0,-1).join(', ')+' y '+nm[nm.length-1];}
   }
   return {dest:dest,destTitulo:destTitulo,svs:svs.concat(hotelSvs),paxTxt:paxTxt,paxN:paxN,warns:warns,anio:anio,opTxt:opTxt,hoteles:hoteles};
 }
@@ -267,7 +269,9 @@ function armarVoucher(txtServ,txtVuelos){
     if(s.tipo==='hotel'){
       it.titulo=(s.ready?s.hotel:titleCase(s.hotel).replace(/\b(Nh|Hb|Ac|Ws|Gh)\b/g,function(x){return x.toUpperCase();})).replace(/^(Hotel|Hostal|Posada|Pousada|Lodge) (el|la|los|las|del|de)\b/,function(m,a,b){return a+' '+b.charAt(0).toUpperCase()+b.slice(1);});
       var d=s.det.map(function(x){return x.charAt(0).toUpperCase()+x.slice(1).toLowerCase();}).join(' · ');
-      it.det=['Alojamiento'+(d?' · '+d:''),s.noches?(s.noches+(s.noches===1?' noche':' noches')):'',s.co?'salida '+s.co.d+' '+MESES[s.co.m-1]:''].filter(Boolean).join(' · ');
+      it.co=s.co;
+      var rango=(s.f&&s.co)?'del '+s.f.d+' '+MESES[s.f.m-1]+' al '+s.co.d+' '+MESES[s.co.m-1]:(s.co?'salida '+s.co.d+' '+MESES[s.co.m-1]:'');
+      it.det=['Alojamiento',s.noches?(s.noches+(s.noches===1?' noche':' noches')):'',rango,d].filter(Boolean).join(' · ');
       items.push(it);return;
     }
     var k=s.kind==='privado'?'Privado':(s.kind==='regular'?'Regular':'');
@@ -294,7 +298,7 @@ function armarVoucher(txtServ,txtVuelos){
   var n=S.paxN||pax.length;
   if(!items.length)warns.push('No detecté ningún servicio.');
     // operador mencionado en el texto
-  var opDet=null,T=norm(txtServ);
+  var opDet=null,T=norm(txtServ+'\n'+(txtVuelos||''));
   OPERADORES.forEach(function(o){if(opDet)return;(o.k||[]).forEach(function(k){if(!opDet&&(' '+T.replace(/[^A-Z0-9]+/g,' ')+' ').indexOf(' '+norm(k)+' ')>=0)opDet=o;});});
   var opTxt=opDet?'':(S.opTxt||'');
   if(!pax.length&&n)warns.push('La solicitud no trae nombres de pasajeros: completalos en el voucher ('+n+' pax).');

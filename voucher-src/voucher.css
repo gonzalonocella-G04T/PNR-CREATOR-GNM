@@ -217,6 +217,9 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 #items .itm{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;margin-top:6px}
 #items .itm label{margin:0;font-weight:500;color:var(--ink)}
 #items .itm input{margin-top:2px;accent-color:var(--sky)}
+.sv .dt s{display:block;text-decoration:none;font:600 2.7mm Inter,sans-serif;letter-spacing:.02em;margin-top:.4mm}
+.v-dig2 .chip em{display:block;font:600 11.5px/1.2 Montserrat,sans-serif;font-style:normal;opacity:.95}
+.v-dig2 .chip{min-height:62px;height:auto;padding:6px 0}
 @media print{
  @page{size:A4;margin:0}
  html,body{background:#fff}

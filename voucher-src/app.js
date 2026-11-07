@@ -74,13 +74,13 @@ function excFoto(t){
 }
 function fotoDe(){if(state.fotoUp)return state.fotoUp;var d=state.v&&state.v.dest;return d?(d.p||(d.f?'tv-fotos/'+d.f:'')):'';}
 function $(id){return document.getElementById(id);}
-function fechaHtml(f){
+function fechaHtml(f,co){
   if(!f)return '<div class="dt"><b>--</b><i>---</i><u>&nbsp;</u></div>';
-  return '<div class="dt"><b>'+String(f.d).padStart(2,'0')+'</b><i>'+MESES[f.m-1]+'</i><u>'+f.y+'</u></div>';
+  return '<div class="dt'+(co?' rng':'')+'"><b>'+String(f.d).padStart(2,'0')+'</b><i>'+MESES[f.m-1]+'</i>'+(co?'<s>al '+co.d+' '+MESES[co.m-1]+'</s>':'')+'<u>'+f.y+'</u></div>';
 }
 function itemHtml(it){
   var fo=(it.tipo==='exc'&&state.ver==='foto')?excFoto(it.titulo||''):'';
-  var h='<div class="sv'+(fo?' exc':'')+'">'+(fo?'<div class="strip">'+im(fo,'','')+'<div class="fade"></div></div>':'')+fechaHtml(it.f)+'<div class="tx"><div class="ti"><span class="icw">'+iconSvg(it)+'</span><span contenteditable>'+esc(it.titulo)+'</span></div>';
+  var h='<div class="sv'+(fo?' exc':'')+'">'+(fo?'<div class="strip">'+im(fo,'','')+'<div class="fade"></div></div>':'')+fechaHtml(it.f,it.tipo==='hotel'?it.co:null)+'<div class="tx"><div class="ti"><span class="icw">'+iconSvg(it)+'</span><span contenteditable>'+esc(it.titulo)+'</span></div>';
   if(it.det)h+='<div class="rt" contenteditable>'+esc(it.det)+'</div>';
   if(it.from)h+='<div class="rt"><span contenteditable>'+esc(it.from)+'</span><em>→</em><span contenteditable>'+esc(it.to)+'</span></div>';
   if(it.vuelo){var v=it.vuelo;h+='<div class="fl"><span contenteditable>'+esc(v.n)+'</span><i>|</i><span contenteditable>'+v.from+' → '+v.to+'</span><i>|</i><span contenteditable>'+v.dep+' – '+v.arr+(v.sig?' (+1)':'')+'</span></div>';}
@@ -124,7 +124,7 @@ function render(){
     var TICKET='<g transform="rotate(-35 12 12)"><path d="M2.5 8h19v2.6a1.6 1.6 0 000 2.8V16h-19v-2.6a1.6 1.6 0 000-2.8z"/><path d="M15 8.5v7" stroke-dasharray="1.4 1.6"/></g>';
     var rows=v.items.map(function(it,idx){
       var bg='linear-gradient(135deg,#1F8A7C,#0F5F55)',fg='#fff';
-      var fch=it.f?'<b>'+it.f.d+' '+MESES[it.f.m-1]+'</b><span>'+it.f.y+'</span>':'<b>—</b>';
+      var fch=it.f?('<b>'+it.f.d+' '+MESES[it.f.m-1]+'</b>'+(it.tipo==='hotel'&&it.co?'<em>al '+it.co.d+' '+MESES[it.co.m-1]+'</em>':'')+'<span>'+it.f.y+'</span>'):'<b>—</b>';
       var chip='<div class="chip" style="background:'+bg+';color:'+fg+'">'+SV(CAL,'cal')+'<div>'+fch+'</div></div>';
       var tit=it.titulo||'',main=tit,sub='';
       if(it.tipo==='exc'){var ps=tit.split(/\s+\+\s+/);main=ps[0];sub=ps.length>1?'+ '+ps.slice(1).join(' + '):'';}
@@ -223,7 +223,7 @@ function generar(){
   if(v.op&&!state.opUpload){$('op').value=v.op.id;state.opLogo=v.op.logo;state.opTxt='';}
   else if(v.opTxt&&!state.opUpload){$('op').value='';state.opLogo=null;state.opTxt=v.opTxt;}
   else{state.opTxt='';var op=OPERADORES.filter(function(o){return o.id===$('op').value;})[0];if(op&&!state.opUpload)state.opLogo=op.logo;}
-  mostrarWarns();listaItems();render();
+  mostrarWarns();listaItems();$('dtit').value=v.destNombre||'';render();
 }
 function cargarLogo(inp,key,upKey){
   var f=inp.files[0];if(!f)return;
@@ -253,6 +253,7 @@ function init(){
   $('go').onclick=generar;
   $('op').onchange=function(){state.opUpload=false;state.opTxt='';var o=OPERADORES.filter(function(x){return x.id===$('op').value;})[0];state.opLogo=o?o.logo:null;if(state.v)render();};
   $('opf').onchange=function(){cargarLogo(this,'opLogo','opUpload');};
+  $('dtit').oninput=function(){if(state.v){state.v.destNombre=this.value;render();}};
   $('fotof').onchange=function(){cargarLogo(this,'fotoUp','fotoUpOk');};
   $('hvf').onchange=function(){cargarLogo(this,'hvLogo','hvUpload');};
   $('obs').oninput=function(){if(state.v)render();};
