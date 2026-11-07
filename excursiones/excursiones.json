@@ -1,0 +1,26 @@
+[
+ {
+  "k": "perito moreno|glaciar moreno|minitrekking|big ice",
+  "f": "excursiones/perito-moreno.jpg"
+ },
+ {
+  "k": "machu picchu|machupicchu|machu pichu",
+  "f": "destinos/machu-picchu.jpg"
+ },
+ {
+  "k": "torres del paine",
+  "f": "destinos/torres-del-paine.jpg"
+ },
+ {
+  "k": "osorno|saltos del petrohue|petrohu",
+  "f": "destinos/volcan-osorno.jpg"
+ },
+ {
+  "k": "moai|rano raraku|tongariki",
+  "f": "destinos/isla-de-pascua.jpg"
+ },
+ {
+  "k": "valle de la luna|atacama",
+  "f": "destinos/atacama.jpg"
+ }
+]

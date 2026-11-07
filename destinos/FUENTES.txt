@@ -21,3 +21,4 @@ puerto-montt.jpg	https://images.unsplash.com/photo-1705329683254-3536b08fa06e
 los-roques.jpg	https://images.unsplash.com/photo-1637407411845-fbfaa0d08923
 varadero.jpg	https://images.unsplash.com/photo-1596163513335-ee2efc4a6885
 el-salvador.jpg	https://images.unsplash.com/photo-1549948711-78d6b434d59b
+el-calafate.jpg	https://images.unsplash.com/photo-1590246646417-b0199da13a3d

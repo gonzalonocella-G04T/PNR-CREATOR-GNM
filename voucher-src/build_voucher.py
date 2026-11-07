@@ -26,12 +26,13 @@ for l in lug:
     nuevos.append(e)
 fotos=fotos.replace('var FOTOS=','var FOTOS_OLD=')+'\nvar FOTOS_NEW='+json.dumps(nuevos,ensure_ascii=False,separators=(',',':'))+';\nvar FOTOS=FOTOS_NEW.concat(FOTOS_OLD);\n'
 paises.update({}) 
-data=fotos+'\nvar SELLOS='+json.dumps(sellos,ensure_ascii=False,separators=(',',':'))+';\nvar OPERADORES='+json.dumps(ops,ensure_ascii=False)+';\nvar PAISES='+json.dumps(pmap,ensure_ascii=False)+';\n'
+exc=json.load(open(os.path.join(root,'excursiones','excursiones.json'),encoding='utf-8')) if os.path.exists(os.path.join(root,'excursiones','excursiones.json')) else []
+data='var EXC_FOTOS='+json.dumps(exc,ensure_ascii=False)+';\n'+fotos+'\nvar SELLOS='+json.dumps(sellos,ensure_ascii=False,separators=(',',':'))+';\nvar OPERADORES='+json.dumps(ops,ensure_ascii=False)+';\nvar PAISES='+json.dumps(pmap,ensure_ascii=False)+';\n'
 js=data+rd(os.path.join(here,'parse.js'))+rd(os.path.join(here,'app.js'))
 assert '</script' not in js.lower()
 html=('<!doctype html>\n<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
  '<title>Voucher de servicios · Hiperviajes</title><link rel="icon" href="tv-fav/favicon.ico?v=2" sizes="any">'
  '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
- '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap">'
+ '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;1,500&family=Oswald:wght@500;600;700&display=swap">'
  '<style>'+rd(os.path.join(here,'voucher.css'))+'</style></head><body>'+rd(os.path.join(here,'body.html'))+'<script>'+js+'</script></body></html>\n')
 open(os.path.join(root,'voucher.html'),'w',encoding='utf-8').write(html); print('voucher.html',len(html))

@@ -1,5 +1,5 @@
 var REMOTE='https://raw.githubusercontent.com/gonzalonocella-G04T/PNR-CREATOR-GNM/voucher-servicios/';
-var HV_LOGO='img/hiperviajes-slogan.png',state={ver:'foto',v:null,opLogo:null,hvLogo:null};
+var HV_LOGO='img/hiperviajes-slogan-teal.png',state={ver:'foto',v:null,opLogo:null,hvLogo:null};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function im(path,cls,alt){
   var rel=/^(data:|blob:|https?:)/.test(path);
@@ -54,7 +54,7 @@ function render(){
   if(!v){st.innerHTML='<p class="hint" style="text-align:center;margin-top:60px">Pegá la solicitud y las líneas de vuelo, y tocá “Generar voucher”.</p>';return;}
   var dest=v.dest,foto=dest?(dest.p||(dest.f?'tv-fotos/'+dest.f:'')):'',sel=dest?selloDe(dest):null;
   var hv=state.hvLogo||HV_LOGO,op=state.opLogo;
-  var cls={foto:'v-foto',ink:'v-ink',dig:'v-dig'}[state.ver];
+  var cls={foto:'v-foto',ink:'v-ink',dig:'v-dig2'}[state.ver];
   var titulo=(v.destNombre||'Destino')+(v.pais?'':'' );
   var lug='<span contenteditable>'+esc((v.destNombre||'').toUpperCase())+'</span>'+(v.pais?' – <span contenteditable>'+esc(v.pais.toUpperCase())+'</span>':'');
   var head=state.ver==='foto'?'':'<div class="hd">'+im(hv,'lg','Hiperviajes')+(op?im(op,'lg','Operador'):'<span></span>')+'</div>';
@@ -68,23 +68,41 @@ function render(){
     intro='<div class="band"><div class="tt"><small>VOUCHER DE SERVICIOS</small><b>'+esc((v.destNombre||'').toUpperCase())+'</b><span>'+esc(v.pais)+'</span></div>'+(sel?im('sellos/'+sel.f,'st',''):'')+'</div>';
   }
   if(state.ver==='dig'){
-    var ito=v.items.map(function(it){
-      var f=it.f?'<b>'+String(it.f.d).padStart(2,'0')+' '+MESES[it.f.m-1]+'</b><i>'+it.f.y+'</i>':'<b>--</b>';
-      var ic=it.tipo==='exc'?'⛰':'🚐';
-      var fo=(it.tipo==='exc')?fotoDe():'';
-      var r='<div class="r'+(it.tipo==='exc'?' exc':'')+'">'+(fo?'<div class="strip" style="background-image:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.5) 40%,rgba(255,255,255,0) 80%),url(\''+fo+'\')"></div>':'')+'<div class="d">'+f+'</div><div class="x"><div class="t"><span class="icw">'+iconSvg(it)+'</span><span contenteditable>'+esc(it.titulo)+'</span></div>';
-      if(it.from)r+='<div class="o"><span contenteditable>'+esc(it.from)+'</span> <em>→</em> <span contenteditable>'+esc(it.to)+'</span></div>';
-      if(it.vuelo){var q=it.vuelo;r+='<div class="fl">✈ <span contenteditable>'+esc(q.n)+'</span> | <span contenteditable>'+q.from+' → '+q.to+'</span> | <b contenteditable>'+q.dep+' – '+q.arr+(q.sig?' (+1)':'')+'</b></div>';}
-      return r+'</div></div>';
+    var n=v.items.length;
+    function mix(c1,c2,t){var a=parseInt(c1.slice(1),16),b=parseInt(c2.slice(1),16);function ch(s){return Math.round(((a>>s)&255)*(1-t)+((b>>s)&255)*t);}return 'rgb('+ch(16)+','+ch(8)+','+ch(0)+')';}
+    var SV=function(d,c){return '<svg class="'+(c||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';};
+    var CAL='<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14.5h.01M12 14.5h.01M16 14.5h.01" stroke-width="2.6"/>';
+    var PLANE='<path d="M10.5 13.5L4 11l1.2-1.2 7.3.9 4.2-4.2c.8-.8 2.1-.8 2.6-.3.5.5.5 1.8-.3 2.6l-4.2 4.2.9 7.3L14.5 21l-2.5-6.5-3.2 3.2.3 2.3-1 1-1.4-3-3-1.4 1-1 2.3.3z" fill="currentColor" stroke="none"/>';
+    var PEOPLE='<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="16.5" cy="9" r="2.6"/><path d="M15.5 14.2c3 .1 5.5 2.2 5.5 5.8"/>';
+    var PIN='<path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0113 0c0 4.8-6.5 11-6.5 11z" fill="currentColor" stroke="none"/><circle cx="12" cy="10" r="2.4" fill="#fff" stroke="none"/>';
+    var TICKET='<g transform="rotate(-35 12 12)"><path d="M2.5 8h19v2.6a1.6 1.6 0 000 2.8V16h-19v-2.6a1.6 1.6 0 000-2.8z"/><path d="M15 8.5v7" stroke-dasharray="1.4 1.6"/></g>';
+    function excFoto(t){var T=norm(t);for(var k=0;k<EXC_FOTOS.length;k++){var ks=EXC_FOTOS[k].k.split('|');for(var m=0;m<ks.length;m++)if(T.indexOf(norm(ks[m]))>=0)return EXC_FOTOS[k].f;}return foto;}
+    var rows=v.items.map(function(it,idx){
+      var t=n>1?idx/(n-1):1,bg='linear-gradient(135deg,'+mix('#B4E3DA','#2A9384',t)+','+mix('#93D3C7','#17786C',t)+')',fg=t<0.34?'#123f3c':'#fff';
+      var fch=it.f?'<b>'+it.f.d+' '+MESES[it.f.m-1]+'</b><span>'+it.f.y+'</span>':'<b>—</b>';
+      var chip='<div class="chip" style="background:'+bg+';color:'+fg+'">'+SV(CAL,'cal')+'<div>'+fch+'</div></div>';
+      var tit=it.titulo||'',main=tit,sub='';
+      if(it.tipo==='exc'){var ps=tit.split(/\s+\+\s+/);main=ps[0];sub=ps.length>1?'+ '+ps.slice(1).join(' + '):'';}
+      var body='<div class="tp">'+SV(IC[iconKey(it)],'ico')+'<div class="x"><div class="t" contenteditable>'+esc(main)+'</div>'+
+        (it.from?'<div class="o"><span contenteditable>'+esc(it.from)+'</span><em>→</em><span contenteditable>'+esc(it.to)+'</span></div>':'')+
+        (sub?'<div class="sub" contenteditable>'+esc(sub)+'</div>':'')+'</div></div>';
+      if(it.vuelo){var q=it.vuelo;body+='<div class="fl">'+SV(PLANE,'pl')+'<span contenteditable>'+esc(q.n)+'</span><i>|</i><span contenteditable>'+q.from+' → '+q.to+'</span><i>|</i><b contenteditable>'+q.dep+' – '+q.arr+(q.sig?' (+1)':'')+'</b></div>';}
+      var fo=it.tipo==='exc'?excFoto(tit):'';
+      return '<div class="r'+(it.tipo==='exc'?' exc':'')+'">'+(fo?'<div class="strip">'+im(fo,'','')+'<div class="fade"></div></div>':'')+chip+'<div class="vl"></div><div class="bd">'+body+'</div></div>';
     }).join('');
     var ob=$('obs').value.trim();
-    st.innerHTML='<div class="sheet v-dig" id="sheet"><div class="hero">'+(foto?im(foto,'ph',''):'')+'<div class="veil"></div><div class="logos">'+im(hv,'lg','Hiperviajes')+(op?'<i></i>'+opImg(op,'lg2'):'')+'</div>'+
-      '<svg class="wave" viewBox="0 0 540 70" preserveAspectRatio="none"><path d="M0 40C90 10 170 5 270 28S450 62 540 20V70H0Z" fill="#fff"/><path d="M0 52C100 28 200 24 300 42S460 66 540 36V70H0Z" fill="#EAF7F4" opacity=".9"/></svg></div>'+
-      '<div class="tit"><small>VOUCHER DE SERVICIOS</small><b contenteditable style="font-size:'+((v.destNombre||'').length>16?40:(v.destNombre||'').length>11?48:58)+'px">'+esc((v.destNombre||'').toUpperCase())+'</b><span contenteditable>'+esc(v.pais.toUpperCase())+'</span></div>'+
-      '<div class="card">'+ito+'</div>'+
-      '<div class="px"><span>PASAJEROS</span><div contenteditable>'+esc(v.pax.join('   |   '))+'</div></div>'+
-      (ob?'<div class="ob" contenteditable>'+esc(ob)+'</div>':'')+
-      '<div class="fo"><span>VOUCHER DE SERVICIO</span>'+(dest&&dest.cr?'<small>Foto: '+esc(dest.cr)+'</small>':'')+'</div></div>';
+    st.innerHTML='<div class="sheet v-dig2" id="sheet">'+
+      '<div class="hero">'+(foto?im(foto,'ph',''):'')+'<div class="veil"></div><div class="logos">'+im(hv,'lg','Hiperviajes')+(op?'<i></i>'+opImg(op,'lg2'):'')+'</div>'+
+      '<svg class="wave" viewBox="0 0 610 70" preserveAspectRatio="none"><path d="M0 18C120 52 230 62 340 44S520 4 610 22V70H0Z" fill="#cfeee7" opacity=".85"/><path d="M0 40C140 66 260 70 360 56S520 26 610 40V70H0Z" fill="#f4fbfa"/></svg></div>'+
+      '<div class="mid"><svg class="deco" viewBox="0 0 610 300" preserveAspectRatio="none"><path d="M0 40C60 70 90 140 40 200S0 280 0 300Z" fill="#d7efea" opacity=".7"/><path d="M610 20C540 60 520 120 570 170S610 250 610 300Z" fill="#d7efea" opacity=".7"/></svg>'+
+      '<div class="tit"><div class="kick"><i></i><span>VOUCHER DE SERVICIOS</span><i></i></div><b contenteditable style="font-size:'+((v.destNombre||'').length>18?34:(v.destNombre||'').length>14?40:(v.destNombre||'').length>11?44:49)+'px">'+esc((v.destNombre||'').toUpperCase())+'</b>'+
+      (v.pais?'<div class="ctry">'+SV(PIN,'pin')+'<span contenteditable>'+esc(v.pais.toUpperCase())+'</span></div>':'')+'</div>'+
+      '<div class="card">'+rows+'</div>'+
+      '<div class="px">'+SV(PEOPLE,'pp')+'<span class="k">PASAJEROS</span><i></i><div class="nm" contenteditable>'+v.pax.map(esc).join('<em>|</em>')+'</div></div>'+
+      (ob?'<div class="ob" contenteditable>'+esc(ob)+'</div>':'')+'</div>'+
+      '<div class="foot"><svg viewBox="0 0 610 90" preserveAspectRatio="none"><path d="M0 22C150 2 300 4 420 16S560 34 610 20V90H0Z" fill="#bfe6de"/><path d="M0 40C140 20 290 22 420 34S560 50 610 36V90H0Z" fill="url(#fg)"/><defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2aa192"/><stop offset="1" stop-color="#14766b"/></linearGradient></defs></svg>'+
+      '<div class="vft"><i></i>'+SV(TICKET,'tk')+'<span>VOUCHER DE SERVICIO</span><i></i></div></div>'+
+      (dest&&dest.cr?'<div class="cr">Foto: '+esc(dest.cr)+'</div>':'')+'</div>';
     document.querySelectorAll('.seg button').forEach(function(b){b.classList.toggle('on',b.dataset.v===state.ver);});
     return;
   }
