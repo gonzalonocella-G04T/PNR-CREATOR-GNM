@@ -29,13 +29,13 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .sheet [contenteditable]:focus{background:rgba(25,192,170,.18)}
 /* ---------- versión con fotos ---------- */
 .v-foto .hd,.v-ink .hd{display:flex;align-items:center;justify-content:center;gap:7mm;padding:6mm 12mm 5mm}
-.hd .lg,.hd .lg2{height:14mm;width:auto;max-width:56mm;object-fit:contain}
+.hd .lg,.hd .lg2{height:16mm;width:auto;max-width:56mm;object-fit:contain}
 .hd .dv{width:.35mm;height:11mm;background:#b9d8d3;flex:none}
 .v-foto .hero{position:relative;height:84mm;background:#9bd3cb center/cover no-repeat}
 .v-foto .hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,75,79,0) 42%,rgba(23,75,79,.78))}
 .veil{position:absolute;left:0;right:0;top:0;height:46%;background:linear-gradient(180deg,#fff 0%,rgba(255,255,255,.92) 32%,rgba(255,255,255,.45) 68%,rgba(255,255,255,0) 100%);z-index:1}
 .v-foto .logos{position:absolute;z-index:3;top:6mm;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:7mm}
-.v-foto .logos .lg,.v-foto .logos .lg2{height:14mm;width:auto;max-width:56mm;object-fit:contain}
+.v-foto .logos .lg,.v-foto .logos .lg2{height:17mm;width:auto;max-width:56mm;object-fit:contain}
 .v-foto .logos i{width:.35mm;height:11mm;background:#9fc9c3}
 .v-foto .hero .tt{position:absolute;left:12mm;bottom:7mm;right:50mm;color:#fff;z-index:2}
 .v-foto .hero .tt small{display:block;font:600 3.3mm Oswald,sans-serif;letter-spacing:.35em;opacity:.9}
@@ -132,13 +132,14 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-dig .fo small{display:block;font:400 10px Inter,sans-serif;opacity:.85;margin-top:6px;letter-spacing:.03em}
 /* ---------- versión celular v2 (réplica del diseño de referencia) ---------- */
 .v-dig2{width:610px;min-height:0;font-family:Montserrat,Inter,sans-serif;color:#12403d;background:linear-gradient(180deg,#f4fbfa 0,#eef8f6 60%,#e9f6f3 100%)}
-.v-dig2 .hero{position:relative;height:232px;background:#bfe3ef;overflow:hidden}
+.v-dig2 .hero{position:relative;height:250px;background:#bfe3ef;overflow:hidden}
 .v-dig2 .hero .ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 40%}
 .v-dig2 .veil{position:absolute;left:0;right:0;top:0;height:66%;background:linear-gradient(180deg,rgba(255,255,255,.97) 0%,rgba(255,255,255,.88) 42%,rgba(255,255,255,.35) 78%,rgba(255,255,255,0) 100%);z-index:1}
 .v-dig2 .logos{position:absolute;z-index:2;top:10px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:22px}
-.v-dig2 .logos .lg{height:66px;width:auto}
-.v-dig2 .logos .lg2{height:52px;width:auto;max-width:170px;object-fit:contain}
-.v-dig2 .logos i{width:1px;height:48px;background:#8fc6bd}
+.v-dig2 .logos .lg,.v-dig2 .logos-below .lg{height:82px;width:auto}
+.v-dig2 .logos .lg2,.v-dig2 .logos-below .lg2{height:64px;width:auto;max-width:210px;object-fit:contain}
+.v-dig2 .logos i,.v-dig2 .logos-below i{width:1px;height:56px;background:#8fc6bd}
+.v-dig2 .logos-below{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:24px;margin:-8px 0 12px}
 .v-dig2 .wave{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:52px;z-index:2}
 .v-dig2 .mid{position:relative;padding:0 0 12px}
 .v-dig2 .deco{position:absolute;left:0;top:-10px;width:100%;height:300px;z-index:0}

@@ -1,5 +1,5 @@
 var REMOTE='https://raw.githubusercontent.com/gonzalonocella-G04T/PNR-CREATOR-GNM/voucher-servicios/';
-var HV_LOGO='img/hiperviajes-slogan-teal.png',state={ver:'foto',v:null,opLogo:null,hvLogo:null};
+var HV_LOGO='img/hiperviajes-slogan-teal.png',state={logoPos:'auto',ver:'foto',v:null,opLogo:null,hvLogo:null};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function im(path,cls,alt){
   var rel=/^(data:|blob:|https?:)/.test(path);
@@ -57,7 +57,7 @@ function render(){
   var cls={foto:'v-foto',ink:'v-ink',dig:'v-dig2'}[state.ver];
   var titulo=(v.destNombre||'Destino')+(v.pais?'':'' );
   var lug='<span contenteditable>'+esc((v.destNombre||'').toUpperCase())+'</span>'+(v.pais?' – <span contenteditable>'+esc(v.pais.toUpperCase())+'</span>':'');
-  var head=state.ver==='foto'?'':'<div class="hd">'+im(hv,'lg','Hiperviajes')+(op?im(op,'lg','Operador'):'<span></span>')+'</div>';
+  var head=(state.ver==='foto'&&!abajo)?'':'<div class="hd">'+im(hv,'lg','Hiperviajes')+(op?im(op,'lg','Operador'):'<span></span>')+'</div>';
   var stamp=sel?im('sellos/'+sel.f,'st',''):'';
   var hero,intro;
   if(state.ver==='foto'){
@@ -67,6 +67,8 @@ function render(){
     hero='';
     intro='<div class="band"><div class="tt"><small>VOUCHER DE SERVICIOS</small><b>'+esc((v.destNombre||'').toUpperCase())+'</b><span>'+esc(v.pais)+'</span></div>'+(sel?im('sellos/'+sel.f,'st',''):'')+'</div>';
   }
+  var abajo=state.logoPos==='abajo'||state.autoAbajo;
+  var LOGOS=im(hv,'lg hvlogo','Hiperviajes')+(op?'<i></i>'+opImg(op,'lg2 oplogo'):'');
   if(state.ver==='dig'){
     var n=v.items.length;
     function mix(c1,c2,t){var a=parseInt(c1.slice(1),16),b=parseInt(c2.slice(1),16);function ch(s){return Math.round(((a>>s)&255)*(1-t)+((b>>s)&255)*t);}return 'rgb('+ch(16)+','+ch(8)+','+ch(0)+')';}
@@ -92,9 +94,9 @@ function render(){
     }).join('');
     var ob=$('obs').value.trim();
     st.innerHTML='<div class="sheet v-dig2" id="sheet">'+
-      '<div class="hero">'+(foto?im(foto,'ph',''):'')+'<div class="veil"></div><div class="logos">'+im(hv,'lg','Hiperviajes')+(op?'<i></i>'+opImg(op,'lg2'):'')+'</div>'+
+      '<div class="hero">'+(foto?im(foto,'ph',''):'')+(abajo?'':'<div class="veil"></div><div class="logos">'+LOGOS+'</div>')+
       '<svg class="wave" viewBox="0 0 610 70" preserveAspectRatio="none"><path d="M0 18C120 52 230 62 340 44S520 4 610 22V70H0Z" fill="#cfeee7" opacity=".85"/><path d="M0 40C140 66 260 70 360 56S520 26 610 40V70H0Z" fill="#f4fbfa"/></svg></div>'+
-      '<div class="mid"><svg class="deco" viewBox="0 0 610 300" preserveAspectRatio="none"><path d="M0 40C60 70 90 140 40 200S0 280 0 300Z" fill="#d7efea" opacity=".7"/><path d="M610 20C540 60 520 120 570 170S610 250 610 300Z" fill="#d7efea" opacity=".7"/></svg>'+
+      (abajo?'<div class="logos-below">'+LOGOS+'</div>':'')+'<div class="mid"><svg class="deco" viewBox="0 0 610 300" preserveAspectRatio="none"><path d="M0 40C60 70 90 140 40 200S0 280 0 300Z" fill="#d7efea" opacity=".7"/><path d="M610 20C540 60 520 120 570 170S610 250 610 300Z" fill="#d7efea" opacity=".7"/></svg>'+
       '<div class="tit"><div class="kick"><i></i><span>VOUCHER DE SERVICIOS</span><i></i></div><b contenteditable style="font-size:'+((v.destNombre||'').length>18?34:(v.destNombre||'').length>14?40:(v.destNombre||'').length>11?44:49)+'px">'+esc((v.destNombre||'').toUpperCase())+'</b>'+
       (v.pais?'<div class="ctry">'+SV(PIN,'pin')+'<span contenteditable>'+esc(v.pais.toUpperCase())+'</span></div>':'')+'</div>'+
       '<div class="card">'+rows+'</div>'+
@@ -104,6 +106,7 @@ function render(){
       '<div class="vft"><i></i>'+SV(TICKET,'tk')+'<span>VOUCHER DE SERVICIO</span><i></i></div></div>'+
       (dest&&dest.cr?'<div class="cr">Foto: '+esc(dest.cr)+'</div>':'')+'</div>';
     document.querySelectorAll('.seg button').forEach(function(b){b.classList.toggle('on',b.dataset.v===state.ver);});
+    ajustarLogos();
     return;
   }
   var pax='<div class="pax"><span class="k">Pasajeros</span><span class="v" contenteditable>'+esc(v.pax.join('  |  '))+'</span><span class="n">'+v.npax+' pax</span></div>';
@@ -111,13 +114,51 @@ function render(){
   var html='<div class="sheet '+cls+'" id="sheet">'+head+hero+intro+'<div class="body">'+pax+v.items.map(itemHtml).join('')+
     '<div class="obs" contenteditable>'+esc(obs)+'</div></div><div class="ft"><span>Hiperviajes</span><span>Voucher de servicios</span></div></div>';
   st.innerHTML=html;
+  ajustarLogos();
   document.querySelectorAll('.seg button').forEach(function(b){b.classList.toggle('on',b.dataset.v===state.ver);});
+}
+/* ---- Integración automática de logos según la foto ---- */
+function tintWhite(img,cb){
+  try{var c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;var x=c.getContext('2d');x.drawImage(img,0,0);x.globalCompositeOperation='source-in';x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);cb(c.toDataURL('image/png'));}catch(e){cb(null);}
+}
+function medirArriba(ph,hero,posY){
+  var W=hero.clientWidth,H=hero.clientHeight,w=ph.naturalWidth,h=ph.naturalHeight,k=Math.max(W/w,H/h),dw=w*k,dh=h*k,ox=(W-dw)/2,oy=(H-dh)*posY;
+  var rx=W*.12,ry=0,rw=W*.76,rh=H*.45;
+  var sx=(rx-ox)/k,sy=(ry-oy)/k,sw=rw/k,sh=rh/k;
+  var c=document.createElement('canvas');c.width=96;c.height=36;var x=c.getContext('2d');x.drawImage(ph,sx,sy,sw,sh,0,0,96,36);
+  var d=x.getImageData(0,0,96,36).data,n=0,sum=0,sq=0;
+  for(var i=0;i<d.length;i+=4){var L=(0.2126*d[i]+0.7152*d[i+1]+0.0722*d[i+2])/255;sum+=L;sq+=L*L;n++;}
+  var m=sum/n;return {m:m,sd:Math.sqrt(Math.max(0,sq/n-m*m))};
+}
+function ajustarLogos(){
+  var sh=$('sheet');if(!sh)return;var hero=sh.querySelector('.hero'),veil=sh.querySelector('.hero .veil'),hvI=sh.querySelector('.hvlogo'),opI=sh.querySelector('.oplogo');
+  if(!hero||!veil)return;
+  var mode=state.logoPos,ph=hero.querySelector('img.ph'),posY=state.ver==='dig'?.4:.5;
+  function setHv(f){if(hvI&&!state.hvUpload)hvI.src=f;}
+  if(mode==='oscuro'){
+    veil.style.background='linear-gradient(180deg,rgba(6,35,33,.74) 0%,rgba(6,35,33,.5) 45%,rgba(6,35,33,0) 92%)';
+    if(state.hvUpload&&hvI)tintWhite(hvI,function(u){if(u)hvI.src=u;});else setHv('img/hiperviajes-slogan-white.png');
+    if(opI){var go=function(){tintWhite(opI,function(u){if(u){opI.src=u;opI.style.background='none';}});};if(opI.complete&&opI.naturalWidth)go();else opI.addEventListener('load',go,{once:true});}
+    return;
+  }
+  function apply(s){
+    var a0=.86+.13*s,a1=.5+.45*s,a2=.12+.38*s;
+    veil.style.height=(60+16*s)+'%';
+    veil.style.background='linear-gradient(180deg,rgba(255,255,255,'+a0+') 0%,rgba(255,255,255,'+a1+') 45%,rgba(255,255,255,'+a2+') 78%,rgba(255,255,255,0) 100%)';
+    setHv(s>.3?'img/hiperviajes-slogan-dark.png':'img/hiperviajes-slogan-teal.png');
+    if(mode==='auto'&&s>.92&&!state.autoAbajo){state.autoAbajo=true;render();}
+  }
+  if(mode==='claro'){apply(1);return;}
+  if(!ph){apply(.2);return;}
+  var run=function(){try{var r=medirArriba(ph,hero,posY);apply(Math.max(0,Math.min(1,(0.82-r.m)*1.4+r.sd*2.2)));}catch(e){apply(.7);}};
+  if(ph.complete&&ph.naturalWidth)run();else{ph.addEventListener('load',run,{once:true});ph.addEventListener('error',function(){apply(.7);},{once:true});}
 }
 function mostrarWarns(){
   var w=state.v?state.v.warns:[],ul=$('warns');
   ul.innerHTML=!state.v?'':(w.length?w.map(function(x){return '<li>⚠ '+esc(x)+'</li>';}).join(''):'<li class="ok">Todo coincide: fechas, vuelos y pasajeros.</li>');
 }
 function generar(){
+  state.autoAbajo=false;
   var v=armarVoucher($('serv').value,$('vue').value);
   var forced=$('dest').value;
   if(forced){var f=FOTOS.filter(function(x){return x.n===forced;})[0];v.dest=f;v.destNombre=nombreDestino(f);v.pais=paisDe(f);v.warns=v.warns.filter(function(w){return w.indexOf('destino')<0;});}
@@ -149,6 +190,7 @@ function init(){
   $('hvf').onchange=function(){cargarLogo(this,'hvLogo','hvUpload');};
   $('obs').oninput=function(){if(state.v)render();};
   document.querySelectorAll('.seg button').forEach(function(b){b.onclick=function(){state.ver=b.dataset.v;if(state.v)render();else document.querySelectorAll('.seg button').forEach(function(x){x.classList.toggle('on',x.dataset.v===state.ver);});};});
+  $('lpos').onchange=function(){state.logoPos=this.value;state.autoAbajo=false;if(state.v)render();};
   $('prn').onclick=function(){window.print();};
   $('png').onclick=exportarPNG;
   if(OPERADORES[0])state.opLogo=OPERADORES[0].logo;
