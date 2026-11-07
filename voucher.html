@@ -157,12 +157,12 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-dig .fo small{display:block;font:400 10px Inter,sans-serif;opacity:.85;margin-top:6px;letter-spacing:.03em}
 /* ---------- versión celular v2 (réplica del diseño de referencia) ---------- */
 .v-dig2{width:610px;min-height:0;font-family:Montserrat,Inter,sans-serif;color:#12403d;background:linear-gradient(180deg,#f4fbfa 0,#eef8f6 60%,#e9f6f3 100%)}
-.v-dig2 .hero{position:relative;height:250px;background:#bfe3ef;overflow:hidden}
+.v-dig2 .hero{position:relative;height:262px;background:#bfe3ef;overflow:hidden}
 .v-dig2 .hero .ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 40%}
 .v-dig2 .veil{position:absolute;left:0;right:0;top:0;height:66%;background:linear-gradient(180deg,rgba(255,255,255,.97) 0%,rgba(255,255,255,.88) 42%,rgba(255,255,255,.35) 78%,rgba(255,255,255,0) 100%);z-index:1}
-.v-dig2 .logos{position:absolute;z-index:2;top:10px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:22px}
-.v-dig2 .logos .lg,.v-dig2 .logos-below .lg{height:82px;width:auto}
-.v-dig2 .logos .lg2,.v-dig2 .logos-below .lg2{height:64px;width:auto;max-width:210px;object-fit:contain}
+.v-dig2 .logos{position:absolute;z-index:2;top:6px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:22px}
+.v-dig2 .logos .lg,.v-dig2 .logos-below .lg{height:104px;width:auto}
+.v-dig2 .logos .lg2,.v-dig2 .logos-below .lg2{height:74px;width:auto;max-width:230px;object-fit:contain}
 .v-dig2 .logos i,.v-dig2 .logos-below i{width:1px;height:56px;background:#8fc6bd}
 .v-dig2 .logos-below{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:24px;margin:-8px 0 12px}
 .v-dig2 .wave{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:52px;z-index:2}
@@ -178,7 +178,7 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-dig2 .card{margin:0 24px;background:rgba(255,255,255,.82);border:1px solid #cfe7e2;border-radius:12px;padding:2px 14px}
 .v-dig2 .r{position:relative;display:flex;align-items:center;padding:12px 0;border-top:1px solid #dcecea}
 .v-dig2 .r:first-child{border-top:0}
-.v-dig2 .chip{position:relative;z-index:1;flex:0 0 112px;height:62px;border-radius:9px;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 2px 6px rgba(20,110,100,.12)}
+.v-dig2 .chip{position:relative;z-index:1;flex:0 0 112px;height:62px;border-radius:9px;text-shadow:0 1px 1px rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 2px 6px rgba(20,110,100,.12)}
 .v-dig2 .chip .cal{width:25px;height:25px}
 .v-dig2 .chip b{display:block;font:700 15px/1.15 Montserrat,sans-serif}
 .v-dig2 .chip span{display:block;font:500 15px/1.15 Montserrat,sans-serif}
@@ -238,12 +238,13 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 <p class="hint">Los logos viven en la carpeta <b>operadores/</b>. Si no está, subí uno suelto:</p>
 <input id="opf" type="file" accept="image/*" style="font-size:12px">
 <label for="dest">Destino (foto y sello)</label><select id="dest"></select>
+<label for="fotof">Foto de portada (opcional, reemplaza la del destino)</label><input id="fotof" type="file" accept="image/*" style="font-size:12px">
 <label for="obs">Observaciones (opcional, se imprime si lo completás)</label>
 <input id="obs" type="text" placeholder="Ej.: indicaciones de punto de encuentro, contacto del operador…">
 <label>Logo Hiperviajes (opcional, por defecto el de la web)</label><input id="hvf" type="file" accept="image/*" style="font-size:12px">
 <div class="btns"><button class="p" id="go">Generar voucher</button></div>
 <label>Versión</label>
-<div class="seg"><button data-v="foto" class="on">Con fotos</button><button data-v="ink">Para imprimir</button><button data-v="dig">Celular</button></div>
+<div class="seg"><button data-v="dig" class="on">Digital</button><button data-v="ink">Para imprimir</button></div>
 <label for="lpos">Logos</label><select id="lpos"><option value="auto">Automático (aclara arriba según la foto)</option><option value="claro">Arriba, con fondo bien claro</option><option value="oscuro">Arriba en blanco (fotos oscuras)</option><option value="abajo">Debajo de la foto</option></select>
 <div class="btns"><button class="s" id="prn">Imprimir / PDF</button><button class="s" id="png">Bajar PNG</button></div>
 <p class="hint">Después de generar, podés hacer clic sobre cualquier texto del voucher para corregirlo.</p>
@@ -492,7 +493,7 @@ function armarVoucher(txtServ,txtVuelos){
   return {dest:dest,destNombre:dest?nombreDestino(dest):'',pais:dest?paisDe(dest):'',pax:pax,npax:n,items:items,warns:warns,op:opDet,opTxt:opTxt};
 }
 var REMOTE='https://raw.githubusercontent.com/gonzalonocella-G04T/PNR-CREATOR-GNM/main/';
-var HV_LOGO='img/hiperviajes-slogan-teal.png',state={logoPos:'auto',ver:'foto',v:null,opLogo:null,hvLogo:null};
+var HV_LOGO='img/hiperviajes-slogan-teal.png',state={logoPos:'auto',ver:'dig',v:null,opLogo:null,hvLogo:null};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function im(path,cls,alt){
   var rel=/^(data:|blob:|https?:)/.test(path);
@@ -563,7 +564,7 @@ function excFoto(t){
   for(var k=0;k<EXC_FOTOS.length;k++){var ks=EXC_FOTOS[k].k.split('|');for(var m=0;m<ks.length;m++)if(T.indexOf(norm(ks[m]))>=0){var f=EXC_FOTOS[k].f;return f===port?'':f;}}
   return '';
 }
-function fotoDe(){var d=state.v&&state.v.dest;return d?(d.p||(d.f?'tv-fotos/'+d.f:'')):'';}
+function fotoDe(){if(state.fotoUp)return state.fotoUp;var d=state.v&&state.v.dest;return d?(d.p||(d.f?'tv-fotos/'+d.f:'')):'';}
 function $(id){return document.getElementById(id);}
 function fechaHtml(f){
   if(!f)return '<div class="dt"><b>--</b><i>---</i><u>&nbsp;</u></div>';
@@ -580,7 +581,7 @@ function itemHtml(it){
 function render(){
   var v0=state.v,st=$('stage'),v=v0?Object.assign({},v0,{items:v0.items.filter(function(x){return !x.off;})}):v0;
   if(!v){st.innerHTML='<p class="hint" style="text-align:center;margin-top:60px">Pegá la solicitud y las líneas de vuelo, y tocá “Generar voucher”.</p>';return;}
-  var dest=v.dest,foto=dest?(dest.p||(dest.f?'tv-fotos/'+dest.f:'')):'',sel=dest?selloDe(dest):null;
+  var dest=v.dest,foto=state.fotoUp||(dest?(dest.p||(dest.f?'tv-fotos/'+dest.f:'')):''),sel=dest?selloDe(dest):null;
   var hv=state.hvLogo||HV_LOGO,op=state.opLogo;
   var abajo=state.logoPos==='abajo'||state.autoAbajo;
   function opHtml(cls){if(op)return opImg(op,cls);if(state.opTxt)return '<span class="optxt '+cls+'" contenteditable>'+esc(state.opTxt)+'</span>';return '';}
@@ -614,7 +615,7 @@ function render(){
     var PIN='<path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0113 0c0 4.8-6.5 11-6.5 11z" fill="currentColor" stroke="none"/><circle cx="12" cy="10" r="2.4" fill="#fff" stroke="none"/>';
     var TICKET='<g transform="rotate(-35 12 12)"><path d="M2.5 8h19v2.6a1.6 1.6 0 000 2.8V16h-19v-2.6a1.6 1.6 0 000-2.8z"/><path d="M15 8.5v7" stroke-dasharray="1.4 1.6"/></g>';
     var rows=v.items.map(function(it,idx){
-      var t=n>1?idx/(n-1):1,bg='linear-gradient(135deg,'+mix('#B4E3DA','#2A9384',t)+','+mix('#93D3C7','#17786C',t)+')',fg=t<0.34?'#123f3c':'#fff';
+      var bg='linear-gradient(135deg,#1F8A7C,#0F5F55)',fg='#fff';
       var fch=it.f?'<b>'+it.f.d+' '+MESES[it.f.m-1]+'</b><span>'+it.f.y+'</span>':'<b>—</b>';
       var chip='<div class="chip" style="background:'+bg+';color:'+fg+'">'+SV(CAL,'cal')+'<div>'+fch+'</div></div>';
       var tit=it.titulo||'',main=tit,sub='';
@@ -677,6 +678,7 @@ function ajustarLogos(){
     return;
   }
   function apply(s){
+    s=Math.max(s,.62);
     var a0=.86+.13*s,a1=.5+.45*s,a2=.12+.38*s;
     veil.style.height=(60+16*s)+'%';
     veil.style.background='linear-gradient(180deg,rgba(255,255,255,'+a0+') 0%,rgba(255,255,255,'+a1+') 45%,rgba(255,255,255,'+a2+') 78%,rgba(255,255,255,0) 100%)';
@@ -735,6 +737,7 @@ function init(){
   $('go').onclick=generar;
   $('op').onchange=function(){state.opUpload=false;state.opTxt='';var o=OPERADORES.filter(function(x){return x.id===$('op').value;})[0];state.opLogo=o?o.logo:null;if(state.v)render();};
   $('opf').onchange=function(){cargarLogo(this,'opLogo','opUpload');};
+  $('fotof').onchange=function(){cargarLogo(this,'fotoUp','fotoUpOk');};
   $('hvf').onchange=function(){cargarLogo(this,'hvLogo','hvUpload');};
   $('obs').oninput=function(){if(state.v)render();};
   document.querySelectorAll('.seg button').forEach(function(b){b.onclick=function(){state.ver=b.dataset.v;if(state.v)render();else document.querySelectorAll('.seg button').forEach(function(x){x.classList.toggle('on',x.dataset.v===state.ver);});};});
