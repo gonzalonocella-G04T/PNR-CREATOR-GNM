@@ -1,0 +1,717 @@
+[
+{
+"n": "Porto de Galinhas",
+"p": "Brasil",
+"c": [
+"REC"
+],
+"a": [
+"GALINHAS",
+"PORTO DE GALINHAS"
+],
+"s": null,
+"f": "porto-de-galinhas.jpg"
+},
+{
+"n": "Maragogi",
+"p": "Brasil",
+"c": [
+"MCZ"
+],
+"a": [
+"MARAGOGI"
+],
+"s": null,
+"f": "maragogi.jpg"
+},
+{
+"n": "Maceió",
+"p": "Brasil",
+"c": [
+"MCZ"
+],
+"a": [
+"MACEIÓ",
+"MACEIO"
+],
+"s": "Maceió",
+"f": "maceio.jpg"
+},
+{
+"n": "Salvador de Bahía",
+"p": "Brasil",
+"c": [
+"SSA"
+],
+"a": [
+"SALVADOR",
+"SALVADOR BAHIA",
+"SALVADOR DE BAHÍA",
+"SALVADOR DE BAHIA"
+],
+"s": "Salvador de Bahía",
+"f": "salvador-de-bahia.jpg"
+},
+{
+"n": "Praia do Forte",
+"p": "Brasil",
+"c": [
+"SSA"
+],
+"a": [
+"PRAIA DO FORTE"
+],
+"s": null,
+"f": "praia-do-forte.jpg"
+},
+{
+"n": "Costa do Sauípe",
+"p": "Brasil",
+"c": [
+"SSA"
+],
+"a": [
+"SAUIPE",
+"COSTA DO SAUÍPE",
+"COSTA DO SAUIPE"
+],
+"s": null,
+"f": "costa-do-sauipe.jpg"
+},
+{
+"n": "Morro de São Paulo",
+"p": "Brasil",
+"c": [
+"SSA"
+],
+"a": [
+"MORRO DE SÃO PAULO",
+"MORRO DE SAO PAULO"
+],
+"s": null,
+"f": "morro-de-sao-paulo.jpg"
+},
+{
+"n": "Río de Janeiro",
+"p": "Brasil",
+"c": [
+"GIG",
+"SDU",
+"RIO"
+],
+"a": [
+"RIO",
+"RÍO DE JANEIRO",
+"RIO DE JANEIRO"
+],
+"s": "Río de Janeiro",
+"f": "rio-de-janeiro.jpg"
+},
+{
+"n": "Búzios",
+"p": "Brasil",
+"c": [
+"CFB",
+"GIG"
+],
+"a": [
+"BUZIOS",
+"BÚZIOS",
+"ARMACAO DOS BUZIOS"
+],
+"s": null,
+"f": "buzios.jpg"
+},
+{
+"n": "Angra dos Reis",
+"p": "Brasil",
+"c": [
+"GIG"
+],
+"a": [
+"ANGRA",
+"ANGRA DOS REIS"
+],
+"s": null,
+"f": "angra-dos-reis.jpg"
+},
+{
+"n": "Cabo Frio",
+"p": "Brasil",
+"c": [
+"CFB"
+],
+"a": [
+"CABO FRIO"
+],
+"s": null,
+"f": "cabo-frio.jpg"
+},
+{
+"n": "Arraial d'Ajuda",
+"p": "Brasil",
+"c": [
+"BPS"
+],
+"a": [
+"ARRAIAL DAJUDA",
+"ARRAIAL D´AJUDA",
+"ARRAIAL D'AJUDA",
+"ARRAIAL D AJUDA"
+],
+"s": null,
+"f": "arraial-d-ajuda.jpg"
+},
+{
+"n": "Porto Seguro",
+"p": "Brasil",
+"c": [
+"BPS"
+],
+"a": [
+"PORTO SEGURO"
+],
+"s": null,
+"f": "porto-seguro.jpg"
+},
+{
+"n": "Arraial do Cabo",
+"p": "Brasil",
+"c": [
+"CFB"
+],
+"a": [
+"ARRAIAL DO CABO"
+],
+"s": null,
+"f": "arraial-do-cabo.jpg"
+},
+{
+"n": "Natal",
+"p": "Brasil",
+"c": [
+"NAT"
+],
+"a": [
+"NATAL"
+],
+"s": "Natal",
+"f": "natal.jpg"
+},
+{
+"n": "Pipa",
+"p": "Brasil",
+"c": [
+"NAT"
+],
+"a": [
+"PIPA",
+"PRAIA DA PIPA"
+],
+"s": null,
+"f": "pipa.jpg"
+},
+{
+"n": "Fortaleza",
+"p": "Brasil",
+"c": [
+"FOR"
+],
+"a": [
+"FORTALEZA"
+],
+"s": null,
+"f": "fortaleza.jpg"
+},
+{
+"n": "Jericoacoara",
+"p": "Brasil",
+"c": [
+"JJD",
+"FOR"
+],
+"a": [
+"JERI",
+"JERICOACOARA"
+],
+"s": null,
+"f": "jericoacoara.jpg"
+},
+{
+"n": "Florianópolis",
+"p": "Brasil",
+"c": [
+"FLN"
+],
+"a": [
+"FLORIPA",
+"FLORIANÓPOLIS",
+"FLORIANOPOLIS"
+],
+"s": null,
+"f": "florianopolis.jpg"
+},
+{
+"n": "Bombinhas",
+"p": "Brasil",
+"c": [
+"FLN",
+"NVT"
+],
+"a": [
+"BOMBINHAS"
+],
+"s": null,
+"f": "bombinhas.jpg"
+},
+{
+"n": "Balneário Camboriú",
+"p": "Brasil",
+"c": [
+"NVT",
+"FLN"
+],
+"a": [
+"CAMBORIU",
+"BALNEÁRIO CAMBORIÚ",
+"BALNEARIO CAMBORIU"
+],
+"s": null,
+"f": "balneario-camboriu.jpg"
+},
+{
+"n": "João Pessoa",
+"p": "Brasil",
+"c": [
+"JPA"
+],
+"a": [
+"JOAO PESSOA",
+"JOÃO PESSOA"
+],
+"s": null,
+"f": "joao-pessoa.jpg"
+},
+{
+"n": "Imbassaí",
+"p": "Brasil",
+"c": [
+"SSA"
+],
+"a": [
+"IMBASSAÍ",
+"IMBASSAI"
+],
+"s": null,
+"f": "imbassai.jpg"
+},
+{
+"n": "Ilha Grande",
+"p": "Brasil",
+"c": [
+"GIG"
+],
+"a": [
+"ILHA GRANDE"
+],
+"s": null,
+"f": "ilha-grande.jpg"
+},
+{
+"n": "Punta Cana",
+"p": "República Dominicana",
+"c": [
+"PUJ"
+],
+"a": [
+"PUNTA CANA"
+],
+"s": "Punta Cana",
+"f": "punta-cana.jpg"
+},
+{
+"n": "Bayahibe",
+"p": "República Dominicana",
+"c": [
+"LRM",
+"PUJ"
+],
+"a": [
+"BAYAHIBE"
+],
+"s": null,
+"f": "bayahibe.jpg"
+},
+{
+"n": "Miches",
+"p": "República Dominicana",
+"c": [
+"PUJ"
+],
+"a": [
+"MICHES"
+],
+"s": null,
+"f": "miches.jpg"
+},
+{
+"n": "Samaná",
+"p": "República Dominicana",
+"c": [
+"AZS"
+],
+"a": [
+"SAMANA",
+"SAMANÁ"
+],
+"s": null,
+"f": "samana.jpg"
+},
+{
+"n": "Puerto Plata",
+"p": "República Dominicana",
+"c": [
+"POP"
+],
+"a": [
+"PUERTO PLATA"
+],
+"s": null,
+"f": "puerto-plata.jpg"
+},
+{
+"n": "La Romana",
+"p": "República Dominicana",
+"c": [
+"LRM"
+],
+"a": [
+"LA ROMANA"
+],
+"s": null,
+"f": "la-romana.jpg"
+},
+{
+"n": "Playa del Carmen",
+"p": "México",
+"c": [
+"CUN"
+],
+"a": [
+"PLAYA DEL CARMEN"
+],
+"s": null,
+"f": "playa-del-carmen.jpg"
+},
+{
+"n": "Playacar",
+"p": "México",
+"c": [
+"CUN"
+],
+"a": [
+"PLAYACAR"
+],
+"s": null,
+"f": "playacar.jpg"
+},
+{
+"n": "Tulum",
+"p": "México",
+"c": [
+"TQO",
+"CUN"
+],
+"a": [
+"TULUM"
+],
+"s": null,
+"f": "tulum.jpg"
+},
+{
+"n": "Akumal",
+"p": "México",
+"c": [
+"CUN"
+],
+"a": [
+"AKUMAL"
+],
+"s": null,
+"f": "akumal.jpg"
+},
+{
+"n": "Playa Paraíso",
+"p": "México",
+"c": [
+"CUN"
+],
+"a": [
+"PLAYA PARAISO",
+"PLAYA PARAÍSO"
+],
+"s": null,
+"f": "playa-paraiso.jpg"
+},
+{
+"n": "Costa Mujeres",
+"p": "México",
+"c": [
+"CUN"
+],
+"a": [
+"COSTA MUJERES"
+],
+"s": null,
+"f": "costa-mujeres.jpg"
+},
+{
+"n": "Cancún",
+"p": "México",
+"c": [
+"CUN"
+],
+"a": [
+"CANCÚN",
+"CANCUN"
+],
+"s": "Cancún",
+"f": "cancun.jpg"
+},
+{
+"n": "Bariloche",
+"p": "Argentina",
+"c": [
+"BRC"
+],
+"a": [
+"BARILOCHE",
+"SAN CARLOS DE BARILOCHE"
+],
+"s": "Bariloche",
+"f": "bariloche.jpg"
+},
+{
+"n": "San Martín de los Andes",
+"p": "Argentina",
+"c": [
+"CPC"
+],
+"a": [
+"SAN MARTÍN DE LOS ANDES",
+"SAN MARTIN DE LOS ANDES"
+],
+"s": null,
+"f": "san-martin-de-los-andes.jpg"
+},
+{
+"n": "Villa La Angostura",
+"p": "Argentina",
+"c": [
+"BRC",
+"CPC"
+],
+"a": [
+"VILLA LA ANGOSTURA"
+],
+"s": null,
+"f": "villa-la-angostura.jpg"
+},
+{
+"n": "Buenos Aires",
+"p": "Argentina",
+"c": [
+"EZE",
+"AEP",
+"BUE"
+],
+"a": [
+"BUENOS AIRES"
+],
+"s": "Buenos Aires",
+"f": "buenos-aires.jpg"
+},
+{
+"n": "La Plata",
+"p": "Argentina",
+"c": [
+"EZE",
+"AEP",
+"LPG"
+],
+"a": [
+"LA PLATA"
+],
+"s": null,
+"f": "la-plata.jpg"
+},
+{
+"n": "El Calafate",
+"p": "Argentina",
+"c": [
+"FTE"
+],
+"a": [
+"CALAFATE",
+"EL CALAFATE"
+],
+"s": "Calafate",
+"f": "el-calafate.jpg"
+},
+{
+"n": "Ushuaia",
+"p": "Argentina",
+"c": [
+"USH"
+],
+"a": [
+"USHUAIA"
+],
+"s": "Ushuaia",
+"f": "ushuaia.jpg"
+},
+{
+"n": "El Chaltén",
+"p": "Argentina",
+"c": [
+"FTE"
+],
+"a": [
+"CHALTEN",
+"EL CHALTEN",
+"EL CHALTÉN"
+],
+"s": null,
+"f": "el-chalten.jpg"
+},
+{
+"n": "Mendoza",
+"p": "Argentina",
+"c": [
+"MDZ"
+],
+"a": [
+"MENDOZA"
+],
+"s": "Mendoza",
+"f": "mendoza.jpg"
+},
+{
+"n": "Córdoba",
+"p": "Argentina",
+"c": [
+"COR"
+],
+"a": [
+"CORDOBA",
+"CÓRDOBA"
+],
+"s": "Córdoba",
+"f": "cordoba.jpg"
+},
+{
+"n": "Salta",
+"p": "Argentina",
+"c": [
+"SLA"
+],
+"a": [
+"SALTA"
+],
+"s": "Salta",
+"f": "salta.jpg"
+},
+{
+"n": "Jujuy",
+"p": "Argentina",
+"c": [
+"JUJ"
+],
+"a": [
+"JUJUY",
+"SAN SALVADOR DE JUJUY"
+],
+"s": "Jujuy",
+"f": "jujuy.jpg"
+},
+{
+"n": "Puerto Iguazú",
+"p": "Argentina",
+"c": [
+"IGR"
+],
+"a": [
+"IGUAZU",
+"IGUAZÚ",
+"PUERTO IGUAZÚ",
+"PUERTO IGUAZU"
+],
+"s": null,
+"f": "puerto-iguazu.jpg"
+},
+{
+"n": "Cataratas del Iguazú",
+"p": "Argentina",
+"c": [
+"IGR",
+"IGU"
+],
+"a": [
+"CATARATAS",
+"CATARATAS ARGENTINAS",
+"CATARATAS DEL IGUAZÚ",
+"CATARATAS DEL IGUAZU"
+],
+"s": null,
+"f": "cataratas-del-iguazu.jpg"
+},
+{
+"n": "Mar del Plata",
+"p": "Argentina",
+"c": [
+"MDQ"
+],
+"a": [
+"MAR DEL PLATA"
+],
+"s": null,
+"f": "mar-del-plata.jpg"
+},
+{
+"n": "Rosario",
+"p": "Argentina",
+"c": [
+"ROS"
+],
+"a": [
+"ROSARIO"
+],
+"s": null,
+"f": "rosario.jpg"
+},
+{
+"n": "Santa Fe",
+"p": "Argentina",
+"c": [
+"SFN"
+],
+"a": [
+"SANTA FE",
+"SANTA FÉ"
+],
+"s": null,
+"f": "santa-fe.jpg"
+},
+{
+"n": "Purmamarca",
+"p": "Argentina",
+"c": [
+"JUJ"
+],
+"a": [
+"PURMAMARCA"
+],
+"s": null,
+"f": "purmamarca.jpg"
+}
+]

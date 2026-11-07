@@ -1,5 +1,6 @@
 Repositorio de logos de operadores (usado por voucher.html)
-- Un archivo por operador (PNG con fondo transparente, ancho ~600-1000 px) y una entrada en operadores.json:
-  {"id":"prestigio","nombre":"Prestigio Operadores Receptivos","logo":"operadores/prestigio.png","destinos":["El Calafate"]}
-- OJO: prestigio.png es un recorte provisorio hecho desde un voucher de muestra. Reemplazar por el archivo original del operador.
-- Después de agregar un operador, correr: python3 voucher-src/build_voucher.py
+- Un archivo PNG por operador y una entrada en operadores.json:
+  {"id":"prestigio","nombre":"Prestigio Operadores Receptivos","logo":"operadores/prestigio.png"}
+- Cargados: Barlan Travel, Vi Travel (con fondo gris propio del archivo), Otium International, Lares Argentina,
+  Prestigio, Brasil Voyage, Luck Receptivo.
+- Después de agregar uno, correr: python3 voucher-src/build_voucher.py

@@ -1,10 +1,37 @@
 [
  {
+  "id": "barlan-travel",
+  "nombre": "Barlan Travel",
+  "logo": "operadores/barlan-travel.png"
+ },
+ {
+  "id": "vi-travel",
+  "nombre": "Vi Travel",
+  "logo": "operadores/vi-travel.png"
+ },
+ {
+  "id": "otium-international",
+  "nombre": "Otium International",
+  "logo": "operadores/otium-international.png"
+ },
+ {
+  "id": "lares-argentina",
+  "nombre": "Lares Argentina",
+  "logo": "operadores/lares-argentina.png"
+ },
+ {
   "id": "prestigio",
   "nombre": "Prestigio Operadores Receptivos",
-  "logo": "operadores/prestigio.png",
-  "destinos": [
-   "El Calafate"
-  ]
+  "logo": "operadores/prestigio.png"
+ },
+ {
+  "id": "brasil-voyage",
+  "nombre": "Brasil Voyage",
+  "logo": "operadores/brasil-voyage.png"
+ },
+ {
+  "id": "luck-receptivo",
+  "nombre": "Luck Receptivo",
+  "logo": "operadores/luck-receptivo.png"
  }
 ]

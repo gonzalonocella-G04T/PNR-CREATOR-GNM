@@ -35,12 +35,10 @@ function destinoPorTexto(txt){
 function nombreDestino(f){var a=f.a.slice().sort(function(x,y){return y.length-x.length;})[0];return titleCase(a||f.n);}
 function paisDe(f){return PAISES[f.n]||'';}
 function selloDe(f){
-  var s=null;
-  SELLOS.forEach(function(x){
-    if(s)return;
-    if(x.c&&f.c.some(function(c){return x.c.indexOf(c)>=0;}))s=x;
-  });
-  if(!s){var n=norm(f.n);SELLOS.forEach(function(x){if(!s&&norm(x.n)===n)s=x;});}
+  var s=null,key=f.s||f.n;
+  if(f.x&&!f.s)return null; // lugar nuevo sin sello propio: no se usa el de otra ciudad que comparte aeropuerto
+  SELLOS.forEach(function(x){if(!s&&norm(x.n)===norm(key))s=x;});
+  if(!s&&!f.x)SELLOS.forEach(function(x){if(!s&&x.c&&f.c.some(function(c){return x.c.indexOf(c)>=0;}))s=x;});
   return s;
 }
 function fechaDe(txt,anioRef){

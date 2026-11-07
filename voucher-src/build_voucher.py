@@ -7,6 +7,25 @@ sellos=json.load(open(os.path.join(root,'sellos','index.json'),encoding='utf-8')
 ops=json.load(open(os.path.join(root,'operadores','operadores.json'),encoding='utf-8'))
 paises=json.load(open(os.path.join(here,'paises.json'),encoding='utf-8'))
 pmap={c:p for p,cs in paises.items() for c in cs}
+lug=json.load(open(os.path.join(here,'lugares.json'),encoding='utf-8'))
+cred=json.load(open(os.path.join(root,'destinos','creditos.json'),encoding='utf-8')) if os.path.exists(os.path.join(root,'destinos','creditos.json')) else {}
+pmap.update({l['n']:l['p'] for l in lug})
+nuevos=[]
+import re as _re,unicodedata as _u
+def _n(t): return _re.sub(r'\s+',' ',''.join(c for c in _u.normalize('NFD',t) if _u.category(c)!='Mn').upper()).strip()
+try: _old=json.loads(fotos[fotos.index('['):fotos.rindex(']')+1])
+except Exception: _old=[]
+for l in lug:
+    e={'n':l['n'],'c':l['c'],'a':l['a'],'s':l['s'],'x':1}
+    if os.path.exists(os.path.join(root,'destinos',l['f'])):
+        e['p']='destinos/'+l['f']; e['cr']=cred.get(l['f'],'')
+    else:
+        keys={_n(l['n'])}|{_n(a) for a in l['a']}
+        o=next((x for x in _old if _n(x['n']) in keys or any(_n(a) in keys for a in x['a'])),None)
+        if o: e['p']='tv-fotos/'+o['f']
+    nuevos.append(e)
+fotos=fotos.replace('var FOTOS=','var FOTOS_OLD=')+'\nvar FOTOS_NEW='+json.dumps(nuevos,ensure_ascii=False,separators=(',',':'))+';\nvar FOTOS=FOTOS_NEW.concat(FOTOS_OLD);\n'
+paises.update({}) 
 data=fotos+'\nvar SELLOS='+json.dumps(sellos,ensure_ascii=False,separators=(',',':'))+';\nvar OPERADORES='+json.dumps(ops,ensure_ascii=False)+';\nvar PAISES='+json.dumps(pmap,ensure_ascii=False)+';\n'
 js=data+rd(os.path.join(here,'parse.js'))+rd(os.path.join(here,'app.js'))
 assert '</script' not in js.lower()

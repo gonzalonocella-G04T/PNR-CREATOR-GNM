@@ -62,6 +62,7 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-ink{--g:#0A4F46;--g2:#0D6B5E;--tint:#E3F2EF}
 .v-ink .hd{display:flex;align-items:center;justify-content:space-between;gap:8mm;padding:7mm 12mm 5mm;border-bottom:.8mm solid var(--g)}
 .v-ink .hd .lg{height:15mm;max-width:58mm;object-fit:contain;filter:contrast(1.25) saturate(1.2)}
+.v-ink .hd .lg:first-child{filter:brightness(.55) saturate(1.6) contrast(1.2)}
 .v-ink .band{position:relative;height:36mm;background:var(--tint);border-bottom:.8mm solid var(--g);border-left:3mm solid var(--g)}
 .v-ink .band .tt{position:absolute;left:9mm;top:50%;transform:translateY(-50%);right:50mm}
 .v-ink .band small{display:block;font:600 3.3mm Oswald,sans-serif;letter-spacing:.35em;color:var(--g2)}
@@ -80,6 +81,37 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-ink .sv .fl i{color:var(--g)}
 .v-ink .obs{border-left:1mm solid var(--g);color:#0b2f2a}
 .v-ink .ft{background:#fff;color:var(--g);border-top:.8mm solid var(--g);margin:0 12mm;padding:3mm 0;font-weight:600}
+/* ---------- versión celular (9:16, para WhatsApp/correo) ---------- */
+.v-dig{display:flex;flex-direction:column;width:540px;min-height:960px;border-radius:0;background:linear-gradient(180deg,#fff,#EAF7F4 55%,#fff);font-family:Inter,sans-serif;color:#0f3d3a}
+.v-dig .hero{position:relative;height:330px;background:#8fd0e6}
+.v-dig .hero .ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.v-dig .hero:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 55%);z-index:1}
+.v-dig .logos{position:absolute;z-index:2;top:16px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:16px}
+.v-dig .logos .lg{height:64px;filter:drop-shadow(0 1px 3px rgba(255,255,255,.9))}
+.v-dig .logos .lg2{height:54px;background:rgba(255,255,255,.85);border-radius:10px;padding:5px 8px}
+.v-dig .logos i{width:1px;height:40px;background:rgba(255,255,255,.9)}
+.v-dig .wave{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:70px;z-index:2}
+.v-dig .tit{text-align:center;padding:4px 20px 14px}
+.v-dig .tit small{display:block;font:600 13px Oswald,sans-serif;letter-spacing:.45em;color:#0f6f64}
+.v-dig .tit b{display:block;font:700 58px/1.05 Oswald,sans-serif;color:#0b4a49;letter-spacing:.01em;margin-top:4px}
+.v-dig .tit span{display:block;font:600 15px Inter,sans-serif;letter-spacing:.5em;color:#17766a;margin-top:6px}
+.v-dig .card{margin:6px 16px 14px;background:#fff;border:1px solid #cfe9e4;border-radius:18px;padding:6px 14px;box-shadow:0 6px 18px rgba(20,141,126,.10)}
+.v-dig .r{display:flex;gap:14px;align-items:center;padding:14px 0;border-top:1px solid #dcefeb}
+.v-dig .r:first-child{border-top:0}
+.v-dig .d{flex:0 0 96px;text-align:center;color:#fff;background:linear-gradient(135deg,#27b49f,#0f8a79);border-radius:14px;padding:12px 4px}
+.v-dig .d b{display:block;font:700 22px/1.1 Oswald,sans-serif}.v-dig .d i{display:block;font:500 15px Inter,sans-serif;font-style:normal;opacity:.95}
+.v-dig .x{flex:1;min-width:0}
+.v-dig .t{font:700 19px/1.2 Inter,sans-serif;color:#0b3d3a}
+.v-dig .o{font:400 14px/1.35 Inter,sans-serif;margin-top:4px;color:#26524f}.v-dig .o em{font-style:normal;color:#0f8a79;font-weight:700}
+.v-dig .fl{margin-top:8px;background:#e3f3ef;border-radius:10px;padding:6px 10px;font:500 13.5px Inter,sans-serif;color:#0b3d3a}
+.v-dig .fl b{font-weight:700}
+.v-dig .px{margin:0 16px 12px;background:#e3f3ef;border-radius:14px;padding:14px 18px;display:flex;gap:16px;align-items:center}
+.v-dig .px span{font:600 12px Oswald,sans-serif;letter-spacing:.3em;color:#0f6f64}
+.v-dig .px div{font:700 18px Inter,sans-serif}
+.v-dig .ob{margin:0 16px 12px;font:400 14px/1.4 Inter,sans-serif;border-left:4px solid #19c0aa;padding-left:10px}
+.v-dig .fo{margin-top:auto;padding:26px 0 22px;text-align:center;background:linear-gradient(180deg,#27b49f,#0f6f64);color:#fff;border-radius:60% 60% 0 0/26px 26px 0 0}
+.v-dig .fo span{font:600 14px Oswald,sans-serif;letter-spacing:.4em}
+.v-dig .fo small{display:block;font:400 10px Inter,sans-serif;opacity:.85;margin-top:6px;letter-spacing:.03em}
 @media print{
  @page{size:A4;margin:0}
  html,body{background:#fff}

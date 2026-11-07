@@ -1,5 +1,5 @@
 var REMOTE='https://raw.githubusercontent.com/gonzalonocella-G04T/PNR-CREATOR-GNM/voucher-servicios/';
-var HV_LOGO='img/pass-logo.png',state={ver:'foto',v:null,opLogo:null,hvLogo:null};
+var HV_LOGO='img/hiperviajes-slogan.png',state={ver:'foto',v:null,opLogo:null,hvLogo:null};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function im(path,cls,alt){
   var rel=/^(data:|blob:|https?:)/.test(path);
@@ -19,9 +19,9 @@ function itemHtml(it){
 function render(){
   var v=state.v,st=$('stage');
   if(!v){st.innerHTML='<p class="hint" style="text-align:center;margin-top:60px">Pegá la solicitud y las líneas de vuelo, y tocá “Generar voucher”.</p>';return;}
-  var dest=v.dest,foto=dest?'tv-fotos/'+dest.f:'',sel=dest?selloDe(dest):null;
+  var dest=v.dest,foto=dest?(dest.p||(dest.f?'tv-fotos/'+dest.f:'')):'',sel=dest?selloDe(dest):null;
   var hv=state.hvLogo||HV_LOGO,op=state.opLogo;
-  var cls=state.ver==='foto'?'v-foto':'v-ink';
+  var cls={foto:'v-foto',ink:'v-ink',dig:'v-dig'}[state.ver];
   var titulo=(v.destNombre||'Destino')+(v.pais?'':'' );
   var lug='<span contenteditable>'+esc((v.destNombre||'').toUpperCase())+'</span>'+(v.pais?' – <span contenteditable>'+esc(v.pais.toUpperCase())+'</span>':'');
   var head='<div class="hd">'+im(hv,'lg','Hiperviajes')+(op?im(op,'lg','Operador'):'<span></span>')+'</div>';
@@ -33,6 +33,26 @@ function render(){
   }else{
     hero='';
     intro='<div class="band"><div class="tt"><small>VOUCHER DE SERVICIOS</small><b>'+esc((v.destNombre||'').toUpperCase())+'</b><span>'+esc(v.pais)+'</span></div>'+(sel?im('sellos/'+sel.f,'st',''):'')+'</div>';
+  }
+  if(state.ver==='dig'){
+    var ito=v.items.map(function(it){
+      var f=it.f?'<b>'+String(it.f.d).padStart(2,'0')+' '+MESES[it.f.m-1]+'</b><i>'+it.f.y+'</i>':'<b>--</b>';
+      var ic=it.tipo==='exc'?'⛰':'🚐';
+      var r='<div class="r"><div class="d">'+f+'</div><div class="x"><div class="t" contenteditable>'+esc(it.titulo)+'</div>';
+      if(it.from)r+='<div class="o"><span contenteditable>'+esc(it.from)+'</span> <em>→</em> <span contenteditable>'+esc(it.to)+'</span></div>';
+      if(it.vuelo){var q=it.vuelo;r+='<div class="fl">✈ <span contenteditable>'+esc(q.n)+'</span> | <span contenteditable>'+q.from+' → '+q.to+'</span> | <b contenteditable>'+q.dep+' – '+q.arr+(q.sig?' (+1)':'')+'</b></div>';}
+      return r+'</div></div>';
+    }).join('');
+    var ob=$('obs').value.trim();
+    st.innerHTML='<div class="sheet v-dig" id="sheet"><div class="hero">'+(foto?im(foto,'ph',''):'')+'<div class="logos">'+im(hv,'lg','Hiperviajes')+(op?'<i></i>'+im(op,'lg2','Operador'):'')+'</div>'+
+      '<svg class="wave" viewBox="0 0 540 70" preserveAspectRatio="none"><path d="M0 40C90 10 170 5 270 28S450 62 540 20V70H0Z" fill="#fff"/><path d="M0 52C100 28 200 24 300 42S460 66 540 36V70H0Z" fill="#EAF7F4" opacity=".9"/></svg></div>'+
+      '<div class="tit"><small>VOUCHER DE SERVICIOS</small><b contenteditable style="font-size:'+((v.destNombre||'').length>16?40:(v.destNombre||'').length>11?48:58)+'px">'+esc((v.destNombre||'').toUpperCase())+'</b><span contenteditable>'+esc(v.pais.toUpperCase())+'</span></div>'+
+      '<div class="card">'+ito+'</div>'+
+      '<div class="px"><span>PASAJEROS</span><div contenteditable>'+esc(v.pax.join('   |   '))+'</div></div>'+
+      (ob?'<div class="ob" contenteditable>'+esc(ob)+'</div>':'')+
+      '<div class="fo"><span>VOUCHER DE SERVICIO</span>'+(dest&&dest.cr?'<small>Foto: '+esc(dest.cr)+'</small>':'')+'</div></div>';
+    document.querySelectorAll('.seg button').forEach(function(b){b.classList.toggle('on',b.dataset.v===state.ver);});
+    return;
   }
   var pax='<div class="pax"><span class="k">Pasajeros</span><span class="v" contenteditable>'+esc(v.pax.join('  |  '))+'</span><span class="n">'+v.npax+' pax</span></div>';
   var obs=$('obs').value.trim();
