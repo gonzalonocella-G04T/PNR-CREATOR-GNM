@@ -342,7 +342,8 @@
 "BAYAHIBE"
 ],
 "s": null,
-"f": "bayahibe.jpg"
+"f": "bayahibe.jpg",
+"y": 0.15
 },
 {
 "n": "Miches",
@@ -403,7 +404,8 @@
 "PLAYA DEL CARMEN"
 ],
 "s": null,
-"f": "playa-del-carmen.jpg"
+"f": "playa-del-carmen.jpg",
+"y": 0.38
 },
 {
 "n": "Playacar",
