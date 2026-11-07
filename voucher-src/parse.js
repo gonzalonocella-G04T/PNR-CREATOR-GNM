@@ -85,6 +85,65 @@ function anioDeTexto(txt){var m=txt.match(/\b(\d{1,2})\s+(?:de\s+)?([A-Za-zé]+)
 function limpiarPrecio(t){return t.replace(/\s+(sgl|dbl|tpl|single|doble|triple|usd|us\$|u\$s|\$|precio|neto|tarifa|por\s+pax)\b.*$/i,'').replace(/\s+\b[A-Z]{3}\b\s*$/,'').trim();}
 var RE_LINEA_FECHA=/^[\s\-–•*·]*(?:(?:lun|mar|mi[eé]|jue|vie|s[aá]b|dom)[a-zéá]*\.?,?\s+)?(\d{1,2})[\s\-\/]*(ene(?:ro)?|feb(?:rero)?|mar(?:zo)?|abr(?:il)?|may(?:o)?|jun(?:io)?|jul(?:io)?|ago(?:sto)?|sep(?:t(?:iembre)?)?|set(?:iembre)?|oct(?:ubre)?|nov(?:iembre)?|dic(?:iembre)?|jan|apr|aug|dec)\.?\s*[\-–:]?\s*(.+)$/i;
 
+/* ---- Itinerarios en tabla: "dd/mm/aa  descripción" con renglones de continuación ---- */
+function ciudadPorCodigo(code){
+  var C=norm(code),r=null;
+  FOTOS.forEach(function(f){if(!r&&f.c.indexOf(C)>=0)r=f;});
+  if(!r)FOTOS.forEach(function(f){if(!r&&f.a.some(function(a){return norm(a).indexOf(C)===0;}))r=f;});
+  return r;
+}
+function sumarDias(f,n){var d=new Date(Date.UTC(f.y,f.m-1,f.d+n));return {d:d.getUTCDate(),m:d.getUTCMonth()+1,y:d.getUTCFullYear()};}
+function esTabla(txt){return txt.split(/\r?\n/).filter(function(l){return /^\s*\d{1,2}\/\d{1,2}\/\d{2,4}\s+\S/.test(l);}).length>=2;}
+function parseTabla(txt,kindDef){
+  var svs=[],noches={},ciudades=[],cur=null,city=null,last=null,warns=[];
+  function key(f){return f.y*10000+f.m*100+f.d;}
+  function linea(t,f){
+    t=t.replace(/\s{2,}/g,' ').trim();if(!t||/^[-=_]{5,}$/.test(t)||/^fecha\s+descrip/i.test(t))return;
+    var mh=t.match(/^(hotel|hostal|posada|pousada|lodge|resort|apart\s*hotel)\b\s*(.*)$/i);
+    if(mh){noches[key(f)]={nombre:titleCase(t).replace(/\b(Nh|Hb|Ac|Ws|Gh|By)\b/g,function(x){return x==='By'?'by':x.toUpperCase();}),f:f,city:city};return;}
+    var mi=t.match(/^incluye\s*:?\s*(.+)$/i);if(mi){if(last){last.det=(last.det?last.det+' · ':'')+'Incluye: '+mi[1].toLowerCase();}return;}
+    if(/^(d[ií]a|ma[nñ]ana|tarde|noche)?\s*libre\b/i.test(t)||/^(ma[nñ]ana|tarde|d[ií]a) libre/i.test(t))return;
+    var mc=t.match(/^([A-Z]{3})\s*:\s*/);if(mc){var cc=ciudadPorCodigo(mc[1]);if(cc){city=cc;if(ciudades.indexOf(cc)<0)ciudades.push(cc);}t=t.slice(mc[0].length);}
+    var hora='',mt=t.match(/^(\d{1,2}[:.]\d{2})(?:\s*(?:a|-|–|hs\.?\s*a)\s*(\d{1,2}[:.]\d{2}))?\s*(hs\.?)?\s*/i);
+    if(mt){hora=mt[2]?mt[1]+' a '+mt[2]+' hs':mt[1]+' hs';t=t.slice(mt[0].length);}
+    var mtu=t.match(/^(am|pm|por la ma[nñ]ana|por la tarde|por la noche)\s*[:,-]?\s*/i);
+    if(mtu){var tu=mtu[1].toLowerCase();hora=hora||({am:'Por la mañana',pm:'Por la tarde'}[tu]||tu.charAt(0).toUpperCase()+tu.slice(1));t=t.slice(mtu[0].length);}
+    t=limpiarPrecio(t);if(t.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g,'').length<4)return;
+    var kd=/privad/i.test(t)?'privado':(/regular|compartid|\bsib\b/i.test(t)?'regular':kindDef);
+    t=t.replace(/\(\s*(privado|regular|compartido|sib)\s*\)/ig,'').trim();
+    if(/^(traslado|transfer|trf)\b/i.test(t)){
+      var rt=t.replace(/^(traslado|transfer|trf)\s*(privado|regular|compartido)?\s*(de\s+)?/i,'');
+      var ps=rt.split(/\s*\/\s*|\s+[-–>→]+\s+/);
+      if(ps.length>=2){
+        var fr=ps[0].trim(),to=ps.slice(1).join(' - ').trim();
+        var tp=/aeropuerto|airport/i.test(fr)?'in':(/aeropuerto|airport/i.test(to)?'out':'tr');
+        last={tipo:tp,kind:kd,rawFrom:fr,rawTo:to,f:f,city:city,hora:hora,ready:true};svs.push(last);return;
+      }
+    }
+    var ti=aplicarGlosario(titleCase(t)).replace(/^Embarque en (Tren .+?) con Destino (?:al Pueblo de |a la Ciudad de |al |a )(.+)$/,'$1 a $2');
+    last={tipo:'exc',titulo:ti,f:f,city:city,det:hora,raw:t};svs.push(last);
+  }
+  txt.split(/\r?\n/).forEach(function(l){
+    var m=l.match(/^\s*(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+(.*)$/);
+    if(m){var y=+m[3];if(y<100)y+=2000;cur={d:+m[1],m:+m[2],y:y};linea(m[4],cur);return;}
+    if(cur)linea(l,cur);
+  });
+  function hotelEn(f){var h=noches[key(f)];return h?h.nombre:'';}
+  function lugarT(raw,s,esOrigen){
+    var r=raw.trim(),c=s.city;
+    if(/^hotel$/i.test(r)){var h=esOrigen?(hotelEn(sumarDias(s.f,-1))||hotelEn(s.f)):(hotelEn(s.f)||hotelEn(sumarDias(s.f,-1)));return h||'Hotel';}
+    if(/^aeropuerto$/i.test(r))return 'Aeropuerto'+(c?' '+nombreDestino(c):'');
+    return titleCase(r).replace(/^Estacion\b/,'Estación').replace(/\bEstacion\b/g,'Estación');
+  }
+  svs.forEach(function(s){if(s.ready){s.from=lugarT(s.rawFrom,s,true);s.to=lugarT(s.rawTo,s,false);if(s.hora)s.det=s.hora;}});
+  // agrupar noches consecutivas en un mismo hotel
+  var ks=Object.keys(noches).sort(),grupos=[];
+  ks.forEach(function(k){var n=noches[k],g=grupos[grupos.length-1];
+    if(g&&g.nombre===n.nombre&&key(sumarDias(g.ult,1))===+k){g.ult=n.f;g.n++;}else grupos.push({nombre:n.nombre,f:n.f,ult:n.f,n:1});});
+  grupos.forEach(function(g){svs.push({tipo:'hotel',hotel:g.nombre,det:[],noches:g.n,f:g.f,co:sumarDias(g.ult,1),ready:true});});
+  return {svs:svs,ciudades:ciudades,warns:warns};
+}
+
 /* ---- Solicitud de servicios ---- */
 function parseServicios(txt){
   var warns=[],lines=txt.split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean);
@@ -96,8 +155,14 @@ function parseServicios(txt){
   var hoteles=[],rawL=txt.split(/\r?\n/).map(function(l){return l.trim();});
   rawL.forEach(function(l,i){if(/^\(\s*\d\s*\*?\s*\)$/.test(l)||/^\*{3,5}$/.test(l)){for(var j=i-1;j>=0;j--){if(rawL[j]){if(!/:/.test(rawL[j]))hoteles.push(rawL[j]);break;}}}});
   if(!hoteles.length)rawL.forEach(function(l){if(/^(hotel|hostal|posada|pousada|resort)\s+\S+/i.test(l)&&!/\d{1,2}\/\d/.test(l)&&l.length<70)hoteles.push(l);});
-  var paxKv=kv['NOMBRE PAX']||kv['PASAJERO']||kv['PASAJEROS']||kv['NOMBRE']||'',nKv=+(kv['N PAXS']||kv['N PAX']||kv['NO PAXS']||kv['CANTIDAD DE PAX']||kv['PAXS']||0)||0;
+  var paxKv=kv['NOMBRE PAX']||kv['PASAJERO TITULAR']||kv['TITULAR']||kv['PASAJERO']||kv['PASAJEROS']||kv['NOMBRE']||'',nKv=parseInt(kv['N PAXS']||kv['N PAX']||kv['NO PAXS']||kv['CANTIDAD DE PAX']||kv['CANTIDAD']||kv['PAXS']||0,10)||0;
   if(!nKv){var mb=txt.match(/base\s+(\d+)\s*paxs?/i)||txt.match(/\b(\d+)\s*paxs?\b/i);if(mb)nKv=+mb[1];}
+  var TB=null;
+  if(esTabla(txt)){
+    var kdef=/PRIVAD/.test(norm(kv['SERVICIOS EN']||''))?'privado':(/COMPART|REGULAR/.test(norm(kv['SERVICIOS EN']||''))?'regular':'');
+    TB=parseTabla(txt,kdef);lines=[];hoteles=[];
+  }
+
   lines.forEach(function(l){
     var low=norm(l);
     var mn=l.match(/^[\s\-–•*·]*(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s*[-–:]?\s*([A-Za-zÁÉÍÓÚÑáéíóúñ*].+)$/);
@@ -169,7 +234,12 @@ function parseServicios(txt){
     if(!ci)warns.push('Hotel "'+h+'" sin fecha de entrada: completala en el voucher.');
   });
   if(!paxTxt&&paxKv){var pm2=paxKv.match(/^(.+?)\s*\(\s*(\d+)\s*pax/i)||paxKv.match(/^(.+?)\s*[xX]\s*(\d+)\s*$/);paxTxt=titleCase(pm2?pm2[1]:paxKv);if(pm2&&!nKv)nKv=+pm2[2];}if(!paxN&&nKv)paxN=nKv;
-  return {dest:dest,svs:svs.concat(hotelSvs),paxTxt:paxTxt,paxN:paxN,warns:warns,anio:anio,opTxt:opTxt,hoteles:hoteles};
+  var destTitulo='';
+  if(TB){svs=TB.svs;warns=warns.concat(TB.warns);
+    if(TB.ciudades.length){dest=TB.ciudades.filter(function(c){return c.p||c.f;})[0]||TB.ciudades[0];
+      if(TB.ciudades.length>1)destTitulo=TB.ciudades.slice(0,3).map(nombreDestino).join(' · ');}
+  }
+  return {dest:dest,destTitulo:destTitulo,svs:svs.concat(hotelSvs),paxTxt:paxTxt,paxN:paxN,warns:warns,anio:anio,opTxt:opTxt,hoteles:hoteles};
 }
 
 function lugar(t,dest,hoteles){
@@ -193,16 +263,16 @@ function armarVoucher(txtServ,txtVuelos){
   var items=[];
   S.svs.forEach(function(s){
     var it={f:s.f,tipo:s.tipo};
-    if(s.tipo==='exc'){it.titulo=s.titulo;items.push(it);return;}
+    if(s.tipo==='exc'){it.titulo=s.titulo;if(s.det)it.det=s.det;items.push(it);return;}
     if(s.tipo==='hotel'){
-      it.titulo=titleCase(s.hotel).replace(/\b(Nh|Hb|Ac|Ws|Gh)\b/g,function(x){return x.toUpperCase();});
+      it.titulo=(s.ready?s.hotel:titleCase(s.hotel).replace(/\b(Nh|Hb|Ac|Ws|Gh)\b/g,function(x){return x.toUpperCase();})).replace(/^(Hotel|Hostal|Posada|Pousada|Lodge) (el|la|los|las|del|de)\b/,function(m,a,b){return a+' '+b.charAt(0).toUpperCase()+b.slice(1);});
       var d=s.det.map(function(x){return x.charAt(0).toUpperCase()+x.slice(1).toLowerCase();}).join(' · ');
       it.det=['Alojamiento'+(d?' · '+d:''),s.noches?(s.noches+(s.noches===1?' noche':' noches')):'',s.co?'salida '+s.co.d+' '+MESES[s.co.m-1]:''].filter(Boolean).join(' · ');
       items.push(it);return;
     }
     var k=s.kind==='privado'?'Privado':(s.kind==='regular'?'Regular':'');
     it.titulo=('Traslado '+k).trim()+(s.tipo==='tr'?'':' – '+(s.tipo==='in'?'IN':'OUT'));
-    it.from=lugar(s.from,dest,S.hoteles);it.to=lugar(s.to,dest,S.hoteles);
+    if(s.ready){it.from=s.from;it.to=s.to;if(s.det)it.det=s.det;}else{it.from=lugar(s.from,dest,S.hoteles);it.to=lugar(s.to,dest,S.hoteles);}
     // vuelo asociado
     if(s.f&&V.vuelos.length&&s.tipo!=='tr'){
       var cand=V.vuelos.filter(function(v){
@@ -215,7 +285,8 @@ function armarVoucher(txtServ,txtVuelos){
     }
     items.push(it);
   });
-  items.sort(function(a,b){var o={in:0,hotel:1,exc:2,tr:3,out:4};return (a.f?iso(a.f):0)-(b.f?iso(b.f):0)||((o[a.tipo]||0)-(o[b.tipo]||0));});
+  items.forEach(function(x,i){x._i=i;});
+  items.sort(function(a,b){return (a.f?iso(a.f):0)-(b.f?iso(b.f):0)||((a.tipo==='hotel')-(b.tipo==='hotel'))||(a._i-b._i);});
   // pasajeros
   var pax=V.pax.length?V.pax:(S.paxTxt?[S.paxTxt]:[]);
   if(S.paxN&&pax.length>1&&pax.length!==S.paxN)warns.push('La solicitud dice x'+S.paxN+' pero hay '+pax.length+' nombre(s) en el PNR/solicitud.');
@@ -228,5 +299,5 @@ function armarVoucher(txtServ,txtVuelos){
   var opTxt=opDet?'':(S.opTxt||'');
   if(!pax.length&&n)warns.push('La solicitud no trae nombres de pasajeros: completalos en el voucher ('+n+' pax).');
   if(opTxt)warns.push('Operador detectado: "'+opTxt+'". No tiene logo cargado; se muestra el nombre. Podés subir el logo.');
-  return {dest:dest,destNombre:dest?nombreDestino(dest):'',pais:dest?paisDe(dest):'',pax:pax,npax:n,items:items,warns:warns,op:opDet,opTxt:opTxt};
+  return {dest:dest,destNombre:S.destTitulo||(dest?nombreDestino(dest):''),pais:dest?paisDe(dest):'',pax:pax,npax:n,items:items,warns:warns,op:opDet,opTxt:opTxt};
 }

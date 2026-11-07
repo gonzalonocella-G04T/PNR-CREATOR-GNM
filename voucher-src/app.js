@@ -27,6 +27,7 @@ var IC={
  traslado:'<path d="M4 16v-4l2-5h12l2 5v4z"/><path d="M4 12h16"/><circle cx="8" cy="17.5" r="1.6"/><circle cx="16" cy="17.5" r="1.6"/>',
  brujula:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>'};
 IC.nieve=IC.hielo;
+IC.tren='<rect x="5" y="3" width="14" height="13" rx="3"/><path d="M5 10h14M8.5 21l1.5-4M15.5 21l-1.5-4"/><circle cx="9" cy="13" r=".9"/><circle cx="15" cy="13" r=".9"/>';
 IC.hotel='<path d="M3 18V7M3 13h18v5M21 18v-3a3 3 0 00-3-3h-7v1"/><circle cx="7" cy="10" r="2"/><path d="M3 18h18"/>';
 IC.hielo='<path d="M3 17l3-8 3 3 3-7 3 6 3-2 3 8z"/><path d="M2 20.5c2-1.2 4-1.2 6 0s4 1.2 6 0 4-1.2 6 0"/>';
 IC.piramide='<path d="M12 3L2 20h20z"/><path d="M12 3l3 17M7.5 11.5h9"/>';
@@ -38,6 +39,7 @@ IC.parque='<path d="M2 18c3 0 4-10 7-10s3 8 6 8 3-6 7-6"/><path d="M4 21v-5M9 21
 IC.rascacielos='<path d="M3 21h18M5 21V10h4v11M9 21V3h6v18M15 21V8h4v13M11 7h2M11 11h2M11 15h2"/>';
 IC.monumento='<path d="M10 21l1-14 1-4 1 4 1 14z"/><path d="M6 21h12M8 18h8"/>';
 var ICMAP=[
+ [/\btren\b|train|ferrocarril|expedition|vistadome|hiram bingham/i,'tren'],
  [/parque tem[aá]tico|disney|universal studios|six flags|beto carrero|seaworld|monta[nñ]a rusa|xcaret|xplor|xel-?h[aá]|parque de diversiones/i,'parque'],
  [/delf[ií]n|ballena|nado con/i,'delfin'],
  [/pir[aá]mide|teotihuac|chich[eé]n|giza|cob[aá]\b/i,'piramide'],
@@ -54,7 +56,7 @@ var ICMAP=[
  [/helic|sobrevuelo|avioneta|globo/i,'avion'],
  [/animal|zool|safari|ping[uü]in|aves|avistaje|fauna|lobos? marinos?|tortuga|cocodril|caballo|cabalgata/i,'animales'],
  [/4x4|buggy|jeep|dunas|quebrada|cuatriciclo|desierto|salinas/i,'jeep'],
- [/trekking|caminata|senderis|mirador|cerro|monta[nñ]a|volc[aá]n|cordillera|andes|torres|fitz|chalt[eé]n|osorno/i,'montana'],
+ [/trekking|caminata|senderis|mirador|cerro|valle|monta[nñ]a|volc[aá]n|cordillera|andes|torres|fitz|chalt[eé]n|osorno/i,'montana'],
  [/city tour|ciudad|centro hist|recorrida|panor[aá]mic|visita de la|museo|iglesia|cultural|hist[oó]ric/i,'ciudad'],
  [/show|tango|cena|noche|folklor|espect/i,'show'],
  [/parque|reserva|selva|bosque|jard|naturaleza/i,'naturaleza'],
