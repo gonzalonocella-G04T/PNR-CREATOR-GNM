@@ -32,7 +32,7 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .hd .lg,.hd .lg2{height:16mm;width:auto;max-width:56mm;object-fit:contain}
 .hd .dv{width:.35mm;height:11mm;background:#b9d8d3;flex:none}
 .v-foto .hero{position:relative;height:84mm;background:#9bd3cb center/cover no-repeat}
-.v-foto .hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,75,79,0) 42%,rgba(23,75,79,.78))}
+.v-foto .hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,52,55,0) 38%,rgba(14,52,55,.55) 62%,rgba(14,52,55,.88))}
 .veil{position:absolute;left:0;right:0;top:0;height:46%;background:linear-gradient(180deg,#fff 0%,rgba(255,255,255,.92) 32%,rgba(255,255,255,.45) 68%,rgba(255,255,255,0) 100%);z-index:1}
 .v-foto .logos{position:absolute;z-index:3;top:6mm;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:7mm}
 .v-foto .logos .lg,.v-foto .logos .lg2{height:17mm;width:auto;max-width:56mm;object-fit:contain}
