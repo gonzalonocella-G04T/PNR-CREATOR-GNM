@@ -24,3 +24,4 @@ el-salvador.jpg	https://images.unsplash.com/photo-1549948711-78d6b434d59b
 el-calafate.jpg	https://images.unsplash.com/photo-1590246646417-b0199da13a3d
 lima.jpg	Foto aportada por Hiperviajes (Gonzalo)
 cuzco.jpg	Foto aportada por Hiperviajes (Gonzalo)
+santiago-de-chile.jpg	Foto aportada por Hiperviajes (Gonzalo) — baja resolución (547 px), reemplazar por una más grande
