@@ -191,7 +191,6 @@ function ajustarLogos(){
     veil.style.height=(60+16*s)+'%';
     veil.style.background='linear-gradient(180deg,rgba(255,255,255,'+a0+') 0%,rgba(255,255,255,'+a1+') 45%,rgba(255,255,255,'+a2+') 78%,rgba(255,255,255,0) 100%)';
     setHv(s>.3?'img/hiperviajes-slogan-dark.png':'img/hiperviajes-slogan-teal.png');
-    if(mode==='auto'&&s>.92&&!state.autoAbajo){state.autoAbajo=true;render();}
   }
   if(mode==='claro'){apply(1);return;}
   if(!ph){apply(.2);return;}
