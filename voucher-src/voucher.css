@@ -28,8 +28,9 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .sheet [contenteditable]:hover{background:rgba(25,192,170,.10)}
 .sheet [contenteditable]:focus{background:rgba(25,192,170,.18)}
 /* ---------- versión con fotos ---------- */
-.v-foto .hd{display:flex;align-items:center;justify-content:space-between;padding:7mm 12mm 5mm;gap:8mm}
-.v-foto .hd .lg{height:15mm;max-width:58mm;object-fit:contain}
+.v-foto .hd,.v-ink .hd{display:flex;align-items:center;justify-content:center;gap:7mm;padding:6mm 12mm 5mm}
+.hd .lg,.hd .lg2{height:14mm;width:auto;max-width:56mm;object-fit:contain}
+.hd .dv{width:.35mm;height:11mm;background:#b9d8d3;flex:none}
 .v-foto .hero{position:relative;height:62mm;background:#9bd3cb center/cover no-repeat}
 .v-foto .hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,75,79,.05) 30%,rgba(23,75,79,.78))}
 .v-foto .hero .tt{position:absolute;left:12mm;bottom:7mm;right:50mm;color:#fff;z-index:2}
@@ -60,8 +61,8 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 /* ---------- versión para imprimir (sin fotos; verdes oscuros que se leen bien en impresora B/N) ---------- */
 .v-foto .hero .ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .v-ink{--g:#0A4F46;--g2:#0D6B5E;--tint:#E3F2EF}
-.v-ink .hd{display:flex;align-items:center;justify-content:space-between;gap:8mm;padding:7mm 12mm 5mm;border-bottom:.8mm solid var(--g)}
-.v-ink .hd .lg{height:15mm;max-width:58mm;object-fit:contain;filter:contrast(1.25) saturate(1.2)}
+.v-ink .hd{border-bottom:.8mm solid var(--g)}
+.v-ink .hd .lg,.v-ink .hd .lg2{filter:contrast(1.25) saturate(1.2)}
 .v-ink .hd .lg:first-child{filter:brightness(.55) saturate(1.6) contrast(1.2)}
 .v-ink .band{position:relative;height:36mm;background:var(--tint);border-bottom:.8mm solid var(--g);border-left:3mm solid var(--g)}
 .v-ink .band .tt{position:absolute;left:9mm;top:50%;transform:translateY(-50%);right:50mm}
@@ -86,10 +87,9 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-dig .hero{position:relative;height:330px;background:#8fd0e6}
 .v-dig .hero .ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .v-dig .hero:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 55%);z-index:1}
-.v-dig .logos{position:absolute;z-index:2;top:16px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:16px}
-.v-dig .logos .lg{height:64px;filter:drop-shadow(0 1px 3px rgba(255,255,255,.9))}
-.v-dig .logos .lg2{height:54px;background:rgba(255,255,255,.85);border-radius:10px;padding:5px 8px}
-.v-dig .logos i{width:1px;height:40px;background:rgba(255,255,255,.9)}
+.v-dig .logos{position:absolute;z-index:3;top:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:16px;background:#fff;border-radius:44px;padding:9px 26px;box-shadow:0 6px 20px rgba(11,74,73,.22)}
+.v-dig .logos .lg,.v-dig .logos .lg2{height:44px;width:auto;max-width:150px;object-fit:contain}
+.v-dig .logos i{width:1px;height:30px;background:#c4dfda;flex:none}
 .v-dig .wave{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:70px;z-index:2}
 .v-dig .tit{text-align:center;padding:4px 20px 14px}
 .v-dig .tit small{display:block;font:600 13px Oswald,sans-serif;letter-spacing:.45em;color:#0f6f64}

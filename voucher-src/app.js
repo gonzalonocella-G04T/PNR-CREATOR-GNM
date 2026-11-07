@@ -5,6 +5,11 @@ function im(path,cls,alt){
   var rel=/^(data:|blob:|https?:)/.test(path);
   return '<img'+(cls?' class="'+cls+'"':'')+' crossorigin="anonymous" src="'+esc(path)+'" alt="'+esc(alt||'')+'"'+(rel?'':' onerror="if(!this.dataset.r){this.dataset.r=1;this.src=REMOTE+this.getAttribute(\'src\')}"')+'>';
 }
+function opImg(path,cls){
+  var o=OPERADORES.filter(function(x){return x.logo===path;})[0];
+  var h=im(path,cls,'Operador');
+  return (o&&o.bg)?h.replace('<img','<img style="background:'+o.bg+';border-radius:1.4mm"'):h;
+}
 function $(id){return document.getElementById(id);}
 function fechaHtml(f){
   if(!f)return '<div class="dt"><b>--</b><i>---</i><u>&nbsp;</u></div>';
@@ -44,7 +49,7 @@ function render(){
       return r+'</div></div>';
     }).join('');
     var ob=$('obs').value.trim();
-    st.innerHTML='<div class="sheet v-dig" id="sheet"><div class="hero">'+(foto?im(foto,'ph',''):'')+'<div class="logos">'+im(hv,'lg','Hiperviajes')+(op?'<i></i>'+im(op,'lg2','Operador'):'')+'</div>'+
+    st.innerHTML='<div class="sheet v-dig" id="sheet"><div class="hero">'+(foto?im(foto,'ph',''):'')+'<div class="logos">'+im(hv,'lg','Hiperviajes')+(op?'<i></i>'+opImg(op,'lg2'):'')+'</div>'+
       '<svg class="wave" viewBox="0 0 540 70" preserveAspectRatio="none"><path d="M0 40C90 10 170 5 270 28S450 62 540 20V70H0Z" fill="#fff"/><path d="M0 52C100 28 200 24 300 42S460 66 540 36V70H0Z" fill="#EAF7F4" opacity=".9"/></svg></div>'+
       '<div class="tit"><small>VOUCHER DE SERVICIOS</small><b contenteditable style="font-size:'+((v.destNombre||'').length>16?40:(v.destNombre||'').length>11?48:58)+'px">'+esc((v.destNombre||'').toUpperCase())+'</b><span contenteditable>'+esc(v.pais.toUpperCase())+'</span></div>'+
       '<div class="card">'+ito+'</div>'+

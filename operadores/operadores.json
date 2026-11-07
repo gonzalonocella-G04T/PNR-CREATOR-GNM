@@ -1,28 +1,18 @@
 [
  {
+  "id": "ads-mundo",
+  "nombre": "ADS Mundo",
+  "logo": "operadores/ads-mundo.png"
+ },
+ {
+  "id": "arcoiris-viajes",
+  "nombre": "Arcoíris Viajes",
+  "logo": "operadores/arcoiris-viajes.png"
+ },
+ {
   "id": "barlan-travel",
   "nombre": "Barlan Travel",
   "logo": "operadores/barlan-travel.png"
- },
- {
-  "id": "vi-travel",
-  "nombre": "Vi Travel",
-  "logo": "operadores/vi-travel.png"
- },
- {
-  "id": "otium-international",
-  "nombre": "Otium International",
-  "logo": "operadores/otium-international.png"
- },
- {
-  "id": "lares-argentina",
-  "nombre": "Lares Argentina",
-  "logo": "operadores/lares-argentina.png"
- },
- {
-  "id": "prestigio",
-  "nombre": "Prestigio Operadores Receptivos",
-  "logo": "operadores/prestigio.png"
  },
  {
   "id": "brasil-voyage",
@@ -30,8 +20,75 @@
   "logo": "operadores/brasil-voyage.png"
  },
  {
+  "id": "cts-turismo",
+  "nombre": "CTS Turismo",
+  "logo": "operadores/cts-turismo.png"
+ },
+ {
+  "id": "de-palm-tours",
+  "nombre": "De Palm Tours Aruba",
+  "logo": "operadores/de-palm-tours.png"
+ },
+ {
+  "id": "fiesta-tours",
+  "nombre": "Fiesta Tours Curaçao",
+  "logo": "operadores/fiesta-tours.png"
+ },
+ {
+  "id": "hover-tours",
+  "nombre": "Hover Tours Venezuela",
+  "logo": "operadores/hover-tours.png",
+  "bg": "#010f67"
+ },
+ {
+  "id": "itaparica-tour",
+  "nombre": "Itaparica Tour Operator",
+  "logo": "operadores/itaparica-tour.png"
+ },
+ {
+  "id": "lares-argentina",
+  "nombre": "Lares Argentina",
+  "logo": "operadores/lares-argentina.png"
+ },
+ {
   "id": "luck-receptivo",
   "nombre": "Luck Receptivo",
   "logo": "operadores/luck-receptivo.png"
+ },
+ {
+  "id": "martin-travel",
+  "nombre": "Martin Travel",
+  "logo": "operadores/martin-travel.png"
+ },
+ {
+  "id": "otium-international",
+  "nombre": "Otium International",
+  "logo": "operadores/otium-international.png"
+ },
+ {
+  "id": "pamtours-ecuador",
+  "nombre": "Pamtours Ecuador",
+  "logo": "operadores/pamtours-ecuador.png",
+  "bg": "#155592"
+ },
+ {
+  "id": "paraty-tours",
+  "nombre": "Paraty Tours",
+  "logo": "operadores/paraty-tours.png"
+ },
+ {
+  "id": "prestigio",
+  "nombre": "Prestigio Operadores Receptivos",
+  "logo": "operadores/prestigio.png"
+ },
+ {
+  "id": "pts-peru",
+  "nombre": "PTS Perú",
+  "logo": "operadores/pts-peru.png"
+ },
+ {
+  "id": "vi-travel",
+  "nombre": "Vi Travel",
+  "logo": "operadores/vi-travel.png"
  }
 ]

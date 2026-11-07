@@ -713,5 +713,442 @@
 ],
 "s": null,
 "f": "purmamarca.jpg"
+},
+{
+"n": "Panamá",
+"p": "Panamá",
+"c": [
+"PTY"
+],
+"a": [
+"PANAMÁ",
+"PANAMA",
+"CIUDAD DE PANAMA"
+],
+"s": "Panamá",
+"f": "panama.jpg"
+},
+{
+"n": "Aruba",
+"p": "Aruba",
+"c": [
+"AUA"
+],
+"a": [
+"ARUBA"
+],
+"s": "Aruba",
+"f": "aruba.jpg"
+},
+{
+"n": "Curazao",
+"p": "Curazao",
+"c": [
+"CUR"
+],
+"a": [
+"CURAZAO",
+"CURACAO",
+"CURAÇAO"
+],
+"s": "Curazao",
+"f": "curazao.jpg"
+},
+{
+"n": "Lima",
+"p": "Perú",
+"c": [
+"LIM"
+],
+"a": [
+"LIMA"
+],
+"s": "Lima",
+"f": "lima.jpg"
+},
+{
+"n": "Cuzco",
+"p": "Perú",
+"c": [
+"CUZ"
+],
+"a": [
+"CUSCO",
+"CUZCO"
+],
+"s": "Cuzco",
+"f": "cuzco.jpg"
+},
+{
+"n": "Machu Picchu",
+"p": "Perú",
+"c": [
+"CUZ"
+],
+"a": [
+"MACHU PICHU",
+"MACHUPICCHU",
+"MACHU PICCHU"
+],
+"s": null,
+"f": "machu-picchu.jpg"
+},
+{
+"n": "Santiago de Chile",
+"p": "Chile",
+"c": [
+"SCL"
+],
+"a": [
+"SANTIAGO",
+"SANTIAGO DE CHILE"
+],
+"s": "Santiago de Chile",
+"f": "santiago-de-chile.jpg"
+},
+{
+"n": "Puerto Varas",
+"p": "Chile",
+"c": [
+"PMC"
+],
+"a": [
+"PUERTO VARAS"
+],
+"s": null,
+"f": "puerto-varas.jpg"
+},
+{
+"n": "Atacama",
+"p": "Chile",
+"c": [
+"CJC"
+],
+"a": [
+"CALAMA",
+"ATACAMA",
+"SAN PEDRO DE ATACAMA"
+],
+"s": null,
+"f": "atacama.jpg"
+},
+{
+"n": "Puerto Montt",
+"p": "Chile",
+"c": [
+"PMC"
+],
+"a": [
+"PUERTO MONTT"
+],
+"s": "Puerto Montt",
+"f": "puerto-montt.jpg"
+},
+{
+"n": "Isla de Pascua",
+"p": "Chile",
+"c": [
+"IPC"
+],
+"a": [
+"RAPA NUI",
+"ISLA DE PASCUA"
+],
+"s": "Isla de Pascua",
+"f": "isla-de-pascua.jpg"
+},
+{
+"n": "Punta Arenas",
+"p": "Chile",
+"c": [
+"PUQ"
+],
+"a": [
+"PUNTA ARENAS"
+],
+"s": null,
+"f": "punta-arenas.jpg"
+},
+{
+"n": "Torres del Paine",
+"p": "Chile",
+"c": [
+"PUQ"
+],
+"a": [
+"PUERTO NATALES",
+"TORRES DEL PAINE"
+],
+"s": null,
+"f": "torres-del-paine.jpg"
+},
+{
+"n": "Volcán Osorno",
+"p": "Chile",
+"c": [
+"PMC"
+],
+"a": [
+"OSORNO",
+"VOLCÁN OSORNO",
+"VOLCAN OSORNO"
+],
+"s": null,
+"f": "volcan-osorno.jpg"
+},
+{
+"n": "Peulla",
+"p": "Chile",
+"c": [
+"PMC"
+],
+"a": [
+"PEULLA"
+],
+"s": null,
+"f": "peulla.jpg"
+},
+{
+"n": "Quito",
+"p": "Ecuador",
+"c": [
+"UIO"
+],
+"a": [
+"QUITO"
+],
+"s": "Quito",
+"f": "quito.jpg"
+},
+{
+"n": "Guayaquil",
+"p": "Ecuador",
+"c": [
+"GYE"
+],
+"a": [
+"GUAYAQUIL"
+],
+"s": null,
+"f": "guayaquil.jpg"
+},
+{
+"n": "Galápagos",
+"p": "Ecuador",
+"c": [
+"GPS",
+"SCY"
+],
+"a": [
+"GALAPAGOS",
+"GALÁPAGOS"
+],
+"s": "Galápagos",
+"f": "galapagos.jpg"
+},
+{
+"n": "Isla Margarita",
+"p": "Venezuela",
+"c": [
+"PMV"
+],
+"a": [
+"MARGARITA",
+"ISLA MARGARITA"
+],
+"s": null,
+"f": "isla-margarita.jpg"
+},
+{
+"n": "Los Roques",
+"p": "Venezuela",
+"c": [
+"LRV"
+],
+"a": [
+"LOS ROQUES"
+],
+"s": null,
+"f": "los-roques.jpg"
+},
+{
+"n": "Bahamas",
+"p": "Bahamas",
+"c": [
+"NAS"
+],
+"a": [
+"NASSAU",
+"BAHAMAS"
+],
+"s": null,
+"f": "bahamas.jpg"
+},
+{
+"n": "Montego Bay",
+"p": "Jamaica",
+"c": [
+"MBJ"
+],
+"a": [
+"MONTEGO BAY"
+],
+"s": "Montego Bay",
+"f": "montego-bay.jpg"
+},
+{
+"n": "Negril",
+"p": "Jamaica",
+"c": [
+"MBJ",
+"NEG"
+],
+"a": [
+"NEGRIL"
+],
+"s": null,
+"f": "negril.jpg"
+},
+{
+"n": "Ocho Ríos",
+"p": "Jamaica",
+"c": [
+"MBJ",
+"KIN"
+],
+"a": [
+"OCHO RIOS",
+"OCHO RÍOS"
+],
+"s": null,
+"f": "ocho-rios.jpg"
+},
+{
+"n": "La Habana",
+"p": "Cuba",
+"c": [
+"HAV"
+],
+"a": [
+"HABANA",
+"HAVANA",
+"LA HABANA"
+],
+"s": "La Habana",
+"f": "la-habana.jpg"
+},
+{
+"n": "Cayo Largo",
+"p": "Cuba",
+"c": [
+"CYO"
+],
+"a": [
+"CAYO LARGO",
+"CAYO LARGO DEL SUR"
+],
+"s": null,
+"f": "cayo-largo.jpg"
+},
+{
+"n": "Cayo Santa María",
+"p": "Cuba",
+"c": [
+"SNU"
+],
+"a": [
+"CAYO SANTA MARIA",
+"CAYO SANTA MARÍA"
+],
+"s": null,
+"f": "cayo-santa-maria.jpg"
+},
+{
+"n": "Varadero",
+"p": "Cuba",
+"c": [
+"VRA"
+],
+"a": [
+"VARADERO"
+],
+"s": null,
+"f": "varadero.jpg"
+},
+{
+"n": "Barbados",
+"p": "Barbados",
+"c": [
+"BGI"
+],
+"a": [
+"BARBADOS"
+],
+"s": null,
+"f": "barbados.jpg"
+},
+{
+"n": "Roatán",
+"p": "Honduras",
+"c": [
+"RTB"
+],
+"a": [
+"ROATÁN",
+"ROATAN"
+],
+"s": null,
+"f": "roatan.jpg"
+},
+{
+"n": "San Blas",
+"p": "Panamá",
+"c": [
+"PTY"
+],
+"a": [
+"SAN BLAS",
+"GUNA YALA"
+],
+"s": null,
+"f": "san-blas.jpg"
+},
+{
+"n": "Costa Rica",
+"p": "Costa Rica",
+"c": [
+"SJO",
+"LIR"
+],
+"a": [
+"COSTA RICA"
+],
+"s": null,
+"f": "costa-rica.jpg"
+},
+{
+"n": "El Salvador",
+"p": "El Salvador",
+"c": [
+"SAL"
+],
+"a": [
+"EL SALVADOR"
+],
+"s": null,
+"f": "el-salvador.jpg"
+},
+{
+"n": "Belice",
+"p": "Belice",
+"c": [
+"BZE"
+],
+"a": [
+"BELIZE",
+"BELICE"
+],
+"s": null,
+"f": "belice.jpg"
 }
 ]
