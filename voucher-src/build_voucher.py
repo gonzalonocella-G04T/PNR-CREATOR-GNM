@@ -33,6 +33,6 @@ assert '</script' not in js.lower()
 html=('<!doctype html>\n<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
  '<title>Voucher de servicios · Hiperviajes</title><link rel="icon" href="tv-fav/favicon.ico?v=2" sizes="any">'
  '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
- '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;1,500&family=Oswald:wght@500;600;700&display=swap">'
+ '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;1,500&family=Playfair+Display:ital,wght@1,700;1,800;1,900&family=Oswald:wght@500;600;700&display=swap">'
  '<style>'+rd(os.path.join(here,'voucher.css'))+'</style></head><body>'+rd(os.path.join(here,'body.html'))+'<script>'+js+'</script></body></html>\n')
 open(os.path.join(root,'voucher.html'),'w',encoding='utf-8').write(html); print('voucher.html',len(html))

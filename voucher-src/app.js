@@ -98,9 +98,10 @@ function render(){
   }else{
     hero='';
     intro='<div class="ihd"><div class="lgs">'+im(state.hvUpload?hv:'img/hiperviajes-slogan-dark.png','lg','Hiperviajes')+(op?'<i></i>'+opImg(op,'lg2'):'')+'</div>'+
-      '<div class="row"><div class="tt"><small><i></i>VOUCHER DE SERVICIOS</small><b contenteditable>'+esc((v.destNombre||'').toUpperCase())+'</b>'+
+      '<div class="row"><div class="tt"><small><i></i>VOUCHER DE SERVICIOS<i></i></small><b contenteditable>'+esc(titleCase(v.destNombre||''))+'</b>'+
+      '<svg class="sw" viewBox="0 0 300 16" preserveAspectRatio="none"><path d="M6 12C80 3 210 1 294 8" fill="none" stroke="url(#swg)" stroke-width="3.2" stroke-linecap="round"/><defs><linearGradient id="swg" x1="0" x2="1"><stop offset="0" stop-color="#0D6B5E"/><stop offset="1" stop-color="#3FA37C"/></linearGradient></defs></svg>'+
       (v.pais?'<span><svg viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0113 0c0 4.8-6.5 11-6.5 11z" fill="currentColor"/><circle cx="12" cy="10" r="2.4" fill="#fff"/></svg><em contenteditable>'+esc(v.pais.toUpperCase())+'</em></span>':'')+'</div>'+
-      (sel?im('sellos/'+sel.f,'st',''):'')+'</div>'+
+      (sel?im('sellos/'+sel.f,'st duo',''):'')+'</div>'+
       '<svg class="iw" viewBox="0 0 600 24" preserveAspectRatio="none"><path d="M0 14C100 2 200 2 300 12S500 24 600 8" fill="none" stroke="#0D6B5E" stroke-width="1.2" opacity=".55"/><path d="M0 19C110 9 210 9 310 17S500 26 600 14" fill="none" stroke="#0D6B5E" stroke-width=".8" opacity=".35"/></svg></div>';
   }
   var abajo=state.logoPos==='abajo'||state.autoAbajo;
@@ -150,6 +151,7 @@ function render(){
     '<div class="obs" contenteditable>'+esc(obs)+'</div></div><div class="ft"><span>Hiperviajes</span><span>Voucher de servicios</span></div></div>';
   st.innerHTML=html;
   ajustarLogos();
+  var du=st.querySelector('img.duo');if(du)duotono(du);
   document.querySelectorAll('.seg button').forEach(function(b){b.classList.toggle('on',b.dataset.v===state.ver);});
 }
 /* ---- Integración automática de logos según la foto ---- */
@@ -187,6 +189,13 @@ function ajustarLogos(){
   if(!ph){apply(.2);return;}
   var run=function(){try{var r=medirArriba(ph,hero,posY);apply(Math.max(0,Math.min(1,(0.82-r.m)*1.4+r.sd*2.2)));}catch(e){apply(.7);}};
   if(ph.complete&&ph.naturalWidth)run();else{ph.addEventListener('load',run,{once:true});ph.addEventListener('error',function(){apply(.7);},{once:true});}
+}
+function duotono(img){
+  function go(){try{var c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;var x=c.getContext('2d');x.drawImage(img,0,0);
+    var d=x.getImageData(0,0,c.width,c.height),p=d.data,D=[10,79,70],L=[244,250,248];
+    for(var i=0;i<p.length;i+=4){var l=(0.2126*p[i]+0.7152*p[i+1]+0.0722*p[i+2])/255;l=Math.pow(l,1.15);p[i]=D[0]+(L[0]-D[0])*l;p[i+1]=D[1]+(L[1]-D[1])*l;p[i+2]=D[2]+(L[2]-D[2])*l;}
+    x.putImageData(d,0,0);img.onload=null;img.src=c.toDataURL('image/png');img.classList.add('ok');}catch(e){img.classList.add('ok');}}
+  if(img.complete&&img.naturalWidth)go();else img.addEventListener('load',go,{once:true});
 }
 function mostrarWarns(){
   var w=state.v?state.v.warns:[],ul=$('warns');

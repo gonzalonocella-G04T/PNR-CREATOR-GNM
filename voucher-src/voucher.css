@@ -107,14 +107,17 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-ink .ihd .lg,.v-ink .ihd .lg2{height:15mm;width:auto;max-width:55mm;object-fit:contain}
 .v-ink .ihd .lg2{filter:contrast(1.15)}
 .v-ink .ihd .lgs i{width:.35mm;height:11mm;background:#9cc6bf}
-.v-ink .ihd .row{display:flex;align-items:center;justify-content:space-between;gap:6mm;padding:4mm 0 1mm}
-.v-ink .ihd .tt small{display:flex;align-items:center;gap:3mm;font:600 3.1mm Oswald,sans-serif;letter-spacing:.35em;color:var(--g2)}
-.v-ink .ihd .tt small i{width:9mm;height:.35mm;background:var(--g2)}
-.v-ink .ihd .tt b{display:block;font:700 11mm/1.05 Montserrat,Oswald,sans-serif;text-transform:uppercase;color:var(--g);margin-top:1.5mm}
-.v-ink .ihd .tt span{display:flex;align-items:center;gap:2mm;margin-top:1.5mm;font:600 3.8mm Inter,sans-serif;letter-spacing:.3em;color:var(--g2)}
-.v-ink .ihd .tt span svg{width:4mm;height:4mm;color:var(--g2)}
+.v-ink .ihd .row{position:relative;display:flex;justify-content:center;padding:4mm 0 1mm}
+.v-ink .ihd .tt{text-align:center;max-width:120mm}
+.v-ink .ihd .tt small{display:flex;align-items:center;justify-content:center;gap:4mm;font:600 3.1mm Montserrat,Oswald,sans-serif;letter-spacing:.38em;color:var(--g2)}
+.v-ink .ihd .tt small i{width:12mm;height:.35mm;background:var(--g2)}
+.v-ink .ihd .tt b{display:block;font:italic 800 15.5mm/1.05 'Playfair Display',Georgia,serif;color:var(--g);margin-top:1.5mm;letter-spacing:-.01em}
+.v-ink .ihd .sw{display:block;width:62%;height:3.4mm;margin:-.5mm auto 0}
+.v-ink .ihd .tt span{display:flex;align-items:center;justify-content:center;gap:2.5mm;margin-top:2mm;font:600 3.8mm Montserrat,Inter,sans-serif;letter-spacing:.45em;color:var(--g2)}
+.v-ink .ihd .tt span svg{width:4.2mm;height:4.2mm;color:var(--g2)}
 .v-ink .ihd .tt span em{font-style:normal}
-.v-ink .ihd .st{height:27mm;transform:rotate(-6deg);filter:contrast(1.2) saturate(1.2)}
+.v-ink .ihd .st{position:absolute;right:2mm;top:50%;height:31mm;transform:translateY(-50%) rotate(-8deg);opacity:0}
+.v-ink .ihd .st.ok{opacity:.92}
 .v-ink .ihd .iw{display:block;width:calc(100% + 14mm);margin:0 -7mm;height:6mm}
 .v-ink .ft{background:#fff;color:var(--g);border-top:.8mm solid var(--g);margin:0 12mm;padding:3mm 0;font-weight:600}
 /* ---------- versión celular (9:16, para WhatsApp/correo) ---------- */
