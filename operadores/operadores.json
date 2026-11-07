@@ -30,7 +30,8 @@
   "logo": "operadores/brasil-voyage.png",
   "k": [
    "BRASIL VOYAGE"
-  ]
+  ],
+  "pais": "Brasil"
  },
  {
   "id": "cts-turismo",
@@ -46,7 +47,8 @@
   "logo": "operadores/de-palm-tours.png",
   "k": [
    "DE PALM"
-  ]
+  ],
+  "pais": "Aruba"
  },
  {
   "id": "fiesta-tours",
@@ -54,7 +56,8 @@
   "logo": "operadores/fiesta-tours.png",
   "k": [
    "FIESTA TOURS"
-  ]
+  ],
+  "pais": "Curazao"
  },
  {
   "id": "hover-tours",
@@ -64,7 +67,8 @@
   "k": [
    "HOVER TOURS",
    "HOVER"
-  ]
+  ],
+  "pais": "Venezuela"
  },
  {
   "id": "itaparica-tour",
@@ -72,7 +76,8 @@
   "logo": "operadores/itaparica-tour.png",
   "k": [
    "ITAPARICA"
-  ]
+  ],
+  "pais": "Brasil"
  },
  {
   "id": "lares-argentina",
@@ -80,7 +85,8 @@
   "logo": "operadores/lares-argentina.png",
   "k": [
    "LARES"
-  ]
+  ],
+  "pais": "Argentina"
  },
  {
   "id": "luck-receptivo",
@@ -88,7 +94,8 @@
   "logo": "operadores/luck-receptivo.png",
   "k": [
    "LUCK"
-  ]
+  ],
+  "pais": "Brasil"
  },
  {
   "id": "martin-travel",
@@ -121,7 +128,8 @@
   "bg": "#155592",
   "k": [
    "PAMTOURS"
-  ]
+  ],
+  "pais": "Ecuador"
  },
  {
   "id": "paraty-tours",
@@ -129,7 +137,8 @@
   "logo": "operadores/paraty-tours.png",
   "k": [
    "PARATY TOURS"
-  ]
+  ],
+  "pais": "Brasil"
  },
  {
   "id": "prestigio",
@@ -137,7 +146,8 @@
   "logo": "operadores/prestigio.png",
   "k": [
    "PRESTIGIO"
-  ]
+  ],
+  "pais": "Argentina"
  },
  {
   "id": "pts-peru",
@@ -146,7 +156,8 @@
   "k": [
    "PTS PERU",
    "PTS"
-  ]
+  ],
+  "pais": "Perú"
  },
  {
   "id": "vi-travel",

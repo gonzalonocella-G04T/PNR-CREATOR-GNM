@@ -240,8 +240,16 @@ function exportarPNG(){
   var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=go;sc.onerror=function(){alert('No pude cargar la librería de exportación.');};document.head.appendChild(sc);
 }
 function init(){
-  $('op').innerHTML=OPERADORES.map(function(o){return '<option value="'+esc(o.id)+'">'+esc(o.nombre)+'</option>';}).join('')+'<option value="">(sin logo de operador)</option>';
-  $('dest').innerHTML='<option value="">Detectar automáticamente</option>'+FOTOS.map(function(f){return '<option>'+esc(f.n)+'</option>';}).join('');
+  function cmp(x,y){return x.localeCompare(y,'es',{sensitivity:'base'});}
+  function grupos(list,pais,nom,opt){
+    var g={};list.forEach(function(x){var p=pais(x)||'';(g[p]=g[p]||[]).push(x);});
+    return Object.keys(g).sort(function(a,b){if(!a)return 1;if(!b)return -1;return cmp(a,b);}).map(function(p){
+      return '<optgroup label="'+esc(p||'Sin país asignado')+'">'+g[p].sort(function(a,b){return cmp(nom(a),nom(b));}).map(opt).join('')+'</optgroup>';}).join('');
+  }
+  $('op').innerHTML='<option value="">(sin logo de operador)</option>'+grupos(OPERADORES,function(o){return o.pais;},function(o){return o.nombre;},function(o){return '<option value="'+esc(o.id)+'">'+esc(o.nombre)+'</option>';});
+  var vistos={},DL=[];
+  FOTOS.forEach(function(f){var nm=f.n,k=norm(nm);if(f.x===undefined){var dup=FOTOS_NEW.some(function(n){return n.a.some(function(al){return norm(al)===norm(f.n);})||norm(n.n)===norm(f.n);});if(dup)return;}if(vistos[k])return;vistos[k]=1;DL.push({f:f,nm:nm});});
+  $('dest').innerHTML='<option value="">Detectar automáticamente</option>'+grupos(DL,function(d){return paisDe(d.f);},function(d){return d.nm;},function(d){return '<option value="'+esc(d.f.n)+'">'+esc(d.nm)+'</option>';});
   $('go').onclick=generar;
   $('op').onchange=function(){state.opUpload=false;state.opTxt='';var o=OPERADORES.filter(function(x){return x.id===$('op').value;})[0];state.opLogo=o?o.logo:null;if(state.v)render();};
   $('opf').onchange=function(){cargarLogo(this,'opLogo','opUpload');};
@@ -252,7 +260,6 @@ function init(){
   $('lpos').onchange=function(){state.logoPos=this.value;state.autoAbajo=false;if(state.v)render();};
   $('prn').onclick=function(){window.print();};
   $('png').onclick=exportarPNG;
-  if(OPERADORES[0])state.opLogo=OPERADORES[0].logo;
   render();
 }
 document.addEventListener('DOMContentLoaded',init);
