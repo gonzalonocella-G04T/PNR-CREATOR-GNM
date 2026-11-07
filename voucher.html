@@ -590,7 +590,7 @@ function render(){
   var titulo=(v.destNombre||'Destino')+(v.pais?'':'' );
   var lug='<span contenteditable>'+esc((v.destNombre||'').toUpperCase())+'</span>'+(v.pais?' – <span contenteditable>'+esc(v.pais.toUpperCase())+'</span>':'');
   var head=((state.ver==='foto'&&!abajo)||state.ver==='ink')?'':'<div class="hd">'+LOGOS+'</div>';
-  var stamp=sel?im('sellos/'+sel.f,'st',''):'';
+  var stamp='';
   var hero,intro;
   if(state.ver==='foto'){
     hero='<div class="hero">'+(foto?im(foto,'ph',''):'')+'<div class="veil"></div><div class="logos">'+im(hv,'lg','Hiperviajes')+(op?'<i></i>'+opImg(op,'lg2'):'')+'</div><div class="tt"><small>VOUCHER DE SERVICIOS</small><b>'+esc((v.destNombre||'').toUpperCase())+'</b><span>'+esc(v.pais)+'</span></div>'+stamp+'</div>';
