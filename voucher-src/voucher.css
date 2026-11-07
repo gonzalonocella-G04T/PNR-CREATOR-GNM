@@ -102,6 +102,20 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-ink .sv .fl{background:var(--tint);border:.4mm solid var(--g);border-radius:5mm;color:#0b2f2a}
 .v-ink .sv .fl i{color:var(--g)}
 .v-ink .obs{border-left:1mm solid var(--g);color:#0b2f2a}
+.v-ink .ihd{margin:8mm 12mm 0;border:.45mm solid var(--g);border-radius:5mm;background:linear-gradient(180deg,#fff 0%,#F1F8F6 100%);padding:5mm 7mm 2mm;position:relative;overflow:hidden}
+.v-ink .ihd .lgs{display:flex;align-items:center;justify-content:center;gap:7mm;padding-bottom:4mm;border-bottom:.3mm dashed #9cc6bf}
+.v-ink .ihd .lg,.v-ink .ihd .lg2{height:15mm;width:auto;max-width:55mm;object-fit:contain}
+.v-ink .ihd .lg2{filter:contrast(1.15)}
+.v-ink .ihd .lgs i{width:.35mm;height:11mm;background:#9cc6bf}
+.v-ink .ihd .row{display:flex;align-items:center;justify-content:space-between;gap:6mm;padding:4mm 0 1mm}
+.v-ink .ihd .tt small{display:flex;align-items:center;gap:3mm;font:600 3.1mm Oswald,sans-serif;letter-spacing:.35em;color:var(--g2)}
+.v-ink .ihd .tt small i{width:9mm;height:.35mm;background:var(--g2)}
+.v-ink .ihd .tt b{display:block;font:700 11mm/1.05 Montserrat,Oswald,sans-serif;text-transform:uppercase;color:var(--g);margin-top:1.5mm}
+.v-ink .ihd .tt span{display:flex;align-items:center;gap:2mm;margin-top:1.5mm;font:600 3.8mm Inter,sans-serif;letter-spacing:.3em;color:var(--g2)}
+.v-ink .ihd .tt span svg{width:4mm;height:4mm;color:var(--g2)}
+.v-ink .ihd .tt span em{font-style:normal}
+.v-ink .ihd .st{height:27mm;transform:rotate(-6deg);filter:contrast(1.2) saturate(1.2)}
+.v-ink .ihd .iw{display:block;width:calc(100% + 14mm);margin:0 -7mm;height:6mm}
 .v-ink .ft{background:#fff;color:var(--g);border-top:.8mm solid var(--g);margin:0 12mm;padding:3mm 0;font-weight:600}
 /* ---------- versión celular (9:16, para WhatsApp/correo) ---------- */
 .v-dig{display:flex;flex-direction:column;width:540px;min-height:960px;border-radius:0;background:linear-gradient(180deg,#fff,#EAF7F4 55%,#fff);font-family:Inter,sans-serif;color:#0f3d3a}

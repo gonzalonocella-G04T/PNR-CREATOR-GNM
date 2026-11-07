@@ -89,7 +89,7 @@ function render(){
   var cls={foto:'v-foto',ink:'v-ink',dig:'v-dig2'}[state.ver];
   var titulo=(v.destNombre||'Destino')+(v.pais?'':'' );
   var lug='<span contenteditable>'+esc((v.destNombre||'').toUpperCase())+'</span>'+(v.pais?' – <span contenteditable>'+esc(v.pais.toUpperCase())+'</span>':'');
-  var head=(state.ver==='foto'&&!abajo)?'':'<div class="hd">'+im(hv,'lg','Hiperviajes')+(op?im(op,'lg','Operador'):'<span></span>')+'</div>';
+  var head=((state.ver==='foto'&&!abajo)||state.ver==='ink')?'':'<div class="hd">'+im(hv,'lg','Hiperviajes')+(op?im(op,'lg','Operador'):'<span></span>')+'</div>';
   var stamp=sel?im('sellos/'+sel.f,'st',''):'';
   var hero,intro;
   if(state.ver==='foto'){
@@ -97,7 +97,11 @@ function render(){
     intro='';
   }else{
     hero='';
-    intro='<div class="band"><div class="tt"><small>VOUCHER DE SERVICIOS</small><b>'+esc((v.destNombre||'').toUpperCase())+'</b><span>'+esc(v.pais)+'</span></div>'+(sel?im('sellos/'+sel.f,'st',''):'')+'</div>';
+    intro='<div class="ihd"><div class="lgs">'+im(state.hvUpload?hv:'img/hiperviajes-slogan-dark.png','lg','Hiperviajes')+(op?'<i></i>'+opImg(op,'lg2'):'')+'</div>'+
+      '<div class="row"><div class="tt"><small><i></i>VOUCHER DE SERVICIOS</small><b contenteditable>'+esc((v.destNombre||'').toUpperCase())+'</b>'+
+      (v.pais?'<span><svg viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0113 0c0 4.8-6.5 11-6.5 11z" fill="currentColor"/><circle cx="12" cy="10" r="2.4" fill="#fff"/></svg><em contenteditable>'+esc(v.pais.toUpperCase())+'</em></span>':'')+'</div>'+
+      (sel?im('sellos/'+sel.f,'st',''):'')+'</div>'+
+      '<svg class="iw" viewBox="0 0 600 24" preserveAspectRatio="none"><path d="M0 14C100 2 200 2 300 12S500 24 600 8" fill="none" stroke="#0D6B5E" stroke-width="1.2" opacity=".55"/><path d="M0 19C110 9 210 9 310 17S500 26 600 14" fill="none" stroke="#0D6B5E" stroke-width=".8" opacity=".35"/></svg></div>';
   }
   var abajo=state.logoPos==='abajo'||state.autoAbajo;
   var LOGOS=im(hv,'lg hvlogo','Hiperviajes')+(op?'<i></i>'+opImg(op,'lg2 oplogo'):'');
