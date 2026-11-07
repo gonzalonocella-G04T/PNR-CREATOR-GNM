@@ -1,6 +1,6 @@
 Fotos de destinos (1800 px de ancho). Unsplash, licencia Unsplash (uso comercial libre, sin atribución obligatoria).
 
-porto-de-galinhas.jpg	https://images.unsplash.com/photo-1597259847845-d4737f7e8e46
+porto-de-galinhas.jpg	Foto aportada por Hiperviajes (Gonzalo) — baja resolución (547 px), reemplazar por una más grande
 praia-do-forte.jpg	https://images.unsplash.com/photo-1745681278433-4f45b29fb3c4
 buzios.jpg	https://images.unsplash.com/photo-1640227204151-b089f08aab4f
 tulum.jpg	https://images.unsplash.com/photo-1775159363607-c78429fe81af
