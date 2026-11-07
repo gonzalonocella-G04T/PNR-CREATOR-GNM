@@ -214,6 +214,9 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-dig2 .optxt{font-size:26px;max-width:220px}
 .sheet .ph{color:#9bb5b1;font-weight:500;font-style:italic}
 .v-dig2 .cnt{margin-left:8px;font:700 12px Montserrat,sans-serif;letter-spacing:.12em;color:#1f8f82;background:#fff;border-radius:20px;padding:4px 10px}
+#items .itm{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;margin-top:6px}
+#items .itm label{margin:0;font-weight:500;color:var(--ink)}
+#items .itm input{margin-top:2px;accent-color:var(--sky)}
 @media print{
  @page{size:A4;margin:0}
  html,body{background:#fff}

@@ -27,6 +27,7 @@ var IC={
  traslado:'<path d="M4 16v-4l2-5h12l2 5v4z"/><path d="M4 12h16"/><circle cx="8" cy="17.5" r="1.6"/><circle cx="16" cy="17.5" r="1.6"/>',
  brujula:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>'};
 IC.nieve=IC.hielo;
+IC.hotel='<path d="M3 18V7M3 13h18v5M21 18v-3a3 3 0 00-3-3h-7v1"/><circle cx="7" cy="10" r="2"/><path d="M3 18h18"/>';
 IC.hielo='<path d="M3 17l3-8 3 3 3-7 3 6 3-2 3 8z"/><path d="M2 20.5c2-1.2 4-1.2 6 0s4 1.2 6 0 4-1.2 6 0"/>';
 IC.piramide='<path d="M12 3L2 20h20z"/><path d="M12 3l3 17M7.5 11.5h9"/>';
 IC.lago='<path d="M3 13l5-6 3 4 3-3 7 5"/><path d="M2 17c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0M4 20.5c2-1.2 4-1.2 6 0s4 1.2 6 0"/>';
@@ -59,6 +60,7 @@ var ICMAP=[
  [/parque|reserva|selva|bosque|jard|naturaleza/i,'naturaleza'],
  [/playa|beach|day pass|cayo|sol\b/i,'playa']];
 function iconKey(it){
+  if(it.tipo==='hotel')return 'hotel';
   if(it.tipo!=='exc')return 'traslado';
   var t=it.titulo||'';for(var i=0;i<ICMAP.length;i++)if(ICMAP[i][0].test(t))return ICMAP[i][1];return 'brujula';
 }
@@ -77,12 +79,13 @@ function fechaHtml(f){
 function itemHtml(it){
   var fo=(it.tipo==='exc'&&state.ver==='foto')?excFoto(it.titulo||''):'';
   var h='<div class="sv'+(fo?' exc':'')+'">'+(fo?'<div class="strip">'+im(fo,'','')+'<div class="fade"></div></div>':'')+fechaHtml(it.f)+'<div class="tx"><div class="ti"><span class="icw">'+iconSvg(it)+'</span><span contenteditable>'+esc(it.titulo)+'</span></div>';
+  if(it.det)h+='<div class="rt" contenteditable>'+esc(it.det)+'</div>';
   if(it.from)h+='<div class="rt"><span contenteditable>'+esc(it.from)+'</span><em>→</em><span contenteditable>'+esc(it.to)+'</span></div>';
   if(it.vuelo){var v=it.vuelo;h+='<div class="fl"><span contenteditable>'+esc(v.n)+'</span><i>|</i><span contenteditable>'+v.from+' → '+v.to+'</span><i>|</i><span contenteditable>'+v.dep+' – '+v.arr+(v.sig?' (+1)':'')+'</span></div>';}
   return h+'</div></div>';
 }
 function render(){
-  var v=state.v,st=$('stage');
+  var v0=state.v,st=$('stage'),v=v0?Object.assign({},v0,{items:v0.items.filter(function(x){return !x.off;})}):v0;
   if(!v){st.innerHTML='<p class="hint" style="text-align:center;margin-top:60px">Pegá la solicitud y las líneas de vuelo, y tocá “Generar voucher”.</p>';return;}
   var dest=v.dest,foto=dest?(dest.p||(dest.f?'tv-fotos/'+dest.f:'')):'',sel=dest?selloDe(dest):null;
   var hv=state.hvLogo||HV_LOGO,op=state.opLogo;
@@ -125,7 +128,7 @@ function render(){
       if(it.tipo==='exc'){var ps=tit.split(/\s+\+\s+/);main=ps[0];sub=ps.length>1?'+ '+ps.slice(1).join(' + '):'';}
       var body='<div class="tp">'+SV(IC[iconKey(it)],'ico')+'<div class="x"><div class="t" contenteditable>'+esc(main)+'</div>'+
         (it.from?'<div class="o"><span contenteditable>'+esc(it.from)+'</span><em>→</em><span contenteditable>'+esc(it.to)+'</span></div>':'')+
-        (sub?'<div class="sub" contenteditable>'+esc(sub)+'</div>':'')+'</div></div>';
+        (it.det?'<div class="o" contenteditable>'+esc(it.det)+'</div>':'')+(sub?'<div class="sub" contenteditable>'+esc(sub)+'</div>':'')+'</div></div>';
       if(it.vuelo){var q=it.vuelo;body+='<div class="fl">'+SV(PLANE,'pl')+'<span contenteditable>'+esc(q.n)+'</span><i>|</i><span contenteditable>'+q.from+' → '+q.to+'</span><i>|</i><b contenteditable>'+q.dep+' – '+q.arr+(q.sig?' (+1)':'')+'</b></div>';}
       var fo=it.tipo==='exc'?excFoto(tit):'';
       return '<div class="r'+(fo?' exc':'')+'">'+(fo?'<div class="strip">'+im(fo,'','')+'<div class="fade"></div></div>':'')+chip+'<div class="vl"></div><div class="bd">'+body+'</div></div>';
@@ -199,6 +202,11 @@ function duotono(img){
     x.putImageData(d,0,0);img.onload=null;img.src=c.toDataURL('image/png');img.classList.add('ok');}catch(e){img.classList.add('ok');}}
   if(img.complete&&img.naturalWidth)go();else img.addEventListener('load',go,{once:true});
 }
+function listaItems(){
+  var box=$('items');if(!box)return;if(!state.v){box.innerHTML='';return;}
+  box.innerHTML='<label>Servicios en el voucher</label>'+state.v.items.map(function(it,i){var f=it.f?(it.f.d+' '+MESES[it.f.m-1]):'s/f';return '<div class="itm"><input type="checkbox" id="it'+i+'" '+(it.off?'':'checked')+'><label for="it'+i+'">'+f+' · '+esc(it.titulo)+'</label></div>';}).join('');
+  state.v.items.forEach(function(it,i){$('it'+i).onchange=function(){it.off=!this.checked;render();};});
+}
 function mostrarWarns(){
   var w=state.v?state.v.warns:[],ul=$('warns');
   ul.innerHTML=!state.v?'':(w.length?w.map(function(x){return '<li>⚠ '+esc(x)+'</li>';}).join(''):'<li class="ok">Todo coincide: fechas, vuelos y pasajeros.</li>');
@@ -212,7 +220,7 @@ function generar(){
   if(v.op&&!state.opUpload){$('op').value=v.op.id;state.opLogo=v.op.logo;state.opTxt='';}
   else if(v.opTxt&&!state.opUpload){$('op').value='';state.opLogo=null;state.opTxt=v.opTxt;}
   else{state.opTxt='';var op=OPERADORES.filter(function(o){return o.id===$('op').value;})[0];if(op&&!state.opUpload)state.opLogo=op.logo;}
-  mostrarWarns();render();
+  mostrarWarns();listaItems();render();
 }
 function cargarLogo(inp,key,upKey){
   var f=inp.files[0];if(!f)return;

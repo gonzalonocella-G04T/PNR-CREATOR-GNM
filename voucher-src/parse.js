@@ -81,9 +81,9 @@ function kvCampos(lines){ // "Etiqueta:" en una línea y el valor en la siguient
   }
   return kv;
 }
-function anioDeTexto(txt){var m=txt.match(/\b(\d{1,2})\s+(?:de\s+)?([A-Za-zé]+)\s+(?:de\s+)?(20\d\d)\b/);if(m&&MES_TXT[m[2].toLowerCase()])return {y:+m[3],m:MES_TXT[m[2].toLowerCase()]};m=txt.match(/\b(20\d\d)\b/);return m?{y:+m[1],m:1}:null;}
+function anioDeTexto(txt){var m=txt.match(/\b(\d{1,2})\s+(?:de\s+)?([A-Za-zé]+)\s+(?:de\s+)?(20\d\d)\b/);if(m&&MES_TXT[m[2].toLowerCase()])return {y:+m[3],m:MES_TXT[m[2].toLowerCase()],d:+m[1]};m=txt.match(/\b(\d{1,2})\/(\d{1,2})\/(20\d\d)\b/);if(m)return {y:+m[3],m:+m[2],d:+m[1]};m=txt.match(/\b(20\d\d)\b/);return m?{y:+m[1],m:1}:null;}
 function limpiarPrecio(t){return t.replace(/\s+(sgl|dbl|tpl|single|doble|triple|usd|us\$|u\$s|\$|precio|neto|tarifa|por\s+pax)\b.*$/i,'').replace(/\s+\b[A-Z]{3}\b\s*$/,'').trim();}
-var RE_LINEA_FECHA=/^[\s\-–•*·]*(\d{1,2})[\s\-\/]*(ene(?:ro)?|feb(?:rero)?|mar(?:zo)?|abr(?:il)?|may(?:o)?|jun(?:io)?|jul(?:io)?|ago(?:sto)?|sep(?:t(?:iembre)?)?|set(?:iembre)?|oct(?:ubre)?|nov(?:iembre)?|dic(?:iembre)?|jan|apr|aug|dec)\.?\s*[\-–:]?\s*(.+)$/i;
+var RE_LINEA_FECHA=/^[\s\-–•*·]*(?:(?:lun|mar|mi[eé]|jue|vie|s[aá]b|dom)[a-zéá]*\.?,?\s+)?(\d{1,2})[\s\-\/]*(ene(?:ro)?|feb(?:rero)?|mar(?:zo)?|abr(?:il)?|may(?:o)?|jun(?:io)?|jul(?:io)?|ago(?:sto)?|sep(?:t(?:iembre)?)?|set(?:iembre)?|oct(?:ubre)?|nov(?:iembre)?|dic(?:iembre)?|jan|apr|aug|dec)\.?\s*[\-–:]?\s*(.+)$/i;
 
 /* ---- Solicitud de servicios ---- */
 function parseServicios(txt){
@@ -100,14 +100,19 @@ function parseServicios(txt){
   if(!nKv){var mb=txt.match(/base\s+(\d+)\s*paxs?/i)||txt.match(/\b(\d+)\s*paxs?\b/i);if(mb)nKv=+mb[1];}
   lines.forEach(function(l){
     var low=norm(l);
+    var mn=l.match(/^[\s\-–•*·]*(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s*[-–:]?\s*([A-Za-zÁÉÍÓÚÑáéíóúñ*].+)$/);
     var md=l.match(RE_LINEA_FECHA);
-    if(md&&!/^\d{1,2}\/\d/.test(l)){
-      var mes=MES_TXT[md[2].toLowerCase().slice(0,3)]||MES_TXT[md[2].toLowerCase()];
-      var y=anio||(ref&&ref.y)||new Date().getFullYear();if(ref&&mes<ref.m)y=ref.y+1;
-      var f={d:+md[1],m:mes,y:y},cuerpo=limpiarPrecio(md[3].replace(/^\*+\s*/,''));
+    if(!md&&mn)md=[mn[0],mn[1],'#'+mn[2]+(mn[3]?'/'+mn[3]:''),mn[4]];
+    if(md&&(md[2].charAt(0)==='#'||!/^\d{1,2}\/\d/.test(l))){
+      var mes,y;
+      if(md[2].charAt(0)==='#'){var pp2=md[2].slice(1).split('/');mes=+pp2[0];y=pp2[1]?(+pp2[1]<100?+pp2[1]+2000:+pp2[1]):null;}
+      else mes=MES_TXT[md[2].toLowerCase().slice(0,3)]||MES_TXT[md[2].toLowerCase()];
+      if(!y){y=anio||(ref&&ref.y)||new Date().getFullYear();if(ref&&mes<ref.m)y=ref.y+1;}
+      var cu0=md[3].replace(/^\*+\s*/,''),my=cu0.match(/^(?:de\s+)?(20\d\d)\b\s*[-–:]?\s*/i);if(my){y=+my[1];cu0=cu0.slice(my[0].length);}
+      var f={d:+md[1],m:mes,y:y},cuerpo=limpiarPrecio(cu0.replace(/^\*+\s*/,''));
       if(/^(de\s+)?\d{4}$/.test(cuerpo)||cuerpo.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g,'').length<4)return;
       var kd=/privad/i.test(cuerpo)?'privado':(/regular|compartid|\bsib\b|shared/i.test(cuerpo)?'regular':kind);
-      cuerpo=cuerpo.replace(/\(\s*(privado|regular|compartido|sib)\s*\)/ig,'').replace(/\s{2,}/g,' ').trim();
+      cuerpo=cuerpo.replace(/\(\s*(privado|regular|compartido|sib)\s*\)/ig,'').replace(/\s{2,}/g,' ').trim().replace(/\s+\b[A-Z]{3}\b\s*$/,'').trim();
       if(/^(traslado|transfer|trf|in\b|out\b)/i.test(cuerpo)){
         var rt=cuerpo.replace(/^(traslado|transfer|trf)\s*(privado|regular|compartido)?\s*(de\s+)?/i,'').replace(/^(in|out)\s*[:\-]?\s*/i,'');
         var ps=rt.split(/\s*\/\s*|\s+[-–>→]+\s+|\s+a\s+(?=hotel|aeropuerto)/i);
@@ -119,7 +124,8 @@ function parseServicios(txt){
       }else{svs.push({tipo:'exc',titulo:aplicarGlosario(titleCase(cuerpo)),f:f,raw:l});}
       return;
     }
-    var mp=l.match(/^(.+?)\s*[xX]\s*(\d+)\s*$/);
+    var mp=l.match(/^(.+?)\s*[xX]\s*(\d+)\s*$/)||l.match(/^([A-Za-zÁÉÍÓÚÑáéíóúñ' ]{3,60}?)\s*\(\s*(\d+)\s*pax/i);
+    if(mp&&/^(base|ciudad|precio|menor)/i.test(mp[1]))mp=null;
     if(mp&&!/\d\/\d/.test(l)){paxTxt=titleCase(mp[1]);paxN=+mp[2];return;}
     var ml=l.match(/^(llegada|salida|in|out|ida|regreso)\s*:\s*(.+)$/i);
     if(ml){
@@ -151,13 +157,24 @@ function parseServicios(txt){
     }
   });
   if(!dest&&hdrDest)dest=hdrDest;
-  if(!paxTxt&&paxKv)paxTxt=titleCase(paxKv);if(!paxN&&nKv)paxN=nKv;
-  return {dest:dest,svs:svs,paxTxt:paxTxt,paxN:paxN,warns:warns,anio:anio,opTxt:opTxt,hoteles:hoteles};
+  var hotelSvs=[];
+  hoteles.forEach(function(h){
+    var i0=rawL.indexOf(h),det=[],noches=null,j,l2;
+    for(j=i0+1;j<rawL.length&&j<i0+25;j++){l2=rawL[j];if(!l2)continue;if(/^ciudad\s*:/i.test(l2)||RE_LINEA_FECHA.test(l2)||hoteles.indexOf(l2)>=0)break;
+      var mN=l2.match(/(\d+)\s*noches?/i);if(mN&&!noches)noches=+mN[1];
+      if(/desayuno|media pensi|pensi[oó]n completa|all inclusive|todo incluido|solo alojamiento|\bsuperior\b|standard|est[aá]ndar|deluxe|\bsuite\b|habitaci[oó]n (doble|triple|single|cu[aá]druple)/i.test(l2)&&!/usd|u\$s|precio|neto|\$/i.test(l2))det.push(l2.replace(/\s{2,}/g,' '));}
+    var ci=(ref&&ref.d)?{d:ref.d,m:ref.m,y:ref.y}:null,co=null;
+    if(ci&&noches){var dt=new Date(Date.UTC(ci.y,ci.m-1,ci.d+noches));co={d:dt.getUTCDate(),m:dt.getUTCMonth()+1,y:dt.getUTCFullYear()};}
+    hotelSvs.push({tipo:'hotel',hotel:h,det:det,noches:noches,f:ci,co:co});
+    if(!ci)warns.push('Hotel "'+h+'" sin fecha de entrada: completala en el voucher.');
+  });
+  if(!paxTxt&&paxKv){var pm2=paxKv.match(/^(.+?)\s*\(\s*(\d+)\s*pax/i)||paxKv.match(/^(.+?)\s*[xX]\s*(\d+)\s*$/);paxTxt=titleCase(pm2?pm2[1]:paxKv);if(pm2&&!nKv)nKv=+pm2[2];}if(!paxN&&nKv)paxN=nKv;
+  return {dest:dest,svs:svs.concat(hotelSvs),paxTxt:paxTxt,paxN:paxN,warns:warns,anio:anio,opTxt:opTxt,hoteles:hoteles};
 }
 
 function lugar(t,dest,hoteles){
   var s=t.trim();
-  if(hoteles&&hoteles.length===1&&/^hotel(\s+en\s+.+|\s*)$/i.test(s))return titleCase(hoteles[0]);
+  if(hoteles&&hoteles.length===1&&/^hotel(\s+en\s+.+|\s*)$/i.test(s))return titleCase(hoteles[0]).replace(/\b(Nh|Hb|Ac|Ws|Gh)\b/g,function(x){return x.toUpperCase();});
   if(/^aeropuerto\b/i.test(s)){
     var resto=s.replace(/^aeropuerto\s*/i,'').replace(/^(de|del|internacional de)\s+/i,'');
     if(!resto&&dest)return 'Aeropuerto '+nombreDestino(dest);
@@ -177,6 +194,12 @@ function armarVoucher(txtServ,txtVuelos){
   S.svs.forEach(function(s){
     var it={f:s.f,tipo:s.tipo};
     if(s.tipo==='exc'){it.titulo=s.titulo;items.push(it);return;}
+    if(s.tipo==='hotel'){
+      it.titulo=titleCase(s.hotel).replace(/\b(Nh|Hb|Ac|Ws|Gh)\b/g,function(x){return x.toUpperCase();});
+      var d=s.det.map(function(x){return x.charAt(0).toUpperCase()+x.slice(1).toLowerCase();}).join(' · ');
+      it.det=['Alojamiento'+(d?' · '+d:''),s.noches?(s.noches+(s.noches===1?' noche':' noches')):'',s.co?'salida '+s.co.d+' '+MESES[s.co.m-1]:''].filter(Boolean).join(' · ');
+      items.push(it);return;
+    }
     var k=s.kind==='privado'?'Privado':(s.kind==='regular'?'Regular':'');
     it.titulo=('Traslado '+k).trim()+(s.tipo==='tr'?'':' – '+(s.tipo==='in'?'IN':'OUT'));
     it.from=lugar(s.from,dest,S.hoteles);it.to=lugar(s.to,dest,S.hoteles);
@@ -192,16 +215,16 @@ function armarVoucher(txtServ,txtVuelos){
     }
     items.push(it);
   });
-  items.sort(function(a,b){return (a.f?iso(a.f):0)-(b.f?iso(b.f):0)||(a.tipo==='in'?-1:b.tipo==='in'?1:0);});
+  items.sort(function(a,b){var o={in:0,hotel:1,exc:2,tr:3,out:4};return (a.f?iso(a.f):0)-(b.f?iso(b.f):0)||((o[a.tipo]||0)-(o[b.tipo]||0));});
   // pasajeros
   var pax=V.pax.length?V.pax:(S.paxTxt?[S.paxTxt]:[]);
-  if(S.paxN&&pax.length&&pax.length!==S.paxN)warns.push('La solicitud dice x'+S.paxN+' pero hay '+pax.length+' nombre(s) en el PNR/solicitud.');
+  if(S.paxN&&pax.length>1&&pax.length!==S.paxN)warns.push('La solicitud dice x'+S.paxN+' pero hay '+pax.length+' nombre(s) en el PNR/solicitud.');
   if(S.paxTxt&&V.pax.length&&!V.pax.some(function(p){return norm(p)===norm(S.paxTxt);}))warns.push('El pasajero de la solicitud ("'+S.paxTxt+'") no figura en el PNR.');
   var n=S.paxN||pax.length;
   if(!items.length)warns.push('No detecté ningún servicio.');
     // operador mencionado en el texto
   var opDet=null,T=norm(txtServ);
-  OPERADORES.forEach(function(o){if(opDet)return;var w=norm(o.nombre).split(' ').filter(function(x){return x.length>3&&!/OPERADOR|RECEPTIV|TRAVEL|TOURS?|VIAJES|TURISMO|INTERNATIONAL/.test(x);});if(w.length&&w.every(function(x){return T.indexOf(x)>=0;}))opDet=o;});
+  OPERADORES.forEach(function(o){if(opDet)return;(o.k||[]).forEach(function(k){if(!opDet&&(' '+T.replace(/[^A-Z0-9]+/g,' ')+' ').indexOf(' '+norm(k)+' ')>=0)opDet=o;});});
   var opTxt=opDet?'':(S.opTxt||'');
   if(!pax.length&&n)warns.push('La solicitud no trae nombres de pasajeros: completalos en el voucher ('+n+' pax).');
   if(opTxt)warns.push('Operador detectado: "'+opTxt+'". No tiene logo cargado; se muestra el nombre. Podés subir el logo.');
