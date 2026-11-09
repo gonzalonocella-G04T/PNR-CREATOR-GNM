@@ -106,12 +106,15 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-ink .sv .fl i{color:var(--g)}
 .v-ink .obs{border-left:1mm solid var(--g);color:#0b2f2a}
 .v-ink .ihd{margin:8mm 12mm 0;border:.45mm solid var(--g);border-radius:5mm;background:linear-gradient(180deg,#fff 0%,#F1F8F6 100%);padding:5mm 7mm 2mm;position:relative;overflow:hidden}
-.v-ink .ihd .lgs{display:flex;align-items:center;justify-content:center;gap:7mm;padding-bottom:4mm;border-bottom:.3mm dashed #9cc6bf}
-.v-ink .ihd .lg,.v-ink .ihd .lg2{height:15mm;width:auto;max-width:55mm;object-fit:contain}
+.v-ink .ihd .lgs{display:flex;align-items:center;justify-content:center;gap:10mm;padding-bottom:5mm;border-bottom:.3mm dashed #9cc6bf}
+.v-ink .ihd .lg{height:24mm;width:auto;max-width:78mm;object-fit:contain}
+.v-ink .ihd .lg2{height:22mm;width:auto;max-width:66mm;object-fit:contain}
+.v-ink .ihd .optxt{font-size:9mm}
 .v-ink .ihd .lg2{filter:contrast(1.15)}
-.v-ink .ihd .lgs i{width:.35mm;height:11mm;background:#9cc6bf}
+.v-ink .ihd .lgs i{width:.35mm;height:18mm;background:#9cc6bf}
 .v-ink .ihd .row{position:relative;display:flex;justify-content:center;padding:4mm 0 1mm}
-.v-ink .ihd .tt{text-align:center;max-width:120mm}
+.v-ink .ihd .tt{text-align:center;max-width:118mm}
+.v-ink .ihd .tt b{text-wrap:balance}
 .v-ink .ihd .tt small{display:flex;align-items:center;justify-content:center;gap:4mm;font:600 3.1mm Montserrat,Oswald,sans-serif;letter-spacing:.38em;color:var(--g2)}
 .v-ink .ihd .tt small i{width:12mm;height:.35mm;background:var(--g2)}
 .v-ink .ihd .tt b{display:block;font:italic 800 15.5mm/1.05 'Playfair Display',Georgia,serif;color:var(--g);margin-top:1.5mm;letter-spacing:-.01em}

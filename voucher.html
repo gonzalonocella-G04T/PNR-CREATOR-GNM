@@ -107,12 +107,15 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-ink .sv .fl i{color:var(--g)}
 .v-ink .obs{border-left:1mm solid var(--g);color:#0b2f2a}
 .v-ink .ihd{margin:8mm 12mm 0;border:.45mm solid var(--g);border-radius:5mm;background:linear-gradient(180deg,#fff 0%,#F1F8F6 100%);padding:5mm 7mm 2mm;position:relative;overflow:hidden}
-.v-ink .ihd .lgs{display:flex;align-items:center;justify-content:center;gap:7mm;padding-bottom:4mm;border-bottom:.3mm dashed #9cc6bf}
-.v-ink .ihd .lg,.v-ink .ihd .lg2{height:15mm;width:auto;max-width:55mm;object-fit:contain}
+.v-ink .ihd .lgs{display:flex;align-items:center;justify-content:center;gap:10mm;padding-bottom:5mm;border-bottom:.3mm dashed #9cc6bf}
+.v-ink .ihd .lg{height:24mm;width:auto;max-width:78mm;object-fit:contain}
+.v-ink .ihd .lg2{height:22mm;width:auto;max-width:66mm;object-fit:contain}
+.v-ink .ihd .optxt{font-size:9mm}
 .v-ink .ihd .lg2{filter:contrast(1.15)}
-.v-ink .ihd .lgs i{width:.35mm;height:11mm;background:#9cc6bf}
+.v-ink .ihd .lgs i{width:.35mm;height:18mm;background:#9cc6bf}
 .v-ink .ihd .row{position:relative;display:flex;justify-content:center;padding:4mm 0 1mm}
-.v-ink .ihd .tt{text-align:center;max-width:120mm}
+.v-ink .ihd .tt{text-align:center;max-width:118mm}
+.v-ink .ihd .tt b{text-wrap:balance}
 .v-ink .ihd .tt small{display:flex;align-items:center;justify-content:center;gap:4mm;font:600 3.1mm Montserrat,Oswald,sans-serif;letter-spacing:.38em;color:var(--g2)}
 .v-ink .ihd .tt small i{width:12mm;height:.35mm;background:var(--g2)}
 .v-ink .ihd .tt b{display:block;font:italic 800 15.5mm/1.05 'Playfair Display',Georgia,serif;color:var(--g);margin-top:1.5mm;letter-spacing:-.01em}
@@ -679,8 +682,8 @@ function render(){
     intro='';
   }else{
     hero='';
-    intro='<div class="ihd"><div class="lgs">'+im(state.hvUpload?hv:'img/hiperviajes-slogan-dark.png','lg','Hiperviajes')+(hasOp?'<i></i>'+opHtml('lg2'):'')+'</div>'+
-      '<div class="row"><div class="tt"><small><i></i>VOUCHER DE SERVICIOS<i></i></small><b contenteditable>'+esc(titleCase(v.destNombre||''))+'</b>'+
+    intro='<div class="ihd"><div class="lgs">'+im(state.hvUpload?hv:'img/hiperviajes-slogan-print.png','lg','Hiperviajes')+(hasOp?'<i></i>'+opHtml('lg2'):'')+'</div>'+
+      '<div class="row"><div class="tt"><small><i></i>VOUCHER DE SERVICIOS<i></i></small><b contenteditable style="font-size:'+((v.destNombre||'').length>22?10:(v.destNombre||'').length>14?12.5:15.5)+'mm">'+esc(titleCase(v.destNombre||''))+'</b>'+
       '<svg class="sw" viewBox="0 0 300 16" preserveAspectRatio="none"><path d="M6 12C80 3 210 1 294 8" fill="none" stroke="url(#swg)" stroke-width="3.2" stroke-linecap="round"/><defs><linearGradient id="swg" x1="0" x2="1"><stop offset="0" stop-color="#0D6B5E"/><stop offset="1" stop-color="#3FA37C"/></linearGradient></defs></svg>'+
       (v.pais?'<span><svg viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0113 0c0 4.8-6.5 11-6.5 11z" fill="currentColor"/><circle cx="12" cy="10" r="2.4" fill="#fff"/></svg><em contenteditable>'+esc(v.pais.toUpperCase())+'</em></span>':'')+'</div>'+
       (sel?im('sellos/'+sel.f,'st duo',''):'')+'</div>'+
