@@ -29,3 +29,4 @@ maragogi.jpg	Foto aportada por Hiperviajes (Gonzalo) — vertical y de baja reso
 playa-del-carmen.jpg	Foto aportada por Hiperviajes (Gonzalo) — vertical y de baja resolución, reemplazar por una horizontal más grande
 bayahibe.jpg	Foto aportada por Hiperviajes (Gonzalo) — baja resolución (678 px)
 bariloche.jpg	Foto aportada por Hiperviajes (Gonzalo) — baja resolución (516 px)
+costa-mujeres.jpg	Foto aportada por Hiperviajes (Gonzalo) — baja resolución (678 px)
