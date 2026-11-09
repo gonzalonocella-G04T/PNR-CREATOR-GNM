@@ -228,15 +228,38 @@ function cargarLogo(inp,key,upKey){
   var f=inp.files[0];if(!f)return;
   var r=new FileReader();r.onload=function(){state[key]=r.result;state[upKey]=true;render();};r.readAsDataURL(f);
 }
+function cargarH2C(){
+  return new Promise(function(ok,ko){
+    if(window.html2canvas)return ok();
+    var sc=document.createElement('script');sc.src='vendor/html2canvas.min.js';sc.onload=function(){ok();};sc.onerror=function(){var s2=document.createElement('script');s2.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';s2.onload=function(){ok();};s2.onerror=function(){ko(new Error('lib'));};document.head.appendChild(s2);};document.head.appendChild(sc);
+  });
+}
+function capturar(){
+  var s=$('sheet');if(!s)return Promise.reject(new Error('sin voucher'));
+  var sel=window.getSelection&&window.getSelection();if(sel)sel.removeAllRanges();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+  return cargarH2C().then(function(){return window.html2canvas(s,{scale:2,useCORS:true,backgroundColor:'#fff'});});
+}
+function nombreArchivo(){return 'voucher-'+(state.v&&state.v.destNombre||'servicios').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9]+/g,'-').toLowerCase()+'-'+(state.ver==='ink'?'imprimir':'digital')+'.png';}
+function aviso(btn,txt,ms){var t=btn.dataset.t||btn.textContent;btn.dataset.t=t;btn.textContent=txt;clearTimeout(btn._t);btn._t=setTimeout(function(){btn.textContent=t;},ms||2500);}
 function exportarPNG(){
-  var s=$('sheet');if(!s)return;
-  function go(){
-    window.html2canvas(s,{scale:2,useCORS:true,backgroundColor:'#fff'}).then(function(c){
-      var a=document.createElement('a');a.download='voucher-'+(state.v.destNombre||'servicios').replace(/\s+/g,'-').toLowerCase()+'-'+state.ver+'.png';a.href=c.toDataURL('image/png');a.click();
-    }).catch(function(){alert('No se pudo exportar PNG (si abriste el archivo desde tu compu, probá desde la web publicada o usá Imprimir → Guardar como PDF).');});
-  }
-  if(window.html2canvas)return go();
-  var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=go;sc.onerror=function(){alert('No pude cargar la librería de exportación.');};document.head.appendChild(sc);
+  capturar().then(function(c){var a=document.createElement('a');a.download=nombreArchivo();a.href=c.toDataURL('image/png');document.body.appendChild(a);a.click();a.remove();})
+  .catch(function(){alert('No se pudo exportar la imagen. Probá desde la web publicada o usá Imprimir → Guardar como PDF.');});
+}
+function copiarImagen(){
+  var btn=$('cpy');if(!$('sheet'))return;
+  aviso(btn,'Copiando…',8000);
+  var blobP=capturar().then(function(c){return new Promise(function(ok,ko){c.toBlob(function(b){b?ok(b):ko(new Error('blob'));},'image/png');});});
+  var puede=navigator.clipboard&&navigator.clipboard.write&&window.ClipboardItem;
+  if(!puede){blobP.then(function(){aviso(btn,'Tu navegador no permite copiar: usá Bajar PNG',4000);});return;}
+  var item;
+  try{item=new ClipboardItem({'image/png':blobP});}catch(e){item=null;}
+  var w=item?navigator.clipboard.write([item]):blobP.then(function(b){return navigator.clipboard.write([new ClipboardItem({'image/png':b})]);});
+  w.then(function(){aviso(btn,'✓ Copiada: pegala en WhatsApp o en el mail',3500);})
+   .catch(function(){
+     blobP.then(function(b){return navigator.clipboard.write([new ClipboardItem({'image/png':b})]);})
+      .then(function(){aviso(btn,'✓ Copiada: pegala en WhatsApp o en el mail',3500);})
+      .catch(function(){aviso(btn,'No se pudo copiar: usá Bajar PNG',4000);});
+   });
 }
 function init(){
   function cmp(x,y){return x.localeCompare(y,'es',{sensitivity:'base'});}
@@ -260,6 +283,8 @@ function init(){
   $('lpos').onchange=function(){state.logoPos=this.value;state.autoAbajo=false;if(state.v)render();};
   $('prn').onclick=function(){window.print();};
   $('png').onclick=exportarPNG;
+  $('cpy').onclick=copiarImagen;
+  cargarH2C().catch(function(){});
   render();
 }
 document.addEventListener('DOMContentLoaded',init);
