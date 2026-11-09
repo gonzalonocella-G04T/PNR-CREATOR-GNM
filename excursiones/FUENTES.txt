@@ -2,3 +2,4 @@ Fotos de excursiones (Unsplash, licencia Unsplash).
 
 perito-moreno.jpg	https://images.unsplash.com/photo-1577373482643-5c7ccf8f0ac9
 pelourinho.jpg	Foto aportada por Hiperviajes (Gonzalo)
+chichen-itza.jpg	Foto aportada por Hiperviajes (Gonzalo)
