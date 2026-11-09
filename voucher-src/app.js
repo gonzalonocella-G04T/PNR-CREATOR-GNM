@@ -272,7 +272,13 @@ function init(){
   var vistos={},DL=[];
   FOTOS.forEach(function(f){var nm=f.n,k=norm(nm);if(f.x===undefined){var dup=FOTOS_NEW.some(function(n){return n.a.some(function(al){return norm(al)===norm(f.n);})||norm(n.n)===norm(f.n);});if(dup)return;}if(vistos[k])return;vistos[k]=1;DL.push({f:f,nm:nm});});
   $('dest').innerHTML='<option value="">Detectar automáticamente</option>'+grupos(DL,function(d){return paisDe(d.f);},function(d){return d.nm;},function(d){return '<option value="'+esc(d.f.n)+'">'+esc(d.nm)+'</option>';});
-  $('go').onclick=generar;
+  $('go').onclick=function(){generar();$('go').disabled=true;};
+  $('go').disabled=true;
+  ['serv','vue'].forEach(function(id){
+    var el=$(id),pegado=false;
+    el.addEventListener('paste',function(){pegado=true;setTimeout(function(){pegado=false;if($('serv').value.trim()){generar();$('go').disabled=true;}},0);});
+    el.addEventListener('input',function(){if(pegado)return;if($('serv').value.trim())$('go').disabled=false;});
+  });
   $('op').onchange=function(){state.opUpload=false;state.opTxt='';state.opAuto=false;var o=OPERADORES.filter(function(x){return x.id===$('op').value;})[0];state.opLogo=o?o.logo:null;if(state.v)render();};
   $('opf').onchange=function(){cargarLogo(this,'opLogo','opUpload');};
   $('dtit').oninput=function(){if(state.v){state.v.destNombre=this.value;render();}};

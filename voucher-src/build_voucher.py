@@ -32,7 +32,7 @@ data='var EXC_FOTOS='+json.dumps(exc,ensure_ascii=False)+';\n'+fotos+'\nvar SELL
 js=data+rd(os.path.join(here,'parse.js'))+rd(os.path.join(here,'app.js'))
 assert '</script' not in js.lower()
 import datetime
-VERSION_TXT=(datetime.datetime.utcnow()-datetime.timedelta(hours=3)).strftime('%d/%m %H:%M')
+VERSION_TXT=(datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)-datetime.timedelta(hours=3)).strftime('%d/%m %H:%M')
 html=('<!doctype html>\n<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
  '<title>Voucher de servicios · Hiperviajes</title><link rel="icon" href="vch-fav/favicon.ico?v=1" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="vch-fav/favicon-32.png?v=1"><link rel="icon" type="image/png" sizes="192x192" href="vch-fav/icon-192.png?v=1"><link rel="apple-touch-icon" href="vch-fav/apple-touch-icon.png?v=1"><meta name="theme-color" content="#19C0AA">'
  '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'

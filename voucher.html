@@ -224,6 +224,7 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .sv .dt s{display:block;text-decoration:none;font:600 2.7mm Inter,sans-serif;letter-spacing:.02em;margin-top:.4mm}
 .v-dig2 .chip em{display:block;font:600 11.5px/1.2 Montserrat,sans-serif;font-style:normal;opacity:.95}
 .v-dig2 .chip{min-height:62px;height:auto;padding:6px 0}
+button:disabled{opacity:.45;cursor:default}
 @media print{
  @page{size:A4;margin:0}
  html,body{background:#fff}
@@ -234,7 +235,7 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
  .sheet [contenteditable]:hover{background:none}
  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
-</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 08/11 23:22</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
+</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 08/11 23:24</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
 <div class="wrap"><aside class="panel">
 <label for="serv">Solicitud / confirmación de servicios</label>
 <textarea id="serv" placeholder="Traslado regular in + out El Calafate&#10;Nombre Apellido x2&#10;Llegada: Aeropuerto … - Hotel …  dd/mm/aaaa&#10;Salida: Hotel … - Aeropuerto …  dd/mm/aaaa&#10;&#10;Excursión … dd/mm/aaaa"></textarea>
@@ -249,7 +250,8 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 <label for="obs">Observaciones (opcional, se imprime si lo completás)</label>
 <input id="obs" type="text" placeholder="Ej.: indicaciones de punto de encuentro, contacto del operador…">
 <label>Logo Hiperviajes (opcional, por defecto el de la web)</label><input id="hvf" type="file" accept="image/*" style="font-size:12px">
-<div class="btns"><button class="p" id="go">Generar voucher</button></div>
+<div class="btns"><button class="p" id="go">Actualizar voucher</button></div>
+<p class="hint">Al pegar el texto, el voucher se arma solo. Si después escribís o corregís algo en estos campos, tocá "Actualizar voucher".</p>
 <label>Versión</label>
 <div class="seg"><button data-v="dig" class="on">Digital</button><button data-v="ink">Para imprimir</button></div>
 <label for="lpos">Logos</label><select id="lpos"><option value="auto">Automático (aclara arriba según la foto)</option><option value="claro">Arriba, con fondo bien claro</option><option value="oscuro">Arriba en blanco (fotos oscuras)</option><option value="abajo">Debajo de la foto</option></select>
@@ -849,7 +851,13 @@ function init(){
   var vistos={},DL=[];
   FOTOS.forEach(function(f){var nm=f.n,k=norm(nm);if(f.x===undefined){var dup=FOTOS_NEW.some(function(n){return n.a.some(function(al){return norm(al)===norm(f.n);})||norm(n.n)===norm(f.n);});if(dup)return;}if(vistos[k])return;vistos[k]=1;DL.push({f:f,nm:nm});});
   $('dest').innerHTML='<option value="">Detectar automáticamente</option>'+grupos(DL,function(d){return paisDe(d.f);},function(d){return d.nm;},function(d){return '<option value="'+esc(d.f.n)+'">'+esc(d.nm)+'</option>';});
-  $('go').onclick=generar;
+  $('go').onclick=function(){generar();$('go').disabled=true;};
+  $('go').disabled=true;
+  ['serv','vue'].forEach(function(id){
+    var el=$(id),pegado=false;
+    el.addEventListener('paste',function(){pegado=true;setTimeout(function(){pegado=false;if($('serv').value.trim()){generar();$('go').disabled=true;}},0);});
+    el.addEventListener('input',function(){if(pegado)return;if($('serv').value.trim())$('go').disabled=false;});
+  });
   $('op').onchange=function(){state.opUpload=false;state.opTxt='';state.opAuto=false;var o=OPERADORES.filter(function(x){return x.id===$('op').value;})[0];state.opLogo=o?o.logo:null;if(state.v)render();};
   $('opf').onchange=function(){cargarLogo(this,'opLogo','opUpload');};
   $('dtit').oninput=function(){if(state.v){state.v.destNombre=this.value;render();}};
