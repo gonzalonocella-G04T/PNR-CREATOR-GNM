@@ -222,7 +222,7 @@ function parseServicios(txt){
       return;
     }
   });
-  if(!dest&&hdrDest)dest=hdrDest;
+  if(hdrDest)dest=hdrDest;
   var hotelSvs=[];
   hoteles.forEach(function(h){
     var i0=rawL.indexOf(h),det=[],noches=null,j,l2;

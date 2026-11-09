@@ -488,7 +488,7 @@ function parseServicios(txt){
       return;
     }
   });
-  if(!dest&&hdrDest)dest=hdrDest;
+  if(hdrDest)dest=hdrDest;
   var hotelSvs=[];
   hoteles.forEach(function(h){
     var i0=rawL.indexOf(h),det=[],noches=null,j,l2;
@@ -792,9 +792,9 @@ function generar(){
   var forced=$('dest').value;
   if(forced){var f=FOTOS.filter(function(x){return x.n===forced;})[0];v.dest=f;v.destNombre=nombreDestino(f);v.pais=paisDe(f);v.warns=v.warns.filter(function(w){return w.indexOf('destino')<0;});}
   state.v=v;
-  if(v.op&&!state.opUpload){$('op').value=v.op.id;state.opLogo=v.op.logo;state.opTxt='';}
-  else if(v.opTxt&&!state.opUpload){$('op').value='';state.opLogo=null;state.opTxt=v.opTxt;}
-  else{state.opTxt='';var op=OPERADORES.filter(function(o){return o.id===$('op').value;})[0];if(op&&!state.opUpload)state.opLogo=op.logo;}
+  if(v.op&&!state.opUpload){$('op').value=v.op.id;state.opLogo=v.op.logo;state.opTxt='';state.opAuto=true;}
+  else if(v.opTxt&&!state.opUpload){$('op').value='';state.opLogo=null;state.opTxt=v.opTxt;state.opAuto=true;}
+  else{state.opTxt='';if(state.opAuto&&!state.opUpload){$('op').value='';state.opLogo=null;}state.opAuto=false;var op=OPERADORES.filter(function(o){return o.id===$('op').value;})[0];if(op&&!state.opUpload)state.opLogo=op.logo;}
   mostrarWarns();listaItems();$('dtit').value=v.destNombre||'';render();
 }
 function cargarLogo(inp,key,upKey){
@@ -823,7 +823,7 @@ function init(){
   FOTOS.forEach(function(f){var nm=f.n,k=norm(nm);if(f.x===undefined){var dup=FOTOS_NEW.some(function(n){return n.a.some(function(al){return norm(al)===norm(f.n);})||norm(n.n)===norm(f.n);});if(dup)return;}if(vistos[k])return;vistos[k]=1;DL.push({f:f,nm:nm});});
   $('dest').innerHTML='<option value="">Detectar automáticamente</option>'+grupos(DL,function(d){return paisDe(d.f);},function(d){return d.nm;},function(d){return '<option value="'+esc(d.f.n)+'">'+esc(d.nm)+'</option>';});
   $('go').onclick=generar;
-  $('op').onchange=function(){state.opUpload=false;state.opTxt='';var o=OPERADORES.filter(function(x){return x.id===$('op').value;})[0];state.opLogo=o?o.logo:null;if(state.v)render();};
+  $('op').onchange=function(){state.opUpload=false;state.opTxt='';state.opAuto=false;var o=OPERADORES.filter(function(x){return x.id===$('op').value;})[0];state.opLogo=o?o.logo:null;if(state.v)render();};
   $('opf').onchange=function(){cargarLogo(this,'opLogo','opUpload');};
   $('dtit').oninput=function(){if(state.v){state.v.destNombre=this.value;render();}};
   $('fotof').onchange=function(){cargarLogo(this,'fotoUp','fotoUpOk');};
