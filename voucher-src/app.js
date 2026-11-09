@@ -241,7 +241,7 @@ function exportarPNG(){
 function init(){
   function cmp(x,y){return x.localeCompare(y,'es',{sensitivity:'base'});}
   function grupos(list,pais,nom,opt){
-    var g={};list.forEach(function(x){var p=pais(x)||'';(g[p]=g[p]||[]).push(x);});
+    var g={};list.forEach(function(x){var ps=pais(x);ps=Array.isArray(ps)?ps:[ps||''];if(!ps.length)ps=[''];ps.forEach(function(p){(g[p]=g[p]||[]).push(x);});});
     return Object.keys(g).sort(function(a,b){if(!a)return 1;if(!b)return -1;return cmp(a,b);}).map(function(p){
       return '<optgroup label="'+esc(p||'Sin país asignado')+'">'+g[p].sort(function(a,b){return cmp(nom(a),nom(b));}).map(opt).join('')+'</optgroup>';}).join('');
   }

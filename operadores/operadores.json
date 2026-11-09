@@ -6,6 +6,9 @@
   "k": [
    "ADS MUNDO",
    "ADSMUNDO"
+  ],
+  "pais": [
+   "Chile"
   ]
  },
  {
@@ -14,6 +17,9 @@
   "logo": "operadores/arcoiris-viajes.png",
   "k": [
    "ARCOIRIS"
+  ],
+  "pais": [
+   "Panamá"
   ]
  },
  {
@@ -22,6 +28,9 @@
   "logo": "operadores/barlan-travel.png",
   "k": [
    "BARLAN"
+  ],
+  "pais": [
+   "Argentina"
   ]
  },
  {
@@ -31,7 +40,9 @@
   "k": [
    "BRASIL VOYAGE"
   ],
-  "pais": "Brasil"
+  "pais": [
+   "Brasil"
+  ]
  },
  {
   "id": "cts-turismo",
@@ -39,6 +50,9 @@
   "logo": "operadores/cts-turismo.png",
   "k": [
    "CTS TURISMO"
+  ],
+  "pais": [
+   "Chile"
   ]
  },
  {
@@ -48,7 +62,9 @@
   "k": [
    "DE PALM"
   ],
-  "pais": "Aruba"
+  "pais": [
+   "Aruba"
+  ]
  },
  {
   "id": "fiesta-tours",
@@ -57,7 +73,9 @@
   "k": [
    "FIESTA TOURS"
   ],
-  "pais": "Curazao"
+  "pais": [
+   "Curazao"
+  ]
  },
  {
   "id": "hover-tours",
@@ -68,7 +86,9 @@
    "HOVER TOURS",
    "HOVER"
   ],
-  "pais": "Venezuela"
+  "pais": [
+   "Venezuela"
+  ]
  },
  {
   "id": "itaparica-tour",
@@ -77,7 +97,9 @@
   "k": [
    "ITAPARICA"
   ],
-  "pais": "Brasil"
+  "pais": [
+   "Brasil"
+  ]
  },
  {
   "id": "lares-argentina",
@@ -86,7 +108,9 @@
   "k": [
    "LARES"
   ],
-  "pais": "Argentina"
+  "pais": [
+   "Argentina"
+  ]
  },
  {
   "id": "luck-receptivo",
@@ -95,7 +119,9 @@
   "k": [
    "LUCK"
   ],
-  "pais": "Brasil"
+  "pais": [
+   "Brasil"
+  ]
  },
  {
   "id": "martin-travel",
@@ -103,6 +129,10 @@
   "logo": "operadores/martin-travel.png",
   "k": [
    "MARTIN TRAVEL"
+  ],
+  "pais": [
+   "Argentina",
+   "Brasil"
   ]
  },
  {
@@ -111,6 +141,10 @@
   "logo": "operadores/otium-international.png",
   "k": [
    "OTIUM"
+  ],
+  "pais": [
+   "México",
+   "República Dominicana"
   ]
  },
  {
@@ -119,6 +153,9 @@
   "logo": "operadores/otsi.png",
   "k": [
    "OTSI"
+  ],
+  "pais": [
+   "Chile"
   ]
  },
  {
@@ -129,7 +166,9 @@
   "k": [
    "PAMTOURS"
   ],
-  "pais": "Ecuador"
+  "pais": [
+   "Ecuador"
+  ]
  },
  {
   "id": "paraty-tours",
@@ -138,7 +177,9 @@
   "k": [
    "PARATY TOURS"
   ],
-  "pais": "Brasil"
+  "pais": [
+   "Brasil"
+  ]
  },
  {
   "id": "prestigio",
@@ -147,7 +188,9 @@
   "k": [
    "PRESTIGIO"
   ],
-  "pais": "Argentina"
+  "pais": [
+   "Argentina"
+  ]
  },
  {
   "id": "pts-peru",
@@ -157,7 +200,9 @@
    "PTS PERU",
    "PTS"
   ],
-  "pais": "Perú"
+  "pais": [
+   "Perú"
+  ]
  },
  {
   "id": "vi-travel",
@@ -165,6 +210,9 @@
   "logo": "operadores/vi-travel.png",
   "k": [
    "VI TRAVEL"
+  ],
+  "pais": [
+   "México"
   ]
  }
 ]
