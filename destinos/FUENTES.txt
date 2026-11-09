@@ -4,7 +4,7 @@ porto-de-galinhas.jpg	Foto aportada por Hiperviajes (Gonzalo) — baja resoluci�
 praia-do-forte.jpg	https://images.unsplash.com/photo-1745681278433-4f45b29fb3c4
 buzios.jpg	https://images.unsplash.com/photo-1640227204151-b089f08aab4f
 tulum.jpg	https://images.unsplash.com/photo-1775159363607-c78429fe81af
-salvador-de-bahia.jpg	https://images.unsplash.com/photo-1606064934508-73f08e379a91
+salvador-de-bahia.jpg	Foto aportada por Hiperviajes (Gonzalo) — Farol da Barra, baja resolución (678 px)
 machu-picchu.jpg	https://images.unsplash.com/photo-1587595431973-160d0d94add1
 torres-del-paine.jpg	https://images.unsplash.com/photo-1776582837216-c698aef2c075
 isla-de-pascua.jpg	https://images.unsplash.com/photo-1768326054603-b72b51b00ff9
