@@ -4,3 +4,4 @@ Repositorio de logos de operadores (usado por voucher.html)
 - Cargados: Barlan Travel, Vi Travel (con fondo gris propio del archivo), Otium International, Lares Argentina,
   Prestigio, Brasil Voyage, Luck Receptivo.
 - Después de agregar uno, correr: python3 voucher-src/build_voucher.py
+- Prestadores (empresa que realiza el servicio para un operador, ej. Búzios Express): llevan "prestador": true en operadores.json y salen en el desplegable aparte "Prestador del servicio".

@@ -241,13 +241,14 @@ button:disabled{opacity:.45;cursor:default}
 .prst b{font-weight:600;color:#3f6662}
 .v-ink .prst{margin:3mm 0 0;font-size:3.1mm;color:#46625e}
 .v-ink .prst img{height:6mm}
-</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 10/11 11:55</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
+</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 10/11 12:00</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
 <div class="wrap"><aside class="panel">
 <label for="serv">Solicitud / confirmación de servicios</label>
 <textarea id="serv" placeholder="Traslado regular in + out El Calafate&#10;Nombre Apellido x2&#10;Llegada: Aeropuerto … - Hotel …  dd/mm/aaaa&#10;Salida: Hotel … - Aeropuerto …  dd/mm/aaaa&#10;&#10;Excursión … dd/mm/aaaa"></textarea>
 <label for="vue">Pasajeros y vuelos (pegado del PNR)</label>
 <textarea id="vue" placeholder=" 1.APELLIDO/NOMBRE&#10;  4  AR1850 T 19JAN 2*AEPFTE HK2  1615 1935 …"></textarea>
 <label for="op">Operador</label><select id="op"></select>
+<label for="prs">Prestador del servicio (opcional)</label><select id="prs"></select>
 <p class="hint">Los logos viven en la carpeta <b>operadores/</b>. Si no está, subí uno suelto:</p>
 <input id="opf" type="file" accept="image/*" style="font-size:12px">
 <label for="dtit">Título del destino (se completa solo, podés cambiarlo)</label><input id="dtit" type="text" placeholder="Ej.: Lima, Cuzco y Machu Picchu">
@@ -661,8 +662,8 @@ function armarVoucher(txtServ,txtVuelos){
     // operador mencionado en el texto
   var opDet=null,T=norm(txtServ+'\n'+(txtVuelos||''));
   var TT=' '+T.replace(/[^A-Z0-9]+/g,' ')+' ',hall=OPERADORES.filter(function(o){return (o.k||[]).some(function(k){return TT.indexOf(' '+norm(k)+' ')>=0;});});
-  opDet=hall.filter(function(o){return !o.prestador;})[0]||hall[0]||null;
-  var prest=opDet?hall.filter(function(o){return o.prestador&&o!==opDet;})[0]||null:null;
+  opDet=hall.filter(function(o){return !o.prestador;})[0]||null;
+  var prest=hall.filter(function(o){return o.prestador;})[0]||null;
   var opTxt=opDet?'':(S.opTxt||'');
   if(!pax.length&&n)warns.push('La solicitud no trae nombres de pasajeros: completalos en el voucher ('+n+' pax).');
   if(opTxt)warns.push('Operador detectado: "'+opTxt+'". No tiene logo cargado; se muestra el nombre. Podés subir el logo.');
@@ -764,7 +765,7 @@ function render(){
   var abajo=state.logoPos==='abajo'||state.autoAbajo;
   function opHtml(cls){if(op)return opImg(op,cls);if(state.opTxt)return '<span class="optxt '+cls+'" contenteditable>'+esc(state.opTxt)+'</span>';return '';}
   var hasOp=!!(op||state.opTxt);
-  var pr=hasOp&&v.prest&&state.opAuto&&$('op').value===(v.op&&v.op.id)?v.prest:null;
+  var pr=OPERADORES.filter(function(o){return o.id===$('prs').value;})[0]||null;
   var PREST=pr?'<div class="prst"><span>Servicio prestado por</span>'+im(pr.logo,'prlogo',pr.nombre)+'</div>':'';
   var LOGOS=im(hv,'lg hvlogo','Hiperviajes')+(hasOp?'<i></i>'+opHtml('lg2 oplogo'):'');
   var cls={foto:'v-foto',ink:'v-ink',dig:'v-dig2'}[state.ver];
@@ -895,6 +896,7 @@ function generar(){
   else if(v.opTxt&&!state.opUpload){$('op').value='';state.opLogo=null;state.opTxt=v.opTxt;state.opAuto=true;}
   else{state.opTxt='';if(state.opAuto&&!state.opUpload){$('op').value='';state.opLogo=null;}state.opAuto=false;var op=OPERADORES.filter(function(o){return o.id===$('op').value;})[0];if(op&&!state.opUpload)state.opLogo=op.logo;}
   var ob=$('obs');if(!ob.value.trim()||ob.value===state.obsAuto){ob.value=v.tel?'Contacto del pasajero: '+v.tel:'';state.obsAuto=ob.value;}
+  if(!state.prsManual)$('prs').value=v.prest?v.prest.id:'';
   mostrarWarns();listaItems();$('dtit').value=v.destNombre||'';render();
 }
 function cargarLogo(inp,key,upKey){
@@ -941,7 +943,9 @@ function init(){
     return Object.keys(g).sort(function(a,b){if(!a)return 1;if(!b)return -1;return cmp(a,b);}).map(function(p){
       return '<optgroup label="'+esc(p||'Sin país asignado')+'">'+g[p].sort(function(a,b){return cmp(nom(a),nom(b));}).map(opt).join('')+'</optgroup>';}).join('');
   }
-  $('op').innerHTML='<option value="">(sin logo de operador)</option>'+grupos(OPERADORES,function(o){return o.pais;},function(o){return o.nombre;},function(o){return '<option value="'+esc(o.id)+'">'+esc(o.nombre)+'</option>';});
+  $('prs').innerHTML='<option value="">(sin prestador)</option>'+grupos(OPERADORES.filter(function(o){return o.prestador;}),function(o){return o.pais;},function(o){return o.nombre;},function(o){return '<option value="'+esc(o.id)+'">'+esc(o.nombre)+'</option>';});
+  $('prs').onchange=function(){state.prsManual=true;if(state.v)render();};
+  $('op').innerHTML='<option value="">(sin logo de operador)</option>'+grupos(OPERADORES.filter(function(o){return !o.prestador;}),function(o){return o.pais;},function(o){return o.nombre;},function(o){return '<option value="'+esc(o.id)+'">'+esc(o.nombre)+'</option>';});
   var vistos={},DL=[];
   FOTOS.forEach(function(f){var nm=f.n,k=norm(nm);if(f.x===undefined){var dup=FOTOS_NEW.some(function(n){return n.a.some(function(al){return norm(al)===norm(f.n);})||norm(n.n)===norm(f.n);});if(dup)return;}if(vistos[k])return;vistos[k]=1;DL.push({f:f,nm:nm});});
   $('dest').innerHTML='<option value="">Detectar automáticamente</option>'+grupos(DL,function(d){return paisDe(d.f);},function(d){return d.nm;},function(d){return '<option value="'+esc(d.f.n)+'">'+esc(d.nm)+'</option>';});
@@ -949,7 +953,7 @@ function init(){
   $('go').disabled=true;
   ['serv','vue'].forEach(function(id){
     var el=$(id),pegado=false;
-    el.addEventListener('paste',function(){pegado=true;setTimeout(function(){pegado=false;if($('serv').value.trim()){generar();$('go').disabled=true;}},0);});
+    el.addEventListener('paste',function(){pegado=true;state.prsManual=false;setTimeout(function(){pegado=false;if($('serv').value.trim()){generar();$('go').disabled=true;}},0);});
     el.addEventListener('input',function(){if(pegado)return;if($('serv').value.trim())$('go').disabled=false;});
   });
   $('op').onchange=function(){state.opUpload=false;state.opTxt='';state.opAuto=false;var o=OPERADORES.filter(function(x){return x.id===$('op').value;})[0];state.opLogo=o?o.logo:null;if(state.v)render();};

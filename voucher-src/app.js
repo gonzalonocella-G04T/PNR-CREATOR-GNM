@@ -94,7 +94,7 @@ function render(){
   var abajo=state.logoPos==='abajo'||state.autoAbajo;
   function opHtml(cls){if(op)return opImg(op,cls);if(state.opTxt)return '<span class="optxt '+cls+'" contenteditable>'+esc(state.opTxt)+'</span>';return '';}
   var hasOp=!!(op||state.opTxt);
-  var pr=hasOp&&v.prest&&state.opAuto&&$('op').value===(v.op&&v.op.id)?v.prest:null;
+  var pr=OPERADORES.filter(function(o){return o.id===$('prs').value;})[0]||null;
   var PREST=pr?'<div class="prst"><span>Servicio prestado por</span>'+im(pr.logo,'prlogo',pr.nombre)+'</div>':'';
   var LOGOS=im(hv,'lg hvlogo','Hiperviajes')+(hasOp?'<i></i>'+opHtml('lg2 oplogo'):'');
   var cls={foto:'v-foto',ink:'v-ink',dig:'v-dig2'}[state.ver];
@@ -225,6 +225,7 @@ function generar(){
   else if(v.opTxt&&!state.opUpload){$('op').value='';state.opLogo=null;state.opTxt=v.opTxt;state.opAuto=true;}
   else{state.opTxt='';if(state.opAuto&&!state.opUpload){$('op').value='';state.opLogo=null;}state.opAuto=false;var op=OPERADORES.filter(function(o){return o.id===$('op').value;})[0];if(op&&!state.opUpload)state.opLogo=op.logo;}
   var ob=$('obs');if(!ob.value.trim()||ob.value===state.obsAuto){ob.value=v.tel?'Contacto del pasajero: '+v.tel:'';state.obsAuto=ob.value;}
+  if(!state.prsManual)$('prs').value=v.prest?v.prest.id:'';
   mostrarWarns();listaItems();$('dtit').value=v.destNombre||'';render();
 }
 function cargarLogo(inp,key,upKey){
@@ -271,7 +272,9 @@ function init(){
     return Object.keys(g).sort(function(a,b){if(!a)return 1;if(!b)return -1;return cmp(a,b);}).map(function(p){
       return '<optgroup label="'+esc(p||'Sin país asignado')+'">'+g[p].sort(function(a,b){return cmp(nom(a),nom(b));}).map(opt).join('')+'</optgroup>';}).join('');
   }
-  $('op').innerHTML='<option value="">(sin logo de operador)</option>'+grupos(OPERADORES,function(o){return o.pais;},function(o){return o.nombre;},function(o){return '<option value="'+esc(o.id)+'">'+esc(o.nombre)+'</option>';});
+  $('prs').innerHTML='<option value="">(sin prestador)</option>'+grupos(OPERADORES.filter(function(o){return o.prestador;}),function(o){return o.pais;},function(o){return o.nombre;},function(o){return '<option value="'+esc(o.id)+'">'+esc(o.nombre)+'</option>';});
+  $('prs').onchange=function(){state.prsManual=true;if(state.v)render();};
+  $('op').innerHTML='<option value="">(sin logo de operador)</option>'+grupos(OPERADORES.filter(function(o){return !o.prestador;}),function(o){return o.pais;},function(o){return o.nombre;},function(o){return '<option value="'+esc(o.id)+'">'+esc(o.nombre)+'</option>';});
   var vistos={},DL=[];
   FOTOS.forEach(function(f){var nm=f.n,k=norm(nm);if(f.x===undefined){var dup=FOTOS_NEW.some(function(n){return n.a.some(function(al){return norm(al)===norm(f.n);})||norm(n.n)===norm(f.n);});if(dup)return;}if(vistos[k])return;vistos[k]=1;DL.push({f:f,nm:nm});});
   $('dest').innerHTML='<option value="">Detectar automáticamente</option>'+grupos(DL,function(d){return paisDe(d.f);},function(d){return d.nm;},function(d){return '<option value="'+esc(d.f.n)+'">'+esc(d.nm)+'</option>';});
@@ -279,7 +282,7 @@ function init(){
   $('go').disabled=true;
   ['serv','vue'].forEach(function(id){
     var el=$(id),pegado=false;
-    el.addEventListener('paste',function(){pegado=true;setTimeout(function(){pegado=false;if($('serv').value.trim()){generar();$('go').disabled=true;}},0);});
+    el.addEventListener('paste',function(){pegado=true;state.prsManual=false;setTimeout(function(){pegado=false;if($('serv').value.trim()){generar();$('go').disabled=true;}},0);});
     el.addEventListener('input',function(){if(pegado)return;if($('serv').value.trim())$('go').disabled=false;});
   });
   $('op').onchange=function(){state.opUpload=false;state.opTxt='';state.opAuto=false;var o=OPERADORES.filter(function(x){return x.id===$('op').value;})[0];state.opLogo=o?o.logo:null;if(state.v)render();};

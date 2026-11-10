@@ -383,8 +383,8 @@ function armarVoucher(txtServ,txtVuelos){
     // operador mencionado en el texto
   var opDet=null,T=norm(txtServ+'\n'+(txtVuelos||''));
   var TT=' '+T.replace(/[^A-Z0-9]+/g,' ')+' ',hall=OPERADORES.filter(function(o){return (o.k||[]).some(function(k){return TT.indexOf(' '+norm(k)+' ')>=0;});});
-  opDet=hall.filter(function(o){return !o.prestador;})[0]||hall[0]||null;
-  var prest=opDet?hall.filter(function(o){return o.prestador&&o!==opDet;})[0]||null:null;
+  opDet=hall.filter(function(o){return !o.prestador;})[0]||null;
+  var prest=hall.filter(function(o){return o.prestador;})[0]||null;
   var opTxt=opDet?'':(S.opTxt||'');
   if(!pax.length&&n)warns.push('La solicitud no trae nombres de pasajeros: completalos en el voucher ('+n+' pax).');
   if(opTxt)warns.push('Operador detectado: "'+opTxt+'". No tiene logo cargado; se muestra el nombre. Podés subir el logo.');
