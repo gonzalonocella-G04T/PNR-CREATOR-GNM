@@ -1,218 +1,250 @@
 [
- {
-  "id": "ads-mundo",
-  "nombre": "ADS Mundo",
-  "logo": "operadores/ads-mundo.png",
-  "k": [
-   "ADS MUNDO",
-   "ADSMUNDO"
-  ],
-  "pais": [
-   "Chile"
-  ]
- },
- {
-  "id": "arcoiris-viajes",
-  "nombre": "Arcoíris Viajes",
-  "logo": "operadores/arcoiris-viajes.png",
-  "k": [
-   "ARCOIRIS"
-  ],
-  "pais": [
-   "Panamá"
-  ]
- },
- {
-  "id": "barlan-travel",
-  "nombre": "Barlan Travel",
-  "logo": "operadores/barlan-travel.png",
-  "k": [
-   "BARLAN"
-  ],
-  "pais": [
-   "Argentina"
-  ]
- },
- {
-  "id": "brasil-voyage",
-  "nombre": "Brasil Voyage",
-  "logo": "operadores/brasil-voyage.png",
-  "k": [
-   "BRASIL VOYAGE"
-  ],
-  "pais": [
-   "Brasil"
-  ]
- },
- {
-  "id": "cts-turismo",
-  "nombre": "CTS Turismo",
-  "logo": "operadores/cts-turismo.png",
-  "k": [
-   "CTS TURISMO"
-  ],
-  "pais": [
-   "Chile"
-  ]
- },
- {
-  "id": "de-palm-tours",
-  "nombre": "De Palm Tours Aruba",
-  "logo": "operadores/de-palm-tours.png",
-  "k": [
-   "DE PALM"
-  ],
-  "pais": [
-   "Aruba"
-  ]
- },
- {
-  "id": "fiesta-tours",
-  "nombre": "Fiesta Tours Curaçao",
-  "logo": "operadores/fiesta-tours.png",
-  "k": [
-   "FIESTA TOURS"
-  ],
-  "pais": [
-   "Curazao"
-  ]
- },
- {
-  "id": "hover-tours",
-  "nombre": "Hover Tours Venezuela",
-  "logo": "operadores/hover-tours.png",
-  "bg": "#010f67",
-  "k": [
-   "HOVER TOURS",
-   "HOVER"
-  ],
-  "pais": [
-   "Venezuela"
-  ]
- },
- {
-  "id": "itaparica-tour",
-  "nombre": "Itaparica Tour Operator",
-  "logo": "operadores/itaparica-tour.png",
-  "k": [
-   "ITAPARICA"
-  ],
-  "pais": [
-   "Brasil"
-  ]
- },
- {
-  "id": "lares-argentina",
-  "nombre": "Lares Argentina",
-  "logo": "operadores/lares-argentina.png",
-  "k": [
-   "LARES"
-  ],
-  "pais": [
-   "Argentina"
-  ]
- },
- {
-  "id": "luck-receptivo",
-  "nombre": "Luck Receptivo",
-  "logo": "operadores/luck-receptivo.png",
-  "k": [
-   "LUCK"
-  ],
-  "pais": [
-   "Brasil"
-  ]
- },
- {
-  "id": "martin-travel",
-  "nombre": "Martin Travel",
-  "logo": "operadores/martin-travel.png",
-  "k": [
-   "MARTIN TRAVEL"
-  ],
-  "pais": [
-   "Argentina",
-   "Brasil"
-  ]
- },
- {
-  "id": "otium-international",
-  "nombre": "Otium International",
-  "logo": "operadores/otium-international.png",
-  "k": [
-   "OTIUM"
-  ],
-  "pais": [
-   "México",
-   "República Dominicana"
-  ]
- },
- {
-  "id": "otsi",
-  "nombre": "OTSI Tour Operator",
-  "logo": "operadores/otsi.png",
-  "k": [
-   "OTSI"
-  ],
-  "pais": [
-   "Chile"
-  ]
- },
- {
-  "id": "pamtours-ecuador",
-  "nombre": "Pamtours Ecuador",
-  "logo": "operadores/pamtours-ecuador.png",
-  "bg": "#155592",
-  "k": [
-   "PAMTOURS"
-  ],
-  "pais": [
-   "Ecuador"
-  ]
- },
- {
-  "id": "paraty-tours",
-  "nombre": "Paraty Tours",
-  "logo": "operadores/paraty-tours.png",
-  "k": [
-   "PARATY TOURS"
-  ],
-  "pais": [
-   "Brasil"
-  ]
- },
- {
-  "id": "prestigio",
-  "nombre": "Prestigio Operadores Receptivos",
-  "logo": "operadores/prestigio.png",
-  "k": [
-   "PRESTIGIO"
-  ],
-  "pais": [
-   "Argentina"
-  ]
- },
- {
-  "id": "pts-peru",
-  "nombre": "PTS Perú",
-  "logo": "operadores/pts-peru.png",
-  "k": [
-   "PTS PERU",
-   "PTS"
-  ],
-  "pais": [
-   "Perú"
-  ]
- },
- {
-  "id": "vi-travel",
-  "nombre": "Vi Travel",
-  "logo": "operadores/vi-travel.png",
-  "k": [
-   "VI TRAVEL"
-  ],
-  "pais": [
-   "México"
-  ]
- }
+{
+"id": "ads-mundo",
+"nombre": "ADS Mundo",
+"logo": "operadores/ads-mundo.png",
+"k": [
+"ADS MUNDO",
+"ADSMUNDO"
+],
+"pais": [
+"Chile"
+]
+},
+{
+"id": "arcoiris-viajes",
+"nombre": "Arcoíris Viajes",
+"logo": "operadores/arcoiris-viajes.png",
+"k": [
+"ARCOIRIS"
+],
+"pais": [
+"Panamá"
+]
+},
+{
+"id": "barlan-travel",
+"nombre": "Barlan Travel",
+"logo": "operadores/barlan-travel.png",
+"k": [
+"BARLAN"
+],
+"pais": [
+"Argentina"
+]
+},
+{
+"id": "brasil-voyage",
+"nombre": "Brasil Voyage",
+"logo": "operadores/brasil-voyage.png",
+"k": [
+"BRASIL VOYAGE"
+],
+"pais": [
+"Brasil"
+]
+},
+{
+"id": "cts-turismo",
+"nombre": "CTS Turismo",
+"logo": "operadores/cts-turismo.png",
+"k": [
+"CTS TURISMO"
+],
+"pais": [
+"Chile"
+]
+},
+{
+"id": "de-palm-tours",
+"nombre": "De Palm Tours Aruba",
+"logo": "operadores/de-palm-tours.png",
+"k": [
+"DE PALM"
+],
+"pais": [
+"Aruba"
+]
+},
+{
+"id": "fiesta-tours",
+"nombre": "Fiesta Tours Curaçao",
+"logo": "operadores/fiesta-tours.png",
+"k": [
+"FIESTA TOURS"
+],
+"pais": [
+"Curazao"
+]
+},
+{
+"id": "hyd-brasil",
+"nombre": "H&D Brasil",
+"logo": "operadores/hyd-brasil.png",
+"k": [
+"H D BRASIL",
+"HYD BRASIL",
+"HD BRASIL",
+"H Y D BRASIL",
+"H AND D BRASIL"
+],
+"pais": [
+"Brasil"
+]
+},
+{
+"id": "hover-tours",
+"nombre": "Hover Tours Venezuela",
+"logo": "operadores/hover-tours.png",
+"bg": "#010f67",
+"k": [
+"HOVER TOURS",
+"HOVER"
+],
+"pais": [
+"Venezuela"
+]
+},
+{
+"id": "itaparica-tour",
+"nombre": "Itaparica Tour Operator",
+"logo": "operadores/itaparica-tour.png",
+"k": [
+"ITAPARICA"
+],
+"pais": [
+"Brasil"
+]
+},
+{
+"id": "lares-argentina",
+"nombre": "Lares Argentina",
+"logo": "operadores/lares-argentina.png",
+"k": [
+"LARES"
+],
+"pais": [
+"Argentina"
+]
+},
+{
+"id": "luck-receptivo",
+"nombre": "Luck Receptivo",
+"logo": "operadores/luck-receptivo.png",
+"k": [
+"LUCK"
+],
+"pais": [
+"Brasil"
+]
+},
+{
+"id": "martin-travel",
+"nombre": "Martin Travel",
+"logo": "operadores/martin-travel.png",
+"k": [
+"MARTIN TRAVEL"
+],
+"pais": [
+"Argentina",
+"Brasil"
+]
+},
+{
+"id": "otium-international",
+"nombre": "Otium International",
+"logo": "operadores/otium-international.png",
+"k": [
+"OTIUM"
+],
+"pais": [
+"México",
+"República Dominicana"
+]
+},
+{
+"id": "otsi",
+"nombre": "OTSI Tour Operator",
+"logo": "operadores/otsi.png",
+"k": [
+"OTSI"
+],
+"pais": [
+"Chile"
+]
+},
+{
+"id": "pamtours-ecuador",
+"nombre": "Pamtours Ecuador",
+"logo": "operadores/pamtours-ecuador.png",
+"bg": "#155592",
+"k": [
+"PAMTOURS"
+],
+"pais": [
+"Ecuador"
+]
+},
+{
+"id": "paraty-tours",
+"nombre": "Paraty Tours",
+"logo": "operadores/paraty-tours.png",
+"k": [
+"PARATY TOURS"
+],
+"pais": [
+"Brasil"
+]
+},
+{
+"id": "prestigio",
+"nombre": "Prestigio Operadores Receptivos",
+"logo": "operadores/prestigio.png",
+"k": [
+"PRESTIGIO"
+],
+"pais": [
+"Argentina"
+]
+},
+{
+"id": "pts-peru",
+"nombre": "PTS Perú",
+"logo": "operadores/pts-peru.png",
+"k": [
+"PTS PERU",
+"PTS"
+],
+"pais": [
+"Perú"
+]
+},
+{
+"id": "red-turistica",
+"nombre": "Red Turística de Hoteles",
+"logo": "operadores/red-turistica.png",
+"k": [
+"RED TURISTICA",
+"REDTURISTICA",
+"RED TURISTICA DE HOTELES"
+],
+"pais": [
+"Argentina",
+"Brasil",
+"Colombia",
+"Estados Unidos",
+"México"
+]
+},
+{
+"id": "vi-travel",
+"nombre": "Vi Travel",
+"logo": "operadores/vi-travel.png",
+"k": [
+"VI TRAVEL"
+],
+"pais": [
+"México"
+]
+}
 ]
