@@ -45,6 +45,18 @@
 ]
 },
 {
+"id": "buzios-express",
+"nombre": "Búzios Express",
+"logo": "operadores/buzios-express.png",
+"k": [
+"BUZIOS EXPRESS",
+"BUZIOSEXPRESS"
+],
+"pais": [
+"Brasil"
+]
+},
+{
 "id": "cts-turismo",
 "nombre": "CTS Turismo",
 "logo": "operadores/cts-turismo.png",
