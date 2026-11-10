@@ -234,3 +234,9 @@ button:disabled{opacity:.45;cursor:default}
  .sheet [contenteditable]:hover{background:none}
  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+
+.prst{display:flex;align-items:center;gap:8px;margin:10px 24px 0;font:500 10.5px Montserrat,sans-serif;color:#5d7f7b;letter-spacing:.02em}
+.prst img{height:24px;width:auto;opacity:.92}
+.prst b{font-weight:600;color:#3f6662}
+.v-ink .prst{margin:3mm 0 0;font-size:3.1mm;color:#46625e}
+.v-ink .prst img{height:6mm}

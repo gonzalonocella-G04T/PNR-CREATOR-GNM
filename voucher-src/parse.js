@@ -382,9 +382,11 @@ function armarVoucher(txtServ,txtVuelos){
   if(!items.length)warns.push('No detecté ningún servicio.');
     // operador mencionado en el texto
   var opDet=null,T=norm(txtServ+'\n'+(txtVuelos||''));
-  OPERADORES.forEach(function(o){if(opDet)return;(o.k||[]).forEach(function(k){if(!opDet&&(' '+T.replace(/[^A-Z0-9]+/g,' ')+' ').indexOf(' '+norm(k)+' ')>=0)opDet=o;});});
+  var TT=' '+T.replace(/[^A-Z0-9]+/g,' ')+' ',hall=OPERADORES.filter(function(o){return (o.k||[]).some(function(k){return TT.indexOf(' '+norm(k)+' ')>=0;});});
+  opDet=hall.filter(function(o){return !o.prestador;})[0]||hall[0]||null;
+  var prest=opDet?hall.filter(function(o){return o.prestador&&o!==opDet;})[0]||null:null;
   var opTxt=opDet?'':(S.opTxt||'');
   if(!pax.length&&n)warns.push('La solicitud no trae nombres de pasajeros: completalos en el voucher ('+n+' pax).');
   if(opTxt)warns.push('Operador detectado: "'+opTxt+'". No tiene logo cargado; se muestra el nombre. Podés subir el logo.');
-  return {tel:S.tel,dest:dest,destNombre:S.destTitulo||(dest?nombreDestino(dest):''),pais:dest?paisDe(dest):'',pax:pax,npax:n,items:items,warns:warns,op:opDet,opTxt:opTxt};
+  return {prest:prest,tel:S.tel,dest:dest,destNombre:S.destTitulo||(dest?nombreDestino(dest):''),pais:dest?paisDe(dest):'',pax:pax,npax:n,items:items,warns:warns,op:opDet,opTxt:opTxt};
 }
