@@ -83,7 +83,7 @@ function itemHtml(it){
   var h='<div class="sv'+(fo?' exc':'')+'">'+(fo?'<div class="strip">'+im(fo,'','')+'<div class="fade"></div></div>':'')+fechaHtml(it.f,it.tipo==='hotel'?it.co:null)+'<div class="tx"><div class="ti"><span class="icw">'+iconSvg(it)+'</span><span contenteditable>'+esc(it.titulo)+'</span></div>';
   if(it.det)h+='<div class="rt" contenteditable>'+esc(it.det)+'</div>';
   if(it.from)h+='<div class="rt"><span contenteditable>'+esc(it.from)+'</span><em>→</em><span contenteditable>'+esc(it.to)+'</span></div>';
-  if(it.vuelo){var v=it.vuelo;h+='<div class="fl"><span contenteditable>'+esc(v.n)+'</span><i>|</i><span contenteditable>'+v.from+' → '+v.to+'</span><i>|</i><span contenteditable>'+v.dep+' – '+v.arr+(v.sig?' (+1)':'')+'</span></div>';}
+  if(it.vuelo){var v=it.vuelo;h+='<div class="fl"><span contenteditable>'+esc(v.n)+'</span><i>|</i><span contenteditable>'+v.from+' → '+v.to+'</span><i>|</i><span contenteditable>'+v.dep+(v.arr?' – '+v.arr:'')+(v.sig?' (+1)':'')+'</span></div>';}
   return h+'</div></div>';
 }
 function render(){
@@ -131,7 +131,7 @@ function render(){
       var body='<div class="tp">'+SV(IC[iconKey(it)],'ico')+'<div class="x"><div class="t" contenteditable>'+esc(main)+'</div>'+
         (it.from?'<div class="o"><span contenteditable>'+esc(it.from)+'</span><em>→</em><span contenteditable>'+esc(it.to)+'</span></div>':'')+
         (it.det?'<div class="o" contenteditable>'+esc(it.det)+'</div>':'')+(sub?'<div class="sub" contenteditable>'+esc(sub)+'</div>':'')+'</div></div>';
-      if(it.vuelo){var q=it.vuelo;body+='<div class="fl">'+SV(PLANE,'pl')+'<span contenteditable>'+esc(q.n)+'</span><i>|</i><span contenteditable>'+q.from+' → '+q.to+'</span><i>|</i><b contenteditable>'+q.dep+' – '+q.arr+(q.sig?' (+1)':'')+'</b></div>';}
+      if(it.vuelo){var q=it.vuelo;body+='<div class="fl">'+SV(PLANE,'pl')+'<span contenteditable>'+esc(q.n)+'</span><i>|</i><span contenteditable>'+q.from+' → '+q.to+'</span><i>|</i><b contenteditable>'+q.dep+(q.arr?' – '+q.arr:'')+(q.sig?' (+1)':'')+'</b></div>';}
       var fo=it.tipo==='exc'?excFoto(tit):'';
       return '<div class="r'+(fo?' exc':'')+'">'+(fo?'<div class="strip">'+im(fo,'','')+'<div class="fade"></div></div>':'')+chip+'<div class="vl"></div><div class="bd">'+body+'</div></div>';
     }).join('');
@@ -222,6 +222,7 @@ function generar(){
   if(v.op&&!state.opUpload){$('op').value=v.op.id;state.opLogo=v.op.logo;state.opTxt='';state.opAuto=true;}
   else if(v.opTxt&&!state.opUpload){$('op').value='';state.opLogo=null;state.opTxt=v.opTxt;state.opAuto=true;}
   else{state.opTxt='';if(state.opAuto&&!state.opUpload){$('op').value='';state.opLogo=null;}state.opAuto=false;var op=OPERADORES.filter(function(o){return o.id===$('op').value;})[0];if(op&&!state.opUpload)state.opLogo=op.logo;}
+  var ob=$('obs');if(!ob.value.trim()||ob.value===state.obsAuto){ob.value=v.tel?'Contacto del pasajero: '+v.tel:'';state.obsAuto=ob.value;}
   mostrarWarns();listaItems();$('dtit').value=v.destNombre||'';render();
 }
 function cargarLogo(inp,key,upKey){
