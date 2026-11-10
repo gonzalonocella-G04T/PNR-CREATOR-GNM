@@ -239,7 +239,8 @@
 "k": [
 "RED TURISTICA",
 "REDTURISTICA",
-"RED TURISTICA DE HOTELES"
+"RED TURISTICA DE HOTELES",
+"RED TURISTICA HOTELERA"
 ],
 "pais": [
 "Argentina",
@@ -247,7 +248,12 @@
 "Colombia",
 "Estados Unidos",
 "México"
-]
+],
+"contacto": {
+"razon": "Red Turística & Hotelera",
+"dir": "Esmeralda 351, 8.º piso – Buenos Aires, Argentina",
+"emerg": "(+55) 11 7332885805"
+}
 },
 {
 "id": "vi-travel",

@@ -240,3 +240,12 @@ button:disabled{opacity:.45;cursor:default}
 .prst b{font-weight:600;color:#3f6662}
 .v-ink .prst{margin:3mm 0 0;font-size:3.1mm;color:#46625e}
 .v-ink .prst img{height:6mm}
+
+.opct{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 0;margin:12px 24px 0;padding-top:8px;border-top:1px solid #cfe5e1;font:500 10px/1.5 Montserrat,sans-serif;color:#5d7f7b;text-align:center}
+.opct b{font-weight:700;color:#2f5753}
+.opct>*:not(:first-child)::before{content:'·';margin:0 7px;color:#9cc4be}
+.opct .em{font-weight:700;color:#14766b}
+.v-ink .opct{margin:5mm 0 0;padding-top:2.5mm;border-top:.3mm solid #b9d3cf;font-size:3mm;color:#46625e}
+.v-ink .opct .em{color:#0b4a42}
+.v-dig2 .opct .em{flex-basis:100%}
+.v-dig2 .opct .em::before{content:none}

@@ -95,6 +95,8 @@ function render(){
   function opHtml(cls){if(op)return opImg(op,cls);if(state.opTxt)return '<span class="optxt '+cls+'" contenteditable>'+esc(state.opTxt)+'</span>';return '';}
   var hasOp=!!(op||state.opTxt);
   var pr=OPERADORES.filter(function(o){return o.id===$('prs').value;})[0]||null;
+  var opSel=OPERADORES.filter(function(o){return o.id===$('op').value;})[0],ct=opSel&&opSel.contacto&&!state.opUpload?opSel.contacto:null;
+  var CONT=ct?'<div class="opct" contenteditable><b>'+esc(ct.razon)+'</b>'+(ct.dir?'<span>'+esc(ct.dir)+'</span>':'')+(ct.tel?'<span>Tel. '+esc(ct.tel)+'</span>':'')+(ct.emerg?'<span class="em">Tel. emergencia: '+esc(ct.emerg)+'</span>':'')+'</div>':'';
   var PREST=pr?'<div class="prst"><span>Servicio prestado por</span>'+im(pr.logo,'prlogo',pr.nombre)+'</div>':'';
   var LOGOS=im(hv,'lg hvlogo','Hiperviajes')+(hasOp?'<i></i>'+opHtml('lg2 oplogo'):'');
   var cls={foto:'v-foto',ink:'v-ink',dig:'v-dig2'}[state.ver];
@@ -146,7 +148,7 @@ function render(){
       (v.pais?'<div class="ctry">'+SV(PIN,'pin')+'<span contenteditable>'+esc(v.pais.toUpperCase())+'</span></div>':'')+'</div>'+
       '<div class="card">'+rows+'</div>'+
       '<div class="px">'+SV(PEOPLE,'pp')+'<span class="k">PASAJEROS</span><i></i><div class="nm" contenteditable>'+(v.pax.length?v.pax.map(esc).join('<em>|</em>'):'<span class="ph">Nombre y apellido</span>')+'</div>'+(v.npax&&v.npax!==v.pax.length?'<span class="cnt">'+v.npax+' PAX</span>':'')+'</div>'+
-      PREST+(ob?'<div class="ob" contenteditable>'+esc(ob)+'</div>':'')+'</div>'+
+      PREST+(ob?'<div class="ob" contenteditable>'+esc(ob)+'</div>':'')+CONT+'</div>'+
       '<div class="foot"><svg viewBox="0 0 610 90" preserveAspectRatio="none"><path d="M0 22C150 2 300 4 420 16S560 34 610 20V90H0Z" fill="#bfe6de"/><path d="M0 40C140 20 290 22 420 34S560 50 610 36V90H0Z" fill="url(#fg)"/><defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2aa192"/><stop offset="1" stop-color="#14766b"/></linearGradient></defs></svg>'+
       '<div class="vft"><i></i>'+SV(TICKET,'tk')+'<span>VOUCHER DE SERVICIO</span><i></i></div></div>'+
       (dest&&dest.cr?'<div class="cr">Foto: '+esc(dest.cr)+'</div>':'')+'</div>';
@@ -156,7 +158,7 @@ function render(){
   }
   var pax='<div class="pax"><span class="k">Pasajeros</span><span class="v" contenteditable>'+(v.pax.length?esc(v.pax.join('  |  ')):'<span class="ph">Nombre y apellido</span>')+'</span><span class="n">'+v.npax+' pax</span></div>';
   var obs=$('obs').value.trim();
-  var html='<div class="sheet '+cls+'" id="sheet">'+head+hero+intro+'<div class="body">'+pax+v.items.map(itemHtml).join('')+PREST+
+  var html='<div class="sheet '+cls+'" id="sheet">'+head+hero+intro+'<div class="body">'+pax+v.items.map(itemHtml).join('')+PREST+CONT+
     '<div class="obs" contenteditable>'+esc(obs)+'</div></div><div class="ft"><span>Hiperviajes</span><span>Voucher de servicios</span></div></div>';
   st.innerHTML=html;
   ajustarLogos();
