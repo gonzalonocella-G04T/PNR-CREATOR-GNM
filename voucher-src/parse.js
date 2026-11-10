@@ -44,16 +44,18 @@ function selloDe(f){
 function fechaDe(txt,anioRef){
   var m=txt.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
   if(!m)return null;
-  var y=m[3]?+m[3]:(anioRef||new Date().getFullYear());if(y<100)y+=2000;
+  var y=m[3]?+m[3]:(anioRef||anioFuturo(+m[1],+m[2]));if(y<100)y+=2000;
   return {d:+m[1],m:+m[2],y:y,raw:m[0]};
 }
 function iso(f){return f.y*10000+f.m*100+f.d;}
 function diaSemana(f){var d=new Date(Date.UTC(f.y,f.m-1,f.d));return ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][d.getUTCDay()];}
 
 /* ---- Vuelos y pasajeros (Amadeus) ---- */
+var RE_AMA=/^\s*(?:\d+\s+)?[A-Z0-9]{2}\s*\d{1,4}\s+[A-Z]\s+\d{2}[A-Z]{3}\s+\d?\*?\s*[A-Z]{6}\s+[A-Z]{2}\d+/,RE_PAXA=/^\s*\d+\.\s*[A-Z'\-]+\/[A-Z]/;
+function sinPNR(txt){return (txt||'').split(/\r?\n/).filter(function(l){return !RE_AMA.test(l)&&!RE_PAXA.test(l)&&!/^\s*RP\/[A-Z0-9]+\//.test(l);}).join('\n');}
 function parseVuelos(txt){
   var out=[],pax=[],warns=[];
-  var re=/^\s*\d+\s+([A-Z0-9]{2})\s*(\d{1,4})\s+[A-Z]\s+(\d{2})([A-Z]{3})\s+\d?\*?\s*([A-Z]{3})([A-Z]{3})\s+[A-Z]{2}\d+\s+(\d{4})\s+(\d{4})(?:\s+(\d{2})([A-Z]{3}))?/;
+  var re=/^\s*(?:\d+\s+)?([A-Z0-9]{2})\s*(\d{1,4})\s+[A-Z]\s+(\d{2})([A-Z]{3})\s+\d?\*?\s*([A-Z]{3})([A-Z]{3})\s+[A-Z]{2}\d+\s+(\d{4})\s+(\d{4})(?:\s+(\d{2})([A-Z]{3}))?/;
   txt.split(/\r?\n/).forEach(function(l){
     var m=l.match(re);
     if(m){
@@ -148,26 +150,35 @@ function parseTabla(txt,kindDef){
 
 /* ---- Pedidos en texto libre: vuelos en bloques, cadena de traslados, nombres sueltos ---- */
 function anioFuturo(d,m){var h=new Date(),y=h.getFullYear();if(m<h.getMonth()+1||(m===h.getMonth()+1&&d<h.getDate()))y++;return y;}
+var AL_EXTRA={'SKY':'H2','SKY AIRLINE':'H2','JETSMART':'JA','JET SMART':'JA','LATAM':'LA','GOL':'G3','AZUL':'AD','COPA':'CM','AVIANCA':'AV','AEROLINEAS':'AR','AEROLINEAS ARGENTINAS':'AR','FLYBONDI':'FO','IBERIA':'IB','AIR EUROPA':'UX','AMERICAN':'AA','UNITED':'UA','DELTA':'DL','AEROMEXICO':'AM','ARAJET':'DM','BOA':'OB','PARANAIR':'ZP','ITA':'AZ','TURKISH':'TK','EMIRATES':'EK','AIR FRANCE':'AF','KLM':'KL','LUFTHANSA':'LH','QATAR':'QR','WINGO':'P5','VIVA':'VB','VOLARIS':'Y4','SURINAM':'PY','CARIBBEAN':'BW','INTERJET':'4O'};
+var AL_ALIAS=null;
+function aliasAerolineas(){if(AL_ALIAS)return AL_ALIAS;var m={};if(typeof AIRN!=='undefined')Object.keys(AIRN).forEach(function(c){var n=norm(AIRN[c]).replace(/[^A-Z0-9 ]/g,' ').replace(/\s+/g,' ').trim();if(n.length>3&&!m[n])m[n]=c;var n2=n.replace(/\s+(AIRLINES?|AIRWAYS|LINHAS AEREAS|LINEAS AEREAS)$/,'');if(n2.length>3&&!m[n2])m[n2]=c;});Object.keys(AL_EXTRA).forEach(function(k){m[k]=AL_EXTRA[k];});AL_ALIAS=Object.keys(m).sort(function(a,b){return b.length-a.length;}).map(function(k){return [k,m[k]];});return AL_ALIAS;}
+function codAerolinea(l){ // "Aerolíneas Argentinas 1850" / "vuelo Sky 1815" -> "AR 1850"
+  var L=norm(l).replace(/[^A-Z0-9:\/\- ]/g,' ');var A=aliasAerolineas();
+  for(var i=0;i<A.length;i++){var re=new RegExp('\\b'+A[i][0].replace(/ /g,'\\s+')+'\\s*(?:VUELO|VLO|NRO|N|#)?\\s*(\\d{1,4})\\b');var m=L.match(re);if(m)return {c:A[i][1],n:m[1],t:L.replace(m[0],' ')};}
+  return null;
+}
 function vuelosLibres(txt){
-  var out=[],cur=null,dir='';
-  function cerrar(){if(cur&&cur.from&&(cur.num||cur.dep))out.push(cur);cur=null;}
+  var out=[],cur=null,dir='';txt=sinPNR(txt);
+  function cerrar(){if(cur&&(cur.from&&(cur.num||cur.dep)||cur.num&&cur.d))out.push(cur);cur=null;}
   txt.split(/\r?\n/).forEach(function(l0){
     var l=l0.trim();if(!l){return;}
     if(/vuelos?\s+de\s+(llegada|ida)|^llegada\b|^ida\b/i.test(l)&&!/\d/.test(l)){cerrar();dir='in';return;}
     if(/vuelos?\s+de\s+(salida|regreso|vuelta)|^salida\b|^regreso\b/i.test(l)&&!/\d/.test(l)){cerrar();dir='out';return;}
-    var rest=l,tk={};
+    var rest=l,tk={},ca=codAerolinea(l);if(ca)rest=ca.t;
+    var dl=/\b(llegada|arribo|arriba|llega|ida)\b/i.test(l)?'in':(/\b(salida|regreso|vuelta|sale|retorno)\b/i.test(l)?'out':'');
     var md=rest.match(/\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/);if(md){tk.f=md;rest=rest.replace(md[0],' ');}
     var mr=rest.match(/\b([A-Z]{3})\s*[-–\/>→]+\s*([A-Z]{3})\b/);if(mr){tk.r=mr;rest=rest.replace(mr[0],' ');}
-    var mt=rest.match(/\b(\d{1,2})[:.](\d{2})\s*(?:hs?\.?)?/i);if(mt){tk.t=mt;rest=rest.replace(mt[0],' ');}
-    var mv=rest.match(/\b([A-Z]{2}|[A-Z]\d|\d[A-Z])\s?(\d{1,4})\b/);if(mv){tk.v=mv;rest=rest.replace(mv[0],' ');}
-    var letras=rest.replace(/\b(vuelo|vuelos|vlo|hs|hrs|horas?|sale|llega|de|a)\b/gi,'').replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g,'');
+    var mt=rest.match(/\b(\d{1,2})[:.](\d{2})\s*(?:hs?\.?)?/i);if(mt){tk.t=mt;rest=rest.replace(mt[0],' ');var mt2=rest.match(/\b(\d{1,2})[:.](\d{2})\s*(?:hs?\.?)?/i);if(mt2){tk.t2=mt2;rest=rest.replace(mt2[0],' ');}}
+    if(ca)tk.v=[null,ca.c,ca.n];else{var mv=rest.match(/\b([A-Z]{2}|[A-Z]\d|\d[A-Z])\s?(\d{1,4})\b/);if(mv){tk.v=mv;rest=rest.replace(mv[0],' ');}}
+    var letras=rest.replace(/\b(vuelos?|vlo|hs|hrs|horas?|sale|salida|llega|llegada|arribo|ida|regreso|vuelta|retorno|de|del|a|al|el|la|en|con|y|nro|n°|aeropuerto|horario)\b/gi,'').replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g,'');
     var n=Object.keys(tk).length;
-    if(!n||(letras.length>2&&!tk.r)){if(cur&&cur.from)cerrar();return;}
+    if(!n||(letras.length>2&&!tk.r&&!(tk.v&&(tk.f||tk.t)))){if(cur&&(cur.from||cur.num))cerrar();return;}
     if(!cur||(tk.f&&cur.d)||(tk.r&&cur.from)||(tk.v&&cur.num))cerrar();
-    if(!cur)cur={aero:'',num:'',d:null,m:null,from:'',to:'',dep:'',arr:'',dir:dir,libre:true};
+    if(!cur)cur={aero:'',num:'',d:null,m:null,from:'',to:'',dep:'',arr:'',dir:dl||dir,libre:true};else if(dl&&!cur.dir)cur.dir=dl;
     if(tk.f){cur.d=+tk.f[1];cur.m=+tk.f[2];if(tk.f[3]){var y=+tk.f[3];cur.y=y<100?y+2000:y;}}
     if(tk.r){cur.from=tk.r[1];cur.to=tk.r[2];}
-    if(tk.t)cur.dep=('0'+tk.t[1]).slice(-2)+':'+tk.t[2];
+    if(tk.t)cur.dep=('0'+tk.t[1]).slice(-2)+':'+tk.t[2];if(tk.t2)cur.arr=('0'+tk.t2[1]).slice(-2)+':'+tk.t2[2];
     if(tk.v){cur.aero=tk.v[1];cur.num=tk.v[2];}
   });
   cerrar();
@@ -189,6 +200,8 @@ function nombresSueltos(rawL){ // bloque de nombres debajo de "4 ADT" / "Pasajer
       out.push(titleCase(l));}
     if(out.length)break;
   }
+  if(!out.length)for(i=0;i<rawL.length&&!out.length;i++){var ps=rawL[i].split(/\s*(?:\/|,|;|\s+y\s+|\s+e\s+|\s+-\s+)\s*/);
+    if(ps.length>=2&&ps.length<=8&&!EXC.test(rawL[i])&&!/\d/.test(rawL[i])&&ps.every(function(x){return /^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñüÜ'´\-\.]+(\s+[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñüÜ'´\-\.]+){1,3}$/.test(x)&&!destinoPorTexto(x);}))out=ps.map(titleCase);}
   return out;
 }
 
@@ -253,12 +266,14 @@ function parseServicios(txt){
     var mp=l.match(/^(.+?)\s*[xX]\s*(\d+)\s*$/)||l.match(/^([A-Za-zÁÉÍÓÚÑáéíóúñ' ]{3,60}?)\s*\(\s*(\d+)\s*pax/i);
     if(mp&&/^(base|ciudad|precio|menor)/i.test(mp[1]))mp=null;
     if(mp&&!/\d\/\d/.test(l)){paxTxt=titleCase(mp[1]);paxN=+mp[2];return;}
-    var ml=l.match(/^(llegada|salida|in|out|ida|regreso)\s*:\s*(.+)$/i);
+    var ml=l.match(/^(llegada|salida|in|out|ida|regreso|arribo)\s*:\s*(.+)$/i)||(/\d{1,2}\/\d{1,2}/.test(l)?l.match(/^(llegada|salida|arribo|regreso)\b\s*(.+)$/i):null);
     if(ml){
-      var f=fechaDe(ml[2],anio),cuerpo=ml[2].replace(/\s*\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\s*$/,'').trim();
+      var f=fechaDe(ml[2],anio)||fechaDe(ml[2].replace(/^.*?(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?).*$/,'$1'),anio),cuerpo=ml[2].replace(/\s*\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\s*$/,'').trim();
       var partes=cuerpo.split(/\s+[-–>→]+\s+/);
-      if(partes.length<2){warns.push('No pude separar origen y destino en: "'+l+'"');return;}
-      var esIn=/^(llegada|in|ida)/i.test(ml[1]);
+      var esIn=/^(llegada|in|ida|arribo)/i.test(ml[1]);
+      if(partes.length<2||/\b[A-Z]{3}\s*-\s*[A-Z]{3}\b|\bvuelo\b/i.test(cuerpo)){ // "Llegada 14/03 vuelo CM 383 ..." → traslado implícito
+        if(!f){warns.push('No pude separar origen y destino en: "'+l+'"');return;}
+        svs.push({tipo:esIn?'in':'out',kind:kind,from:esIn?'Aeropuerto':'__HOTEL__',to:esIn?'__HOTEL__':'Aeropuerto',f:f,raw:l});return;}
       svs.push({tipo:esIn?'in':'out',kind:kind,from:partes[0],to:partes.slice(1).join(' - '),f:f,raw:l});
       if(!f)warns.push('Servicio sin fecha: "'+l+'"');
       return;
@@ -306,6 +321,7 @@ function parseServicios(txt){
       if(nm0.length>1)destTitulo=nm0.length===2?nm0.join(' y '):nm0.slice(0,-1).join(', ')+' y '+nm0[nm0.length-1];}
   }else inter.forEach(function(x){svs.push({tipo:'tr',inter:true,kind:kind,from:x.de,to:x.a,f:x.f,det:x.hora,raw:''});});
   var hotelSvs=[];
+  svs.forEach(function(x){if(x.from==='__HOTEL__')x.from=hoteles[0]||'Hotel';if(x.to==='__HOTEL__')x.to=hoteles[0]||'Hotel';});
   hoteles.forEach(function(h){
     var i0=rawL.indexOf(h),det=[],noches=null,j,l2;
     for(j=i0+1;j<rawL.length&&j<i0+25;j++){l2=rawL[j];if(!l2)continue;if(/^ciudad\s*:/i.test(l2)||RE_LINEA_FECHA.test(l2)||hoteles.indexOf(l2)>=0)break;
@@ -314,6 +330,8 @@ function parseServicios(txt){
     var ci=(ref&&ref.d)?{d:ref.d,m:ref.m,y:ref.y}:null,co=null;
     if(ci&&noches){var dt=new Date(Date.UTC(ci.y,ci.m-1,ci.d+noches));co={d:dt.getUTCDate(),m:dt.getUTCMonth()+1,y:dt.getUTCFullYear()};}
     hotelSvs.push({tipo:'hotel',hotel:h,det:det,noches:noches,f:ci,co:co});
+    if(!ci&&hoteles.length===1){var tin=svs.filter(function(x){return x.tipo==='in'&&x.f;})[0],tout=svs.filter(function(x){return x.tipo==='out'&&x.f;}).slice(-1)[0];
+      if(tin){ci={d:tin.f.d,m:tin.f.m,y:tin.f.y};if(tout){co={d:tout.f.d,m:tout.f.m,y:tout.f.y};noches=Math.round((Date.UTC(co.y,co.m-1,co.d)-Date.UTC(ci.y,ci.m-1,ci.d))/864e5);}hotelSvs[hotelSvs.length-1]={tipo:'hotel',hotel:h,det:det,noches:noches,f:ci,co:co};}}
     if(!ci)warns.push('Hotel "'+h+'" sin fecha de entrada: completala en el voucher.');
   });
   if(!paxTxt&&paxKv){var pm2=paxKv.match(/^(.+?)\s*\(\s*(\d+)\s*pax/i)||paxKv.match(/^(.+?)\s*[xX]\s*(\d+)\s*$/);paxTxt=titleCase(pm2?pm2[1]:paxKv);if(pm2&&!nKv)nKv=+pm2[2];}if(!paxN&&nKv)paxN=nKv;
@@ -341,8 +359,9 @@ function lugar(t,dest,hoteles){
 
 /* ---- Armado del voucher ---- */
 function armarVoucher(txtServ,txtVuelos){
-  var S=parseServicios(txtServ),V=parseVuelos(txtVuelos||''),warns=S.warns.concat(V.warns),dest=S.dest;
-  if(!V.vuelos.length){V.vuelos=S.vuelosL.concat(vuelosLibres(txtVuelos||''));}
+  var todo=(txtServ||'')+'\n'+(txtVuelos||''),S=parseServicios(sinPNR(txtServ)),V=parseVuelos(todo),warns=S.warns.concat(V.warns),dest=S.dest;
+  if(!V.vuelos.length){V.vuelos=vuelosLibres(todo);}
+  var usados=[];
   if(!dest)warns.push('No reconocí el destino: elegilo manualmente o revisá el texto.');
   var codes=dest?dest.c:[];
   var items=[];
@@ -360,20 +379,28 @@ function armarVoucher(txtServ,txtVuelos){
     var k=s.kind==='privado'?'Privado':(s.kind==='regular'?'Regular':'');
     it.titulo=('Traslado '+k).trim()+(s.tipo==='tr'?(s.inter?' – Interhotel':''):' – '+(s.tipo==='in'?'IN':'OUT'));
     if(s.ready){it.from=s.from;it.to=s.to;if(s.det)it.det=s.det;}else{it.from=lugar(s.from,dest,S.hoteles);it.to=lugar(s.to,dest,S.hoteles);if(s.det)it.det=s.det;}
-    if(s.vueloL){var w=s.vueloL;it.vuelo={n:w.aero+' '+w.num,from:w.from,to:w.to,dep:w.dep,arr:w.arr||'',sig:false};items.push(it);return;}
+    function vObj(w){usados.push(w);return {aero:w.aero,num:w.num,n:w.aero+' '+w.num,from:w.from,to:w.to,dep:w.dep,arr:w.arr||'',dir:s.tipo,libre:!!w.libre,sig:!!(w.arrD&&w.arrD!==w.d)};}
+    if(s.vueloL){var w0=V.vuelos.filter(function(v){return v.num===s.vueloL.num&&v.aero===s.vueloL.aero;})[0]||s.vueloL;it.vuelo=vObj(w0);items.push(it);return;}
     // vuelo asociado
     if(s.f&&V.vuelos.length&&s.tipo!=='tr'){
       var porFecha=V.vuelos.filter(function(v){if(s.tipo==='in'){var dd=v.arrD||v.d,mm=v.arrM||v.m;return dd===s.f.d&&mm===s.f.m;}return v.d===s.f.d&&v.m===s.f.m;});
-      var cand=porFecha.filter(function(v){return codes.indexOf(s.tipo==='in'?v.to:v.from)>=0;});
+      var ap=destinoPorTexto(s.tipo==='in'?s.from:s.to),cc=codes.concat(ap?ap.c:[]);
+      var cand=porFecha.filter(function(v){return v.from&&cc.indexOf(s.tipo==='in'?v.to:v.from)>=0;});
+      if(!cand.length)cand=porFecha.filter(function(v){return v.dir===s.tipo;});
+      if(!cand.length)cand=porFecha.filter(function(v){return !v.from&&!v.dir;});
       if(!cand.length&&porFecha.length===1)cand=porFecha;
-      if(cand.length===1){var v=cand[0];it.vuelo={n:v.aero+(v.libre?' ':'')+v.num,from:v.from,to:v.to,dep:v.dep,arr:v.arr||'',sig:!!(v.arrD&&v.arrD!==v.d)};}
-      else if(cand.length>1)warns.push('Más de un vuelo coincide con el '+s.f.d+'/'+s.f.m+' ('+s.tipo.toUpperCase()+'): revisá a mano.');
+      cand.sort(function(a,b){return s.tipo==='in'?((b.arr||b.dep)>(a.arr||a.dep)?1:-1):((a.dep>b.dep)?1:-1);});
+      if(cand.length){it.vuelo=vObj(cand[0]);if(cand.length>1)warns.push('Hay más de un vuelo el '+s.f.d+'/'+s.f.m+' para el traslado '+s.tipo.toUpperCase()+': tomé el '+cand[0].aero+' '+cand[0].num+', revisalo.');}
       else warns.push('No encontré vuelo para el traslado '+s.tipo.toUpperCase()+' del '+s.f.d+'/'+s.f.m+'.');
     }
     items.push(it);
   });
   items.forEach(function(x,i){x._i=i;});
-  items.sort(function(a,b){return (a.f?iso(a.f):0)-(b.f?iso(b.f):0)||((a.tipo==='hotel')-(b.tipo==='hotel'))||(a._i-b._i);});
+  var RK={in:0,tr:1,exc:1,out:2,hotel:3};function hr(x){var m=(x.det||'').match(/(\d{1,2}):(\d{2})/);return m?+m[1]*60+ +m[2]:(x.vuelo?((x.tipo==='in'?(x.vuelo.arr||x.vuelo.dep):x.vuelo.dep)||'').replace(':','')*0.6:0);}
+  var dias={};items.forEach(function(x){if(x.f){var k=iso(x.f);dias[k]=dias[k]||{};dias[k][x.tipo]=1;}});
+  function rk(x){var r=RK[x.tipo]==null?1:RK[x.tipo];if(x.tipo==='out'&&x.f&&dias[iso(x.f)].in)r=-1;return r;} // cambio de ciudad: primero el OUT, después el IN
+  items.sort(function(a,b){return (a.f?iso(a.f):0)-(b.f?iso(b.f):0)||(rk(a)-rk(b))||(hr(a)-hr(b))||(a._i-b._i);});
+  V.vuelos.forEach(function(v){if(usados.indexOf(v)<0&&!usados.some(function(u){return u.num===v.num&&u.aero===v.aero&&u.d===v.d;}))warns.push('El vuelo '+v.aero+' '+v.num+' del '+v.d+'/'+v.m+' no quedó asociado a ningún traslado.');});
   // pasajeros
   var pax=V.pax.length?V.pax:(S.paxLista.length?S.paxLista:(S.paxTxt?[S.paxTxt]:[]));
   if(S.paxN&&pax.length>1&&pax.length!==S.paxN)warns.push('La solicitud dice x'+S.paxN+' pero hay '+pax.length+' nombre(s) en el PNR/solicitud.');

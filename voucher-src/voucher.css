@@ -248,3 +248,16 @@ button:disabled{opacity:.45;cursor:default}
 .v-ink .opct .em{color:#0b4a42}
 .v-dig2 .opct .em{flex-basis:100%}
 .v-dig2 .opct .em::before{content:none}
+
+.fl .fx{display:flex;flex-direction:column;gap:1px;min-width:0}
+.fl .fx b{font-weight:700}
+.fl .fh{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:1px;padding-left:10px;white-space:nowrap}
+.fl .fh b{font-weight:700}
+.v-dig2 .fl{align-items:center;padding:7px 12px;line-height:1.35}
+.v-dig2 .fl .fx span{font-size:11px;color:#3d6662}
+.v-dig2 .fl .fh{font-size:11px;color:#3d6662;border-left:1px solid #c3dbd7}
+.v-dig2 .fl .fh b{color:#0e3d3b;font-size:12px}
+.sv .fl{display:flex;max-width:150mm;border-radius:3mm;padding:1.6mm 3.5mm;line-height:1.35}
+.sv .fl .fx span{font-weight:500;font-size:3.3mm}
+.sv .fl .fh{font-weight:500;font-size:3.3mm;border-left:.3mm solid var(--line);padding-left:3.5mm}
+.v-ink .sv .fl .fh{border-left-color:var(--g)}

@@ -1,6 +1,13 @@
 var REMOTE='https://raw.githubusercontent.com/gonzalonocella-G04T/PNR-CREATOR-GNM/main/';
 var HV_LOGO='img/hiperviajes-slogan-teal.png',state={logoPos:'auto',ver:'dig',v:null,opLogo:null,hvLogo:null};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function ciudadAp(c){if(!c)return '';var d=typeof ciudadPorCodigo==='function'?ciudadPorCodigo(c):null;return (d?nombreDestino(d):(typeof APTC!=='undefined'&&APTC[c])||c);}
+function vueloHtml(q,ico){
+  var al=(typeof AIRN!=='undefined'&&AIRN[q.aero])||'',num=(q.aero+' '+q.num).trim();
+  var ruta=q.from?ciudadAp(q.from)+' ('+q.from+') → '+ciudadAp(q.to)+' ('+q.to+')':'';
+  var hs=q.dep&&q.arr?'<span>Sale <b>'+q.dep+'</b></span><span>Llega <b>'+q.arr+(q.sig?' (+1)':'')+'</b></span>':(q.dep?'<span><b>'+q.dep+' hs</b></span>':'');
+  return '<div class="fl">'+(ico||'')+'<div class="fx" contenteditable><b>'+esc(al?al+' · '+num:'Vuelo '+num)+'</b>'+(ruta?'<span>'+esc(ruta)+'</span>':'')+'</div>'+(hs?'<div class="fh" contenteditable>'+hs+'</div>':'')+'</div>';
+}
 function im(path,cls,alt){
   var rel=/^(data:|blob:|https?:)/.test(path);
   return '<img'+(cls?' class="'+cls+'"':'')+' crossorigin="anonymous" src="'+esc(path)+'" alt="'+esc(alt||'')+'"'+(rel?'':' onerror="if(!this.dataset.r){this.dataset.r=1;this.src=REMOTE+this.getAttribute(\'src\')}"')+'>';
@@ -83,12 +90,12 @@ function itemHtml(it){
   var h='<div class="sv'+(fo?' exc':'')+'">'+(fo?'<div class="strip">'+im(fo,'','')+'<div class="fade"></div></div>':'')+fechaHtml(it.f,it.tipo==='hotel'?it.co:null)+'<div class="tx"><div class="ti"><span class="icw">'+iconSvg(it)+'</span><span contenteditable>'+esc(it.titulo)+'</span></div>';
   if(it.det)h+='<div class="rt" contenteditable>'+esc(it.det)+'</div>';
   if(it.from)h+='<div class="rt"><span contenteditable>'+esc(it.from)+'</span><em>→</em><span contenteditable>'+esc(it.to)+'</span></div>';
-  if(it.vuelo){var v=it.vuelo;h+='<div class="fl"><span contenteditable>'+esc(v.n)+'</span><i>|</i><span contenteditable>'+v.from+' → '+v.to+'</span><i>|</i><span contenteditable>'+v.dep+(v.arr?' – '+v.arr:'')+(v.sig?' (+1)':'')+'</span></div>';}
+  if(it.vuelo)h+=vueloHtml(it.vuelo,'');
   return h+'</div></div>';
 }
 function render(){
   var v0=state.v,st=$('stage'),v=v0?Object.assign({},v0,{items:v0.items.filter(function(x){return !x.off;})}):v0;
-  if(!v){st.innerHTML='<p class="hint" style="text-align:center;margin-top:60px">Pegá la solicitud y las líneas de vuelo, y tocá “Generar voucher”.</p>';return;}
+  if(!v){st.innerHTML='<p class="hint" style="text-align:center;margin-top:60px">Pegá la solicitud con los vuelos y el voucher se arma solo.</p>';return;}
   var dest=v.dest,foto=state.fotoUp||(dest?(dest.p||(dest.f?'tv-fotos/'+dest.f:'')):''),sel=dest?selloDe(dest):null;
   var hv=state.hvLogo||HV_LOGO,op=state.opLogo;
   var abajo=state.logoPos==='abajo'||state.autoAbajo;
@@ -135,7 +142,7 @@ function render(){
       var body='<div class="tp">'+SV(IC[iconKey(it)],'ico')+'<div class="x"><div class="t" contenteditable>'+esc(main)+'</div>'+
         (it.from?'<div class="o"><span contenteditable>'+esc(it.from)+'</span><em>→</em><span contenteditable>'+esc(it.to)+'</span></div>':'')+
         (it.det?'<div class="o" contenteditable>'+esc(it.det)+'</div>':'')+(sub?'<div class="sub" contenteditable>'+esc(sub)+'</div>':'')+'</div></div>';
-      if(it.vuelo){var q=it.vuelo;body+='<div class="fl">'+SV(PLANE,'pl')+'<span contenteditable>'+esc(q.n)+'</span><i>|</i><span contenteditable>'+q.from+' → '+q.to+'</span><i>|</i><b contenteditable>'+q.dep+(q.arr?' – '+q.arr:'')+(q.sig?' (+1)':'')+'</b></div>';}
+      if(it.vuelo)body+=vueloHtml(it.vuelo,SV(PLANE,'pl'));
       var fo=it.tipo==='exc'?excFoto(tit):'';
       return '<div class="r'+(fo?' exc':'')+'">'+(fo?'<div class="strip">'+im(fo,'','')+'<div class="fade"></div></div>':'')+chip+'<div class="vl"></div><div class="bd">'+body+'</div></div>';
     }).join('');
@@ -219,7 +226,7 @@ function mostrarWarns(){
 }
 function generar(){
   state.autoAbajo=false;
-  var v=armarVoucher($('serv').value,$('vue').value);
+  var v=armarVoucher($('serv').value,'');
   var forced=$('dest').value;
   if(forced){var f=FOTOS.filter(function(x){return x.n===forced;})[0];v.dest=f;v.destNombre=nombreDestino(f);v.pais=paisDe(f);v.warns=v.warns.filter(function(w){return w.indexOf('destino')<0;});}
   state.v=v;
@@ -282,7 +289,7 @@ function init(){
   $('dest').innerHTML='<option value="">Detectar automáticamente</option>'+grupos(DL,function(d){return paisDe(d.f);},function(d){return d.nm;},function(d){return '<option value="'+esc(d.f.n)+'">'+esc(d.nm)+'</option>';});
   $('go').onclick=function(){generar();$('go').disabled=true;};
   $('go').disabled=true;
-  ['serv','vue'].forEach(function(id){
+  ['serv'].forEach(function(id){
     var el=$(id),pegado=false;
     el.addEventListener('paste',function(){pegado=true;state.prsManual=false;setTimeout(function(){pegado=false;if($('serv').value.trim()){generar();$('go').disabled=true;}},0);});
     el.addEventListener('input',function(){if(pegado)return;if($('serv').value.trim())$('go').disabled=false;});

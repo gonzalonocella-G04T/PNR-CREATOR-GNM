@@ -28,7 +28,23 @@ for l in lug:
 fotos=fotos.replace('var FOTOS=','var FOTOS_OLD=')+'\nvar FOTOS_NEW='+json.dumps(nuevos,ensure_ascii=False,separators=(',',':'))+';\nvar FOTOS=FOTOS_NEW.concat(FOTOS_OLD);\n'
 paises.update({}) 
 exc=json.load(open(os.path.join(root,'excursiones','excursiones.json'),encoding='utf-8')) if os.path.exists(os.path.join(root,'excursiones','excursiones.json')) else []
-data='var EXC_FOTOS='+json.dumps(exc,ensure_ascii=False)+';\n'+fotos+'\nvar SELLOS='+json.dumps(sellos,ensure_ascii=False,separators=(',',':'))+';\nvar OPERADORES='+json.dumps(ops,ensure_ascii=False)+';\nvar PAISES='+json.dumps(pmap,ensure_ascii=False)+';\n'
+idx=rd(os.path.join(root,'index.html'))
+_m=_re.search(r"var RAW = '([^']*)';\n  RAW.split\(';'\)",idx)
+air={}
+for e in _m.group(1).split(';'):
+    p=e.split('|')
+    if len(p)>1: air[p[0]]=p[1]
+apt={}
+_a=_re.search(r"var APX=(\{.*?\});",idx)
+if _a:
+    for tz,v in json.loads(_a.group(1)).items():
+        for e in v.split(';'):
+            p=e.split('|')
+            if len(p)>1 and tz.startswith('America/'): apt[p[0]]=p[1]
+_b=_re.search(r"var RAW = \{(.*?)\n  \};",idx,_re.S)
+for code,city in _re.findall(r"\b([A-Z]{3}) ([^,/']+)(?:/[^,']*)?",_b.group(1)): apt[code]=city.strip()
+data='var AIRN='+json.dumps(air,ensure_ascii=False,separators=(',',':'))+';\nvar APTC='+json.dumps(apt,ensure_ascii=False,separators=(',',':'))+';\n'
+data+='var EXC_FOTOS='+json.dumps(exc,ensure_ascii=False)+';\n'+fotos+'\nvar SELLOS='+json.dumps(sellos,ensure_ascii=False,separators=(',',':'))+';\nvar OPERADORES='+json.dumps(ops,ensure_ascii=False)+';\nvar PAISES='+json.dumps(pmap,ensure_ascii=False)+';\n'
 js=data+rd(os.path.join(here,'parse.js'))+rd(os.path.join(here,'app.js'))
 assert '</script' not in js.lower()
 import datetime
