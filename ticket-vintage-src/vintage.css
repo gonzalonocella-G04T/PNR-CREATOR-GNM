@@ -157,3 +157,10 @@ body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Inter",Arial
 .head.pax-m .tk .sm,.head.pax-l .tk .sm{font-size:10.5px}
 .big.pax .pn{white-space:nowrap;break-inside:avoid}
 .info.bag-man .v{white-space:normal;max-width:140px;line-height:1.2;font-size:13px}.seg-top .fn{white-space:nowrap}.seg-top .info{min-width:0}
+/* open jaw: dos destinos, dos sellos apilados */
+.head.oj{padding-right:200px}
+.stamp2{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:150px;height:286px}
+.stamp2 img{position:absolute;height:128px;width:auto;right:4px}
+.stamp2 .st-a{top:4px;transform:rotate(-6deg)}
+.stamp2 .st-b{bottom:4px;transform:rotate(5deg)}
+.big.dest.oj{font-size:30px;line-height:1.05}
