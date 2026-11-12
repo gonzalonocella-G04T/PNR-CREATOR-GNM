@@ -112,6 +112,7 @@
     J.forEach(function (j, i) { j.label = J.length === 1 ? 'IDA' : (i === 0 ? 'IDA' : (i === J.length - 1 && c0 === cl ? 'VUELTA' : 'TRAMO ' + (i + 1))); j.from = j.segs[0].from.code; j.to = j.segs[j.segs.length - 1].to.code; });
     return J;
   }
+  function ojOn() { return !!st.oj && nrm(st.dest) === nrm(st.destAuto); }
   function openJaw(r) { var J = journeys(r.segs); if (J.length !== 2) return null; var a = city(J[0].to), b = city(J[1].from); if (city(J[0].from) !== city(J[1].to) || a === b) return null; return [J[0].to, J[1].from]; }
   function guessDest(r) {
     var J = journeys(r.segs); if (!J.length) return '';
@@ -164,7 +165,7 @@
   loadLib.busy = {};
   function photoList() {
     if (st.photos.length) return st.photos.filter(Boolean);
-    if (st.oj && !st.lib) { var L = st.oj.map(function (c) { return FOT_C[c]; }); if (L[0] && L[1]) { L.forEach(loadLib); return L.every(function (e) { return st.libData[e.f]; }) ? L.map(function (e) { return st.libData[e.f]; }) : []; } }
+    if (ojOn() && !st.lib) { var L = st.oj.map(function (c) { return FOT_C[c]; }); if (L[0] && L[1]) { L.forEach(loadLib); return L.every(function (e) { return st.libData[e.f]; }) ? L.map(function (e) { return st.libData[e.f]; }) : []; } }
     var e = curLib(); if (!e) return [];
     loadLib(e);
     return st.libData[e.f] ? [st.libData[e.f]] : [];
@@ -205,7 +206,7 @@
     return (sq ? '<img class="al-s" src="' + sq + '" alt="">' : '') + '<span class="al-n">' + esc(a.name) + '</span>';
   }
   function stamp(dest) {
-    if (st.oj && !st.stamp) { var s1 = SEL_C[st.oj[0]], s2 = SEL_C[st.oj[1]]; if (s1 && s2) return '<div class="stamp2"><img class="st-a" src="' + s1.s + '" alt=""><img class="st-b" src="' + s2.s + '" alt=""></div>'; }
+    if (ojOn() && !st.stamp) { var s1 = SEL_C[st.oj[0]], s2 = SEL_C[st.oj[1]]; if (s1 && s2) return '<div class="stamp2"><img class="st-a" src="' + s1.s + '" alt=""><img class="st-b" src="' + s2.s + '" alt=""></div>'; }
     var e = curStamp();
     if (e) return '<img class="stamp stamp-img" src="' + e.s + '" alt="">';
     var txt = esc(dest || 'DESTINO');
@@ -224,9 +225,9 @@
     var locAl = r.airlineLocs.filter(function (a) { return a.loc && a.loc !== r.gdsLoc; });
     var h = '<div class="tv-doc">';
     // encabezado
-    h += '<div class="card head' + (st.oj && !st.stamp ? ' oj' : '') + (P.length >= 7 ? ' pax-l' : P.length >= 4 ? ' pax-m' : '') + '"><div class="h-top"><div class="h-logo">' + brand() + '</div>' +
+    h += '<div class="card head' + (ojOn() && !st.stamp ? ' oj' : '') + (P.length >= 7 ? ' pax-l' : P.length >= 4 ? ' pax-m' : '') + '"><div class="h-top"><div class="h-logo">' + brand() + '</div>' +
       '<div class="h-cell"><div class="lab">' + (many ? 'PASAJEROS' : (/a$/i.test(first(P[0].edit)) ? 'PASAJERA' : 'PASAJERO')) + '</div><div class="big pax">' + P.map(function (p) { return '<div class="pn">' + esc(p.edit.toUpperCase()) + '</div>'; }).join('') + '</div></div>' +
-      '<div class="h-cell"><div class="lab">DESTINO' + (st.oj ? 'S' : '') + ' ' + PLANE + '</div><div class="big dest' + (st.oj ? ' oj' : '') + '">' + esc(st.dest).replace(" / ", st.oj ? "<br>" : " / ") + '</div></div></div>' +
+      '<div class="h-cell"><div class="lab">DESTINO' + (ojOn() ? 'S' : '') + ' ' + PLANE + '</div><div class="big dest' + (ojOn() ? ' oj' : '') + '">' + esc(st.dest).replace(" / ", ojOn() ? "<br>" : " / ") + '</div></div></div>' +
       '<div class="h-bot"><div class="h-cell"><div class="lab">CÓDIGO DE RESERVA</div><div class="mid">' + esc(r.gdsLoc) + '</div>' + (locAl.length ? '<div class="sm">' + locAl.map(function (a) { return esc((a.al || a.name) + ' ' + a.loc); }).join(' · ') + '</div>' : '') + '</div>' +
       '<div class="h-cell"><div class="lab">' + (tickets.length > 1 || /,/.test(tickets[0].t) ? 'Nº DE BILLETES' : 'Nº DE BILLETE') + '</div>' + '<div class="tks' + (P.length >= 7 ? ' cols' : '') + '">' + tickets.map(function (t, i) { return '<div class="mid tk">' + esc(t.t) + (many ? ' <span class="sm">' + esc(sn[i]) + '</span>' : '') + '</div>'; }).join('') + '</div></div></div>' +
       stamp(st.dest) + '</div>';
