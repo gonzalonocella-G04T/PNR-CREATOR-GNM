@@ -321,7 +321,20 @@
     ['cppng', 'dlpng', 'dlpdf'].forEach(function (id) { $(id).disabled = !!m.length; });
     var D = docs();
     $('preview').innerHTML = D.length ? D.map(function (P, i) { return '<div class="pv-wrap"><div class="pv" data-i="' + i + '">' + docHTML(P) + '</div></div>'; }).join('') : '';
-    fitPreview();
+    fitDest($('preview')); fitPreview();
+    if (document.fonts && !renderPreview.f) { renderPreview.f = 1; document.fonts.ready.then(function () { fitDest($('preview')); fitPreview(); }); }
+  }
+  /* el destino achica la letra si no entra antes del sello (nombres largos o encabezado angosto) */
+  function fitDest(root) {
+    [].forEach.call((root || document).querySelectorAll('.head .big.dest'), function (d) {
+      var head = d.closest('.head'); if (!head) return;
+      d.style.fontSize = '';
+      var x = 0, n = d; while (n && n !== head) { x += n.offsetLeft; n = n.offsetParent; }
+      if (n !== head) return;
+      var avail = head.clientWidth - parseFloat(getComputedStyle(head).paddingRight) - x - 8;
+      var fs = parseFloat(getComputedStyle(d).fontSize);
+      while (d.offsetWidth > avail && fs > 20) { fs -= 1; d.style.fontSize = fs + 'px'; }
+    });
   }
   function fitPreview() {
     [].forEach.call(document.querySelectorAll('.pv-wrap'), function (w) {
@@ -382,7 +395,7 @@
     return loadScript(H2C).then(function () { return document.fonts ? document.fonts.ready : null; }).then(function () {
       var host = $('cap'); host.innerHTML = docHTML(docs()[i]);
       var el = host.querySelector('.tv-doc');
-      inlineSvgs(el);
+      fitDest(host); inlineSvgs(el);
       var imgs = el.querySelectorAll('img');
       return Promise.all([].map.call(imgs, function (im) { return im.complete ? 0 : new Promise(function (r) { im.onload = im.onerror = r; }); })).then(function () {
         return window.html2canvas(el, { scale: 2, backgroundColor: '#FFFFFF', logging: false, useCORS: true, windowWidth: 1300 });

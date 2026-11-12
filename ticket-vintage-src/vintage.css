@@ -164,3 +164,5 @@ body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Inter",Arial
 .stamp2 .st-a{top:4px;transform:rotate(-6deg)}
 .stamp2 .st-b{bottom:4px;transform:rotate(5deg)}
 .big.dest.oj{font-size:30px;line-height:1.05}
+/* destino: ancho del texto para ajustar la letra */
+.big.dest{display:inline-block;white-space:nowrap}
