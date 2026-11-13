@@ -6,7 +6,7 @@ function ciudadAp(c){if(!c)return '';var d=typeof ciudadPorCodigo==='function'?c
   return d?nombreDestino(d):(a||c);}
 function vueloHtml(q,ico){
   var al=(typeof AIRN!=='undefined'&&AIRN[q.aero])||'',num=(q.aero+' '+q.num).trim();
-  var ruta=q.from?ciudadAp(q.from)+' ('+q.from+') → '+ciudadAp(q.to)+' ('+q.to+')':'';
+  var ruta=q.from&&q.to?ciudadAp(q.from)+' ('+q.from+') → '+ciudadAp(q.to)+' ('+q.to+')':(q.to?'Llega a '+ciudadAp(q.to)+' ('+q.to+')':(q.from?'Sale de '+ciudadAp(q.from)+' ('+q.from+')':''));
   var hs=q.dep&&q.arr?'<span>Sale <b>'+q.dep+'</b></span><span>Llega <b>'+q.arr+(q.sig?' (+1)':'')+'</b></span>':(q.dep?'<span><b>'+q.dep+' hs</b></span>':'');
   return '<div class="fl">'+(ico||'')+'<div class="fx" contenteditable><b>'+esc(al?al+' · '+num:'Vuelo '+num)+'</b>'+(ruta?'<span>'+esc(ruta)+'</span>':'')+'</div>'+(hs?'<div class="fh" contenteditable>'+hs+'</div>':'')+'</div>';
 }
