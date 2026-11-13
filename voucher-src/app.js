@@ -157,7 +157,7 @@ function render(){
       (v.pais?'<div class="ctry">'+SV(PIN,'pin')+'<span contenteditable>'+esc(v.pais.toUpperCase())+'</span></div>':'')+'</div>'+
       '<div class="card">'+rows+'</div>'+
       '<div class="px">'+SV(PEOPLE,'pp')+'<span class="k">PASAJEROS</span><i></i><div class="nm" contenteditable>'+(v.pax.length?v.pax.map(function(x){return '<span class="pn">'+esc(x)+'</span>';}).join('<em>|</em><wbr>'):'<span class="ph">Nombre y apellido</span>')+'</div>'+(v.npax&&v.npax!==v.pax.length?'<span class="cnt">'+v.npax+' PAX</span>':'')+'</div>'+
-      PREST+(ob?'<div class="ob" contenteditable>'+esc(ob)+'</div>':'')+CONT+'</div>'+
+      PREST+(ob?'<div class="ob" contenteditable>'+esc(ob)+'</div>':'')+CONT+'<div class="bye"><b contenteditable>¡Buen viaje!</b><span contenteditable>Gracias por elegirnos</span></div>'+'</div>'+
       '<div class="foot"><svg viewBox="0 0 610 90" preserveAspectRatio="none"><path d="M0 22C150 2 300 4 420 16S560 34 610 20V90H0Z" fill="#bfe6de"/><path d="M0 40C140 20 290 22 420 34S560 50 610 36V90H0Z" fill="url(#fg)"/><defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2aa192"/><stop offset="1" stop-color="#14766b"/></linearGradient></defs></svg>'+
       '<div class="vft"><i></i>'+SV(TICKET,'tk')+'<span>VOUCHER DE SERVICIO</span><i></i></div></div>'+
       (dest&&dest.cr?'<div class="cr">Foto: '+esc(dest.cr)+'</div>':'')+'</div>';
@@ -168,7 +168,7 @@ function render(){
   var pax='<div class="pax"><span class="k">Pasajeros</span><span class="v" contenteditable>'+(v.pax.length?v.pax.map(function(x){return '<span class="pn">'+esc(x)+'</span>';}).join('  |  '):'<span class="ph">Nombre y apellido</span>')+'</span><span class="n">'+v.npax+' pax</span></div>';
   var obs=$('obs').value.trim();
   var html='<div class="sheet '+cls+'" id="sheet">'+head+hero+intro+'<div class="body">'+pax+v.items.map(itemHtml).join('')+PREST+CONT+
-    '<div class="obs" contenteditable>'+esc(obs)+'</div></div><div class="ft"><span>Hiperviajes</span><span>Voucher de servicios</span></div></div>';
+    '<div class="obs" contenteditable>'+esc(obs)+'</div>'+'<div class="bye"><b contenteditable>¡Buen viaje!</b><span contenteditable>Gracias por elegirnos</span></div>'+'</div><div class="ft"><span>Hiperviajes</span><span>Voucher de servicios</span></div></div>';
   st.innerHTML=html;
   ajustarLogos();
   var du=st.querySelector('img.duo');if(du)duotono(du);

@@ -265,7 +265,18 @@ button:disabled{opacity:.45;cursor:default}
 
 /* un nombre no se corta entre renglones */
 .pn{white-space:nowrap}
-</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 13/11 17:26</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
+
+/* cierre: buen viaje + gracias */
+.bye{text-align:center}
+.bye b{display:block;font-weight:400}
+.bye span{display:block;text-transform:uppercase}
+.v-dig2 .bye{margin:22px 0 4px}
+.v-dig2 .bye b{font:400 40px/1.1 'Kaushan Script',Montserrat,cursive;color:#0e3d3b}
+.v-dig2 .bye span{font:600 11px/1.4 Montserrat,sans-serif;letter-spacing:.32em;color:#1b7a70;margin-top:6px}
+.v-ink .bye{margin:6mm 0 2mm}
+.v-ink .bye b{font:italic 800 9mm/1.1 'Playfair Display',Georgia,serif;color:var(--g)}
+.v-ink .bye span{font:600 2.6mm/1.4 Inter,sans-serif;letter-spacing:.3em;color:#333;margin-top:1.2mm}
+</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 13/11 17:31</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
 <div class="wrap"><aside class="panel">
 <label for="serv">Solicitud / confirmación de servicios (con los vuelos)</label>
 <textarea id="serv" placeholder="Traslado regular in + out El Calafate&#10;Nombre Apellido x2&#10;Llegada: Aeropuerto … - Hotel …  dd/mm/aaaa&#10;Salida: Hotel … - Aeropuerto …  dd/mm/aaaa&#10;&#10;Excursión … dd/mm/aaaa&#10;&#10;Vuelos: líneas del PNR o “22/02 MVD-RIO 17:45 H2 1815”"></textarea>
@@ -949,7 +960,7 @@ function render(){
       (v.pais?'<div class="ctry">'+SV(PIN,'pin')+'<span contenteditable>'+esc(v.pais.toUpperCase())+'</span></div>':'')+'</div>'+
       '<div class="card">'+rows+'</div>'+
       '<div class="px">'+SV(PEOPLE,'pp')+'<span class="k">PASAJEROS</span><i></i><div class="nm" contenteditable>'+(v.pax.length?v.pax.map(function(x){return '<span class="pn">'+esc(x)+'</span>';}).join('<em>|</em><wbr>'):'<span class="ph">Nombre y apellido</span>')+'</div>'+(v.npax&&v.npax!==v.pax.length?'<span class="cnt">'+v.npax+' PAX</span>':'')+'</div>'+
-      PREST+(ob?'<div class="ob" contenteditable>'+esc(ob)+'</div>':'')+CONT+'</div>'+
+      PREST+(ob?'<div class="ob" contenteditable>'+esc(ob)+'</div>':'')+CONT+'<div class="bye"><b contenteditable>¡Buen viaje!</b><span contenteditable>Gracias por elegirnos</span></div>'+'</div>'+
       '<div class="foot"><svg viewBox="0 0 610 90" preserveAspectRatio="none"><path d="M0 22C150 2 300 4 420 16S560 34 610 20V90H0Z" fill="#bfe6de"/><path d="M0 40C140 20 290 22 420 34S560 50 610 36V90H0Z" fill="url(#fg)"/><defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2aa192"/><stop offset="1" stop-color="#14766b"/></linearGradient></defs></svg>'+
       '<div class="vft"><i></i>'+SV(TICKET,'tk')+'<span>VOUCHER DE SERVICIO</span><i></i></div></div>'+
       (dest&&dest.cr?'<div class="cr">Foto: '+esc(dest.cr)+'</div>':'')+'</div>';
@@ -960,7 +971,7 @@ function render(){
   var pax='<div class="pax"><span class="k">Pasajeros</span><span class="v" contenteditable>'+(v.pax.length?v.pax.map(function(x){return '<span class="pn">'+esc(x)+'</span>';}).join('  |  '):'<span class="ph">Nombre y apellido</span>')+'</span><span class="n">'+v.npax+' pax</span></div>';
   var obs=$('obs').value.trim();
   var html='<div class="sheet '+cls+'" id="sheet">'+head+hero+intro+'<div class="body">'+pax+v.items.map(itemHtml).join('')+PREST+CONT+
-    '<div class="obs" contenteditable>'+esc(obs)+'</div></div><div class="ft"><span>Hiperviajes</span><span>Voucher de servicios</span></div></div>';
+    '<div class="obs" contenteditable>'+esc(obs)+'</div>'+'<div class="bye"><b contenteditable>¡Buen viaje!</b><span contenteditable>Gracias por elegirnos</span></div>'+'</div><div class="ft"><span>Hiperviajes</span><span>Voucher de servicios</span></div></div>';
   st.innerHTML=html;
   ajustarLogos();
   var du=st.querySelector('img.duo');if(du)duotono(du);

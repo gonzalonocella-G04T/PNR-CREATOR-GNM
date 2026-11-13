@@ -264,3 +264,14 @@ button:disabled{opacity:.45;cursor:default}
 
 /* un nombre no se corta entre renglones */
 .pn{white-space:nowrap}
+
+/* cierre: buen viaje + gracias */
+.bye{text-align:center}
+.bye b{display:block;font-weight:400}
+.bye span{display:block;text-transform:uppercase}
+.v-dig2 .bye{margin:22px 0 4px}
+.v-dig2 .bye b{font:400 40px/1.1 'Kaushan Script',Montserrat,cursive;color:#0e3d3b}
+.v-dig2 .bye span{font:600 11px/1.4 Montserrat,sans-serif;letter-spacing:.32em;color:#1b7a70;margin-top:6px}
+.v-ink .bye{margin:6mm 0 2mm}
+.v-ink .bye b{font:italic 800 9mm/1.1 'Playfair Display',Georgia,serif;color:var(--g)}
+.v-ink .bye span{font:600 2.6mm/1.4 Inter,sans-serif;letter-spacing:.3em;color:#333;margin-top:1.2mm}
