@@ -174,7 +174,7 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-dig2 .tit{text-align:center;padding:0 24px 14px}
 .v-dig2 .kick{display:flex;align-items:center;justify-content:center;gap:14px;font:600 11px Montserrat,sans-serif;letter-spacing:.42em;color:#1d3f3c}
 .v-dig2 .kick i{width:46px;height:1px;background:#2a8f83}
-.v-dig2 .tit b{display:block;font:800 49px/1.04 Montserrat,sans-serif;color:#0e3d3b;letter-spacing:-.005em;margin-top:6px}
+.v-dig2 .tit b{display:block;font:400 49px/1.12 'Kaushan Script',Montserrat,cursive;color:#0e3d3b;letter-spacing:0;margin-top:6px;padding:0 6px;text-wrap:balance}
 .v-dig2 .ctry{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:6px;font:600 12px Montserrat,sans-serif;letter-spacing:.55em;color:#12403d}
 .v-dig2 .pin{width:15px;height:15px;color:#1f8f82}
 .v-dig2 .card{margin:0 24px;background:rgba(255,255,255,.82);border:1px solid #cfe7e2;border-radius:12px;padding:2px 14px}

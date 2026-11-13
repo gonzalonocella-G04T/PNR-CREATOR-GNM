@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Voucher de servicios · Hiperviajes</title><link rel="icon" href="vch-fav/favicon.ico?v=1" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="vch-fav/favicon-32.png?v=1"><link rel="icon" type="image/png" sizes="192x192" href="vch-fav/icon-192.png?v=1"><link rel="apple-touch-icon" href="vch-fav/apple-touch-icon.png?v=1"><meta name="theme-color" content="#19C0AA"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;1,500&family=Playfair+Display:ital,wght@1,700;1,800;1,900&family=Oswald:wght@500;600;700&display=swap"><style>:root{--navy:#174B4F;--sky:#148D7E;--sky2:#19C0AA;--ink:#1A474B;--line:#D9EEEC;--bg:#F3FBFA}
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Voucher de servicios · Hiperviajes</title><link rel="icon" href="vch-fav/favicon.ico?v=1" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="vch-fav/favicon-32.png?v=1"><link rel="icon" type="image/png" sizes="192x192" href="vch-fav/icon-192.png?v=1"><link rel="apple-touch-icon" href="vch-fav/apple-touch-icon.png?v=1"><meta name="theme-color" content="#19C0AA"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;1,500&family=Playfair+Display:ital,wght@1,700;1,800;1,900&family=Oswald:wght@500;600;700&display=swap"><style>:root{--navy:#174B4F;--sky:#148D7E;--sky2:#19C0AA;--ink:#1A474B;--line:#D9EEEC;--bg:#F3FBFA}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
 .top{background:#fff;border-bottom:1px solid var(--line);padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
@@ -175,7 +175,7 @@ button.p{background:var(--sky);color:#fff}button.s{background:#fff;color:var(--s
 .v-dig2 .tit{text-align:center;padding:0 24px 14px}
 .v-dig2 .kick{display:flex;align-items:center;justify-content:center;gap:14px;font:600 11px Montserrat,sans-serif;letter-spacing:.42em;color:#1d3f3c}
 .v-dig2 .kick i{width:46px;height:1px;background:#2a8f83}
-.v-dig2 .tit b{display:block;font:800 49px/1.04 Montserrat,sans-serif;color:#0e3d3b;letter-spacing:-.005em;margin-top:6px}
+.v-dig2 .tit b{display:block;font:400 49px/1.12 'Kaushan Script',Montserrat,cursive;color:#0e3d3b;letter-spacing:0;margin-top:6px;padding:0 6px;text-wrap:balance}
 .v-dig2 .ctry{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:6px;font:600 12px Montserrat,sans-serif;letter-spacing:.55em;color:#12403d}
 .v-dig2 .pin{width:15px;height:15px;color:#1f8f82}
 .v-dig2 .card{margin:0 24px;background:rgba(255,255,255,.82);border:1px solid #cfe7e2;border-radius:12px;padding:2px 14px}
@@ -265,7 +265,7 @@ button:disabled{opacity:.45;cursor:default}
 
 /* un nombre no se corta entre renglones */
 .pn{white-space:nowrap}
-</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 13/11 17:23</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
+</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 13/11 17:26</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
 <div class="wrap"><aside class="panel">
 <label for="serv">Solicitud / confirmación de servicios (con los vuelos)</label>
 <textarea id="serv" placeholder="Traslado regular in + out El Calafate&#10;Nombre Apellido x2&#10;Llegada: Aeropuerto … - Hotel …  dd/mm/aaaa&#10;Salida: Hotel … - Aeropuerto …  dd/mm/aaaa&#10;&#10;Excursión … dd/mm/aaaa&#10;&#10;Vuelos: líneas del PNR o “22/02 MVD-RIO 17:45 H2 1815”"></textarea>
@@ -945,7 +945,7 @@ function render(){
       '<div class="hero">'+(foto?im(foto,'ph','').replace('<img','<img style="object-position:center '+(state.fotoUp||!dest||dest.y==null?40:Math.round(dest.y*100))+'%"'):'')+(abajo?'':'<div class="veil"></div><div class="logos">'+LOGOS+'</div>')+
       '<svg class="wave" viewBox="0 0 610 70" preserveAspectRatio="none"><path d="M0 18C120 52 230 62 340 44S520 4 610 22V70H0Z" fill="#cfeee7" opacity=".85"/><path d="M0 40C140 66 260 70 360 56S520 26 610 40V70H0Z" fill="#f4fbfa"/></svg></div>'+
       (abajo?'<div class="logos-below">'+LOGOS+'</div>':'')+'<div class="mid"><svg class="deco" viewBox="0 0 610 300" preserveAspectRatio="none"><path d="M0 40C60 70 90 140 40 200S0 280 0 300Z" fill="#d7efea" opacity=".7"/><path d="M610 20C540 60 520 120 570 170S610 250 610 300Z" fill="#d7efea" opacity=".7"/></svg>'+
-      '<div class="tit"><div class="kick"><i></i><span>VOUCHER DE SERVICIOS</span><i></i></div><b contenteditable style="font-size:'+((v.destNombre||'').length>18?34:(v.destNombre||'').length>14?40:(v.destNombre||'').length>11?44:49)+'px">'+esc((v.destNombre||'').toUpperCase())+'</b>'+
+      '<div class="tit"><div class="kick"><i></i><span>VOUCHER DE SERVICIOS</span><i></i></div><b contenteditable style="font-size:'+((v.destNombre||'').length>23?42:(v.destNombre||'').length>19?48:(v.destNombre||'').length>14?58:64)+'px">'+esc(v.destNombre||'')+'</b>'+
       (v.pais?'<div class="ctry">'+SV(PIN,'pin')+'<span contenteditable>'+esc(v.pais.toUpperCase())+'</span></div>':'')+'</div>'+
       '<div class="card">'+rows+'</div>'+
       '<div class="px">'+SV(PEOPLE,'pp')+'<span class="k">PASAJEROS</span><i></i><div class="nm" contenteditable>'+(v.pax.length?v.pax.map(function(x){return '<span class="pn">'+esc(x)+'</span>';}).join('<em>|</em><wbr>'):'<span class="ph">Nombre y apellido</span>')+'</div>'+(v.npax&&v.npax!==v.pax.length?'<span class="cnt">'+v.npax+' PAX</span>':'')+'</div>'+
