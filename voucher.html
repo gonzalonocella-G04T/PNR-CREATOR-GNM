@@ -262,7 +262,10 @@ button:disabled{opacity:.45;cursor:default}
 .sv .fl .fx span{font-weight:500;font-size:3.3mm}
 .sv .fl .fh{font-weight:500;font-size:3.3mm;border-left:.3mm solid var(--line);padding-left:3.5mm}
 .v-ink .sv .fl .fh{border-left-color:var(--g)}
-</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 10/11 14:31</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
+
+/* un nombre no se corta entre renglones */
+.pn{white-space:nowrap}
+</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 13/11 17:09</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
 <div class="wrap"><aside class="panel">
 <label for="serv">Solicitud / confirmación de servicios (con los vuelos)</label>
 <textarea id="serv" placeholder="Traslado regular in + out El Calafate&#10;Nombre Apellido x2&#10;Llegada: Aeropuerto … - Hotel …  dd/mm/aaaa&#10;Salida: Hotel … - Aeropuerto …  dd/mm/aaaa&#10;&#10;Excursión … dd/mm/aaaa&#10;&#10;Vuelos: líneas del PNR o “22/02 MVD-RIO 17:45 H2 1815”"></textarea>
@@ -353,7 +356,8 @@ function diaSemana(f){var d=new Date(Date.UTC(f.y,f.m-1,f.d));return ['Domingo',
 
 /* ---- Vuelos y pasajeros (Amadeus) ---- */
 var RE_AMA=/^\s*(?:\d+\s+)?[A-Z0-9]{2}\s*\d{1,4}\s+[A-Z]\s+\d{2}[A-Z]{3}\s+\d?\*?\s*[A-Z]{6}\s+[A-Z]{2}\d+/,RE_PAXA=/^\s*\d+\.\s*[A-Z'\-]+\/[A-Z]/;
-function sinPNR(txt){return (txt||'').split(/\r?\n/).filter(function(l){return !RE_AMA.test(l)&&!RE_PAXA.test(l)&&!/^\s*RP\/[A-Z0-9]+\//.test(l);}).join('\n');}
+var RE_VCOMP=/^\s*(?:\d+\s+)?[A-Z0-9]{2}\s*\d{1,4}\s+(?:[A-Z]\s+)?\d{1,2}[A-Za-z]{3}\s+(?:\d\*?\s*)?[A-Z]{3}\s*[-\/]?\s*[A-Z]{3}\s+/;
+function sinPNR(txt){return (txt||'').split(/\r?\n/).filter(function(l){return !RE_AMA.test(l)&&!RE_VCOMP.test(l)&&!RE_PAXA.test(l)&&!/^\s*RP\/[A-Z0-9]+\//.test(l);}).join('\n');}
 function parseVuelos(txt){
   var out=[],pax=[],warns=[];
   var re=/^\s*(?:\d+\s+)?([A-Z0-9]{2})\s*(\d{1,4})\s+[A-Z]\s+(\d{2})([A-Z]{3})\s+\d?\*?\s*([A-Z]{3})([A-Z]{3})\s+[A-Z]{2}\d+\s+(\d{4})\s+(\d{4})(?:\s+(\d{2})([A-Z]{3}))?/;
@@ -366,6 +370,10 @@ function parseVuelos(txt){
         arrD:m[9]?+m[9]:null,arrM:m[10]?MESES_EN.indexOf(m[10])+1:null});
       return;
     }
+    var m2=l.match(/^\s*(?:\d+\s+)?([A-Z0-9]{2})\s*(\d{1,4})\s+(?:[A-Z]\s+)?(\d{1,2})([A-Za-z]{3})\s+(?:\d\*?\s*)?([A-Z]{3})\s*[-\/]?\s*([A-Z]{3})\s+(?:[A-Z]{2}\d+\s+)?(\d{1,2}):?(\d{2})\s*(?:hs?\s+)?(?:-\s*)?(\d{1,2}):?(\d{2})(?:\s*\+1)?(?:\s+(\d{2})([A-Z]{3}))?/);
+    if(m2){var k2=m2[4].toLowerCase(),mes2=MES_TXT[k2];
+      if(mes2){out.push({aero:m2[1],num:m2[2],d:+m2[3],m:mes2,from:m2[5],to:m2[6],dep:('0'+m2[7]).slice(-2)+':'+m2[8],arr:('0'+m2[9]).slice(-2)+':'+m2[10],
+        arrD:m2[11]?+m2[11]:null,arrM:m2[12]?MESES_EN.indexOf(m2[12])+1:null});return;}}
     var pm,pr=/(\d+)\.\s*([A-ZÁÉÍÓÚÑ'\-]+)\/([A-ZÁÉÍÓÚÑ'\- ]+?)(?=\s{2,}|\s+\d+\.|$)/g;
     while((pm=pr.exec(l))){pax.push(titleCase(pm[3].replace(/\s+(MR|MRS|MS|MISS|MSTR|CHD|INF)\b/,''))+' '+titleCase(pm[2]));}
   });
@@ -502,9 +510,52 @@ function nombresSueltos(rawL){ // bloque de nombres debajo de "4 ADT" / "Pasajer
       out.push(titleCase(l));}
     if(out.length)break;
   }
+  if(!out.length){ // renglones seguidos que son nombres, sin "Pasajeros:" arriba
+    var EDAD=/\s*\((?:\s*\d{1,2}\s*(?:a[nñ]os?|yrs?|y\.?o\.?)?|chd|inf|adt|menor|ni[nñ][oa]|beb[eé])[^)]*\)\s*$/i,run=[],best=[];
+    var esNom=function(l){var x=l.replace(EDAD,'').trim();return x&&!/[:\d]/.test(x)&&/^[A-Za-zÁÉÍÓÚÑáéíóúñüÜ'´\-\.]+(\s+[A-Za-zÁÉÍÓÚÑáéíóúñüÜ'´\-\.]+){1,4}$/.test(x)&&!EXC.test(x)&&!RE_TRF.test(x)&&!RE_EXC.test(x)&&!destinoPorTexto(x)?x:'';};
+    for(i=0;i<=rawL.length;i++){var nn=i<rawL.length?esNom(rawL[i]):'';if(nn)run.push(titleCase(nn));else{if(run.length>best.length)best=run;run=[];}}
+    if(best.length>=2)out=best;
+  }
   if(!out.length)for(i=0;i<rawL.length&&!out.length;i++){var ps=rawL[i].split(/\s*(?:\/|,|;|\s+y\s+|\s+e\s+|\s+-\s+)\s*/);
     if(ps.length>=2&&ps.length<=8&&!EXC.test(rawL[i])&&!/\d/.test(rawL[i])&&ps.every(function(x){return /^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñüÜ'´\-\.]+(\s+[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚÑáéíóúñüÜ'´\-\.]+){1,3}$/.test(x)&&!destinoPorTexto(x);}))out=ps.map(titleCase);}
   return out;
+}
+
+/* ---- Texto libre: fechas "02sep", "12 sep", "2 de septiembre", "02/09" y servicios en cualquier orden ---- */
+var RE_FECHA_LIBRE=/(?:^|[^A-Za-z0-9])(\d{1,2})\s*(?:de\s+)?(ene(?:ro)?|feb(?:rero)?|mar(?:zo)?|abr(?:il)?|may(?:o)?|jun(?:io)?|jul(?:io)?|ago(?:sto)?|sept?(?:iembre)?|set(?:iembre)?|oct(?:ubre)?|nov(?:iembre)?|dic(?:iembre)?|jan(?:uary)?|apr(?:il)?|aug(?:ust)?|dec(?:ember)?)\.?(?![A-Za-z])(?:\s*(?:de\s+|\/\s*)?(20\d\d))?/i;
+function fechaLibre(l,anio,ref){
+  var f=fechaDe(l,anio);if(f)return f;
+  var m=l.match(RE_FECHA_LIBRE);if(!m)return null;
+  var k=m[2].toLowerCase(),mes=MES_TXT[k]||MES_TXT[k.slice(0,3)],d=+m[1];if(!mes||d<1||d>31)return null;
+  var y=m[3]?+m[3]:(anio||(ref&&ref.y)||anioFuturo(d,mes));if(!m[3]&&!anio&&ref&&ref.y&&mes<ref.m)y=ref.y+1;
+  return {d:d,m:mes,y:y,raw:m[0].replace(/^[^0-9]/,'')};
+}
+var RE_TRF=/\b(tfr|trf|trasl\w*|transfers?|in|out)\b/i,RE_EXC=/\b(excursi\w*|tour|paseo|visita|full\s*day|half\s*day|city|entrada|ticket|catamar\w*|buggy|navegaci\w*|snorkel\w*|degustaci\w*)\b/i;
+function servicioLibre(l,anio,ref,kind){ // una línea con fecha + palabra de servicio, en cualquier orden
+  var f=fechaLibre(l,anio,ref);if(!f)return null;
+  var aero=/\b(aeropuerto|aeroparque|airport|aeroporto)\b/i.test(l);
+  if(!RE_TRF.test(l)&&!aero&&!RE_EXC.test(l))return null;
+  var cu=l.replace(f.raw,' ').replace(/^[\s\-–•*·]+/,'');
+  var kd=/privad/i.test(l)?'privado':(/regular|compartid|\bsib\b|shared/i.test(l)?'regular':kind);
+  if(RE_EXC.test(l)&&!/\b(tfr|trf|trasl\w*|transfers?)\b/i.test(l)&&!aero){
+    var t=limpiarPrecio(cu.replace(/\s{2,}/g,' ').replace(/[\s\-–:,.]+$/,'').trim()).replace(/\s+(?:el|del|para\s+el|on|for)$/i,'').replace(/^(?:el|del)\s+/i,'');
+    return t.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g,'').length<4?null:{tipo:'exc',titulo:aplicarGlosario(titleCase(t)),f:f,raw:l};
+  }
+  var dirIn=/\b(in|llegada|arribo|arrival|llegan?)\b/i.test(l),dirOut=/\b(out|salida|regreso|departure|retorno|vuelven?)\b/i.test(l);
+  cu=cu.replace(/\b(tfr|trf|traslados?|transfers?)\b\s*(privados?|regular(?:es)?|compartidos?)?/ig,' ').replace(/\(\s*(privado|regular|compartido|sib)\s*\)/ig,' ')
+       .replace(/\b(in|out)\b\s*[:\-–]?/ig,' ').replace(/\s{2,}/g,' ').trim().replace(/^[\-–:,\s]+/,'');
+  var fr='',to='',m=cu.match(/\bdesde\s+(?:el\s+|la\s+)?(.+?)\s+(?:a|al|a\s+la|hasta|hacia|para)\s+(?:el\s+|la\s+)?(.+)$/i)
+    ||cu.match(/^(?:de|del)\s+(?:el\s+|la\s+)?(.+?)\s+(?:a|al|a\s+la|hasta|hacia)\s+(?:el\s+|la\s+)?(.+)$/i)
+    ||cu.match(/^(.+?)\s+(?:a|al|a\s+la|hasta|hacia)\s+(?:el\s+|la\s+)?((?:hotel|aeropuerto|aeroparque|aeroporto|airport|pousada|posada|resort|puerto|terminal|estaci[oó]n|muelle)\b.+)$/i);
+  if(m){fr=m[1];to=m[2];}
+  else{var ps=cu.split(/\s*\/\s*|\s+[-–>→]+\s+|\s*→\s*/).filter(Boolean);if(ps.length>=2){fr=ps[0];to=ps.slice(1).join(' - ');}}
+  function lim(x){x=quitarVuelo(limpiarPrecio(x||'')).replace(/[\s.,;:]+$/,'').trim();var ma=x.match(/^(.+?)\s+(?:international\s+)?(?:airport|aeroporto|aeropuerto)$/i);if(ma)x='Aeropuerto '+ma[1];return x.replace(/^(?:aeroporto|airport)\b\s*(?:de\s+|of\s+)?/i,'Aeropuerto ');}
+  fr=lim(fr);to=lim(to);
+  var esA=function(x){return /\b(aeropuerto|aeroparque|airport|aeroporto|terminal)\b/i.test(x);};
+  var tp=fr&&to?(esA(fr)?'in':(esA(to)?'out':(dirIn?'in':(dirOut?'out':'tr')))):(dirIn?'in':(dirOut?'out':(aero?'in':null)));
+  if(!tp)return null;
+  if(!fr||!to){fr=tp==='in'?'Aeropuerto':'__HOTEL__';to=tp==='in'?'__HOTEL__':'Aeropuerto';}
+  return {tipo:tp,kind:kd,from:fr,to:to,f:f,raw:l};
 }
 
 /* ---- Solicitud de servicios ---- */
@@ -519,7 +570,7 @@ function parseServicios(txt){
   rawL.forEach(function(l,i){if(/^\(\s*\d\s*\*?\s*\)$/.test(l)||/^\*{3,5}$/.test(l)){for(var j=i-1;j>=0;j--){if(rawL[j]){if(!/:/.test(rawL[j]))hoteles.push(rawL[j]);break;}}}});
   if(!hoteles.length)rawL.forEach(function(l){if(/^(hotel|hostal|posada|pousada|resort)\s+\S+/i.test(l)&&!/\d{1,2}\/\d/.test(l)&&l.length<70)hoteles.push(l);});
   var paxKv=kv['NOMBRE PAX']||kv['PASAJERO TITULAR']||kv['TITULAR']||kv['PASAJERO']||kv['PASAJEROS']||kv['NOMBRE']||'',nKv=parseInt(kv['N PAXS']||kv['N PAX']||kv['NO PAXS']||kv['CANTIDAD DE PAX']||kv['CANTIDAD']||kv['PAXS']||0,10)||0;
-  if(!nKv){var mb=txt.match(/base\s+(\d+)\s*paxs?/i)||txt.match(/\b(\d+)\s*paxs?\b/i);if(mb)nKv=+mb[1];}
+  if(!nKv){var mb=txt.match(/base\s+(\d+)\s*paxs?/i)||txt.match(/\b(\d+)\s*paxs?\b/i)||txt.match(/\b(\d+)[ \t]*(?:personas|pasajeros|viajeros|integrantes)\b/i);if(mb)nKv=+mb[1];}
   if(!nKv){var ma,rea=/^\s*(\d+)\s*(adt|adultos?|chd|ni[nñ]os?|menores?|inf|infantes?)\b/gim;while((ma=rea.exec(txt)))nKv+=+ma[1];}
   var paxLista=nombresSueltos(rawL),cadena=null,inter=[],VL=vuelosLibres(txt);
   var TB=null;
@@ -590,20 +641,25 @@ function parseServicios(txt){
       kind=/PRIVAD/.test(low)?'privado':(/REGULAR|COMPARTID/.test(low)?'regular':'');
       var d=destinoPorTexto(l);if(d)hdrDest=d;
       var f2=fechaDe(l,anio);
+      var hecho=false;
       if(f2){ // traslado suelto con fecha en la misma línea
         var cu=l.replace(/\s*\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\s*$/,'');
         var pp=cu.split(/\s+[-–>→]+\s+/);
-        if(pp.length>=2){var esAero=/aeropuerto/i.test(pp[0].replace(/^traslado\s+\w*\s*/i,''));
+        if(pp.length>=2){var esAero=/aeropuerto/i.test(pp[0].replace(/^traslado\s+\w*\s*/i,''));hecho=true;
           svs.push({tipo:esAero?'in':'out',kind:kind,from:pp[0].replace(/^traslado\s+(regular|privado)?\s*/i,''),to:pp.slice(1).join(' - '),f:f2,raw:l});}
       }
+      if(!hecho){var g0=servicioLibre(l,anio,ref,kind);if(g0)svs.push(g0);}
       return;
     }
     if(/^(excursi|tour|paseo|entrada|city tour|visita|full day|half day)/i.test(low)){
-      var f3=fechaDe(l,anio),t=l.replace(/\s*\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\s*$/,'').trim();
+      var f3=fechaLibre(l,anio,ref),t=(f3?l.replace(f3.raw,' '):l).replace(/\s{2,}/g,' ').replace(/[\s\-–:,]+$/,'').trim().replace(/\s+(?:el|del|para\s+el|on|for)$/i,'');
       svs.push({tipo:'exc',titulo:aplicarGlosario(titleCase(t)),f:f3,raw:l});
       if(!f3)warns.push('Excursión sin fecha: "'+l+'"');
       return;
     }
+    var g=servicioLibre(l,anio,ref,kind);
+    if(g){svs.push(g);return;}
+    if(/\b(traslados?|transfers?|tfr|trf)\b/i.test(l)){if(/privad/i.test(l))kind='privado';else if(/regular|compartid/i.test(l))kind='regular';}
   });
   if(hdrDest)dest=hdrDest;
   var destTitulo='';
@@ -648,6 +704,7 @@ function parseServicios(txt){
       if(tin){ci={d:tin.f.d,m:tin.f.m,y:tin.f.y};if(tout){co={d:tout.f.d,m:tout.f.m,y:tout.f.y};noches=Math.round((Date.UTC(co.y,co.m-1,co.d)-Date.UTC(ci.y,ci.m-1,ci.d))/864e5);}hotelSvs[hotelSvs.length-1]={tipo:'hotel',hotel:h,det:det,noches:noches,f:ci,co:co};}}
     if(!ci)warns.push('Hotel "'+h+'" sin fecha de entrada: completala en el voucher.');
   });
+  if(!paxLista.length&&paxKv&&/[,;\/]|\s+y\s+/.test(paxKv)){var lp=paxKv.split(/\s*(?:,|;|\/|\s+y\s+)\s*/).filter(Boolean);if(lp.length>=2&&lp.every(function(x){return /^[A-Za-zÁÉÍÓÚÑáéíóúñüÜ'´\-\. ]{3,60}$/.test(x);})){paxLista=lp.map(titleCase);paxKv='';}}
   if(!paxTxt&&paxKv){var pm2=paxKv.match(/^(.+?)\s*\(\s*(\d+)\s*pax/i)||paxKv.match(/^(.+?)\s*[xX]\s*(\d+)\s*$/);paxTxt=titleCase(pm2?pm2[1]:paxKv);if(pm2&&!nKv)nKv=+pm2[2];}if(!paxN&&nKv)paxN=nKv;
   if(TB){svs=TB.svs;warns=warns.concat(TB.warns);
     if(TB.ciudades.length){dest=TB.ciudades.filter(function(c){return c.p||c.f;})[0]||TB.ciudades[0];
@@ -736,7 +793,9 @@ function armarVoucher(txtServ,txtVuelos){
 var REMOTE='https://raw.githubusercontent.com/gonzalonocella-G04T/PNR-CREATOR-GNM/main/';
 var HV_LOGO='img/hiperviajes-slogan-teal.png',state={logoPos:'auto',ver:'dig',v:null,opLogo:null,hvLogo:null};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-function ciudadAp(c){if(!c)return '';var d=typeof ciudadPorCodigo==='function'?ciudadPorCodigo(c):null;return (d?nombreDestino(d):(typeof APTC!=='undefined'&&APTC[c])||c);}
+function ciudadAp(c){if(!c)return '';var d=typeof ciudadPorCodigo==='function'?ciudadPorCodigo(c):null,a=typeof APTC!=='undefined'?APTC[c]:'';
+  if(d&&d.x&&a&&d.c.indexOf(c)>=0&&a.indexOf('/')<0&&norm(a).replace(/[^A-Z]/g,'').indexOf(norm(d.n).replace(/[^A-Z]/g,''))<0&&!d.a.some(function(z){return norm(z)===norm(a);}))return a; // REC es Recife aunque el destino sea Porto de Galinhas
+  return d?nombreDestino(d):(a||c);}
 function vueloHtml(q,ico){
   var al=(typeof AIRN!=='undefined'&&AIRN[q.aero])||'',num=(q.aero+' '+q.num).trim();
   var ruta=q.from?ciudadAp(q.from)+' ('+q.from+') → '+ciudadAp(q.to)+' ('+q.to+')':'';
@@ -889,7 +948,7 @@ function render(){
       '<div class="tit"><div class="kick"><i></i><span>VOUCHER DE SERVICIOS</span><i></i></div><b contenteditable style="font-size:'+((v.destNombre||'').length>18?34:(v.destNombre||'').length>14?40:(v.destNombre||'').length>11?44:49)+'px">'+esc((v.destNombre||'').toUpperCase())+'</b>'+
       (v.pais?'<div class="ctry">'+SV(PIN,'pin')+'<span contenteditable>'+esc(v.pais.toUpperCase())+'</span></div>':'')+'</div>'+
       '<div class="card">'+rows+'</div>'+
-      '<div class="px">'+SV(PEOPLE,'pp')+'<span class="k">PASAJEROS</span><i></i><div class="nm" contenteditable>'+(v.pax.length?v.pax.map(esc).join('<em>|</em>'):'<span class="ph">Nombre y apellido</span>')+'</div>'+(v.npax&&v.npax!==v.pax.length?'<span class="cnt">'+v.npax+' PAX</span>':'')+'</div>'+
+      '<div class="px">'+SV(PEOPLE,'pp')+'<span class="k">PASAJEROS</span><i></i><div class="nm" contenteditable>'+(v.pax.length?v.pax.map(function(x){return '<span class="pn">'+esc(x)+'</span>';}).join('<em>|</em><wbr>'):'<span class="ph">Nombre y apellido</span>')+'</div>'+(v.npax&&v.npax!==v.pax.length?'<span class="cnt">'+v.npax+' PAX</span>':'')+'</div>'+
       PREST+(ob?'<div class="ob" contenteditable>'+esc(ob)+'</div>':'')+CONT+'</div>'+
       '<div class="foot"><svg viewBox="0 0 610 90" preserveAspectRatio="none"><path d="M0 22C150 2 300 4 420 16S560 34 610 20V90H0Z" fill="#bfe6de"/><path d="M0 40C140 20 290 22 420 34S560 50 610 36V90H0Z" fill="url(#fg)"/><defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2aa192"/><stop offset="1" stop-color="#14766b"/></linearGradient></defs></svg>'+
       '<div class="vft"><i></i>'+SV(TICKET,'tk')+'<span>VOUCHER DE SERVICIO</span><i></i></div></div>'+
@@ -898,7 +957,7 @@ function render(){
     ajustarLogos();
     return;
   }
-  var pax='<div class="pax"><span class="k">Pasajeros</span><span class="v" contenteditable>'+(v.pax.length?esc(v.pax.join('  |  ')):'<span class="ph">Nombre y apellido</span>')+'</span><span class="n">'+v.npax+' pax</span></div>';
+  var pax='<div class="pax"><span class="k">Pasajeros</span><span class="v" contenteditable>'+(v.pax.length?v.pax.map(function(x){return '<span class="pn">'+esc(x)+'</span>';}).join('  |  '):'<span class="ph">Nombre y apellido</span>')+'</span><span class="n">'+v.npax+' pax</span></div>';
   var obs=$('obs').value.trim();
   var html='<div class="sheet '+cls+'" id="sheet">'+head+hero+intro+'<div class="body">'+pax+v.items.map(itemHtml).join('')+PREST+CONT+
     '<div class="obs" contenteditable>'+esc(obs)+'</div></div><div class="ft"><span>Hiperviajes</span><span>Voucher de servicios</span></div></div>';

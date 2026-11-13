@@ -261,3 +261,6 @@ button:disabled{opacity:.45;cursor:default}
 .sv .fl .fx span{font-weight:500;font-size:3.3mm}
 .sv .fl .fh{font-weight:500;font-size:3.3mm;border-left:.3mm solid var(--line);padding-left:3.5mm}
 .v-ink .sv .fl .fh{border-left-color:var(--g)}
+
+/* un nombre no se corta entre renglones */
+.pn{white-space:nowrap}
