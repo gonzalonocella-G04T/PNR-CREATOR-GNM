@@ -276,7 +276,16 @@ button:disabled{opacity:.45;cursor:default}
 .v-ink .bye{margin:6mm 0 2mm}
 .v-ink .bye b{font:italic 800 9mm/1.1 'Playfair Display',Georgia,serif;color:var(--g)}
 .v-ink .bye span{font:600 2.6mm/1.4 Inter,sans-serif;letter-spacing:.3em;color:#333;margin-top:1.2mm}
-</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 13/11 17:46</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
+
+/* quién presta el servicio: logo + nombre */
+.prst{flex-wrap:wrap}
+.prst .pv{display:flex;align-items:center;gap:12px}
+.prst .pv b{font:700 15px/1.2 Montserrat,sans-serif;letter-spacing:0;text-transform:none;color:#0e3d3b}
+.prst .pv img+b{padding-left:12px;border-left:1px solid #cfe5e1}
+.v-ink .prst .pv b{font:700 4mm/1.2 Inter,sans-serif;color:#0b2f2a}
+.v-ink .prst .pv{gap:3mm}
+.v-ink .prst .pv img+b{padding-left:3mm;border-left:.3mm solid #b9d3cf}
+</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 13/11 18:04</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
 <div class="wrap"><aside class="panel">
 <label for="serv">Solicitud / confirmación de servicios (con los vuelos)</label>
 <textarea id="serv" placeholder="Traslado regular in + out El Calafate&#10;Nombre Apellido x2&#10;Llegada: Aeropuerto … - Hotel …  dd/mm/aaaa&#10;Salida: Hotel … - Aeropuerto …  dd/mm/aaaa&#10;&#10;Excursión … dd/mm/aaaa&#10;&#10;Vuelos: líneas del PNR o “22/02 MVD-RIO 17:45 H2 1815”"></textarea>
@@ -583,6 +592,15 @@ function servicioLibre(l,anio,ref,kind){ // una línea con fecha + palabra de se
   return {tipo:tp,kind:kd,from:fr,to:to,f:f,raw:l};
 }
 
+var RE_TELX=/\s*[-–:,]?\s*(?:tel\.?|cel\.?)?\s*\+?\d[\d\s\-]{6,}\d(?=\s*(?:[-–,]|[xX]\s*\d|$))/i;
+function titularXN(l){ // "Natalia Sosa x 6", "Natalia Sosa - +598... x 6", "Natalia Sosa x6 - +598..."
+  if(/\d{1,2}\/\d{1,2}/.test(l))return null;
+  var tel=null,mt=l.match(/\+\d[\d\s\-]{6,}\d/);if(mt){tel=mt[0];l=l.replace(RE_TELX,' ');}
+  l=l.replace(/\s{2,}/g,' ').replace(/[\s\-–,]+$/,'').trim();
+  var m=l.match(/^([A-Za-zÁÉÍÓÚÑáéíóúñüÜ'´\.\- ]{3,60}?)\s*[xX]\s*(\d{1,2})\s*(?:pax\w*|personas)?$/i)||l.match(/^([A-Za-zÁÉÍÓÚÑáéíóúñüÜ'´\.\- ]{3,60}?)\s*\(\s*(\d{1,2})\s*(?:pax\w*|personas)\s*\)$/i);
+  if(!m||/^(base|ciudad|precio|menor)/i.test(m[1]))return null;
+  return {nombre:m[1].replace(/[\s\-–]+$/,'').trim(),n:+m[2],tel:tel};
+}
 /* ---- Solicitud de servicios ---- */
 function parseServicios(txt){
   var warns=[],lines=txt.split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean);
@@ -641,6 +659,7 @@ function parseServicios(txt){
       }else{svs.push({tipo:'exc',titulo:aplicarGlosario(titleCase(cuerpo)),f:f,raw:l});}
       return;
     }
+    var tx=titularXN(l);if(tx){paxTxt=titleCase(tx.nombre);paxN=tx.n;return;}
     var mp=l.match(/^(.+?)\s*[xX]\s*(\d+)\s*$/)||l.match(/^([A-Za-zÁÉÍÓÚÑáéíóúñ' ]{3,60}?)\s*\(\s*(\d+)\s*pax/i);
     if(mp&&/^(base|ciudad|precio|menor)/i.test(mp[1]))mp=null;
     if(mp&&!/\d\/\d/.test(l)){paxTxt=titleCase(mp[1]);paxN=+mp[2];return;}
@@ -686,6 +705,7 @@ function parseServicios(txt){
     if(g){svs.push(g);return;}
     if(/\b(traslados?|transfers?|tfr|trf)\b/i.test(l)){if(/privad/i.test(l))kind='privado';else if(/regular|compartid/i.test(l))kind='regular';}
   });
+  if(!paxTxt)rawL.some(function(l){var tx=titularXN(l);if(tx){paxTxt=titleCase(tx.nombre);paxN=tx.n;}return !!tx;});
   if(hdrDest)dest=hdrDest;
   var destTitulo='';
   if(cadena){
@@ -736,7 +756,7 @@ function parseServicios(txt){
       var nm=[];TB.ciudades.forEach(function(c){var n=nombreDestino(c);if(nm.indexOf(n)<0)nm.push(n);});
       if(nm.length>1)destTitulo=nm.length===2?nm.join(' y '):nm.slice(0,-1).join(', ')+' y '+nm[nm.length-1];}
   }
-  var mtel=txt.match(/(?:n[uú]mero\s+de\s+)?(?:contacto|tel[eé]fono|celular|cel|whatsapp)\s*(?:del?\s+pasajero)?\s*:?\s*(\+?\d[\d\s\-]{6,}\d)/i)||txt.match(/^[A-Za-zÁÉÍÓÚÑáéíóúñ' ]{4,60}?\s*[-–:,]\s*(\+\d[\d\s\-]{6,}\d)\s*$/m);
+  var mtel=txt.match(/(?:n[uú]mero\s+de\s+)?(?:contacto|tel[eé]fono|celular|cel|whatsapp)\s*(?:del?\s+pasajero)?\s*:?\s*(\+?\d[\d\s\-]{6,}\d)/i)||txt.match(/^[A-Za-zÁÉÍÓÚÑáéíóúñ' ]{4,60}?\s*(?:[xX]\s*\d{1,2}\s*)?[-–:,]\s*(\+\d[\d\s\-]{6,}\d)\s*(?:[xX]\s*\d{1,2})?\s*$/m);
   return {dest:dest,destTitulo:destTitulo,svs:svs.concat(hotelSvs),paxTxt:paxTxt,paxN:paxN,paxLista:paxLista,vuelosL:VL,tel:mtel?mtel[1].replace(/\s+/g,' ').trim():'',warns:warns,anio:anio,opTxt:opTxt,hoteles:hoteles};
 }
 
@@ -926,7 +946,9 @@ function render(){
   var pr=OPERADORES.filter(function(o){return o.id===$('prs').value;})[0]||null;
   var opSel=OPERADORES.filter(function(o){return o.id===$('op').value;})[0],ct=opSel&&opSel.contacto&&!state.opUpload?opSel.contacto:null;
   var CONT=ct?'<div class="opct" contenteditable><b>'+esc(ct.razon)+'</b>'+(ct.dir?'<span>'+esc(ct.dir)+'</span>':'')+(ct.tel?'<span>Tel. '+esc(ct.tel)+'</span>':'')+(ct.emerg?'<span class="em">Tel. emergencia: '+esc(ct.emerg)+'</span>':'')+'</div>':'';
-  var PREST=pr?'<div class="prst"><span>Servicio prestado por</span>'+im(pr.logo,'prlogo',pr.nombre)+'</div>':'';
+  // quién presta el servicio: el prestador si se eligió; si no, el operador (logo + nombre, para que quede claro)
+  var quien=pr?{logo:pr.logo,nombre:pr.nombre}:(opSel&&!state.opUpload?{logo:opSel.logo,nombre:opSel.nombre}:(state.opTxt?{logo:null,nombre:state.opTxt}:(state.opUpload&&op?{logo:op,nombre:''}:null)));
+  var PREST=quien?'<div class="prst"><span class="pk">'+(v.items.filter(function(x){return !x.off;}).length>1?'Servicios prestados por':'Servicio prestado por')+'</span><div class="pv">'+(quien.logo?im(quien.logo,'prlogo',quien.nombre):'')+(quien.nombre?'<b contenteditable>'+esc(quien.nombre)+'</b>':'')+'</div></div>':'';
   var LOGOS=im(hv,'lg hvlogo','Hiperviajes')+(hasOp?'<i></i>'+opHtml('lg2 oplogo'):'');
   var cls={foto:'v-foto',ink:'v-ink',dig:'v-dig2'}[state.ver];
   var titulo=(v.destNombre||'Destino')+(v.pais?'':'' );

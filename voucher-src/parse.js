@@ -268,6 +268,15 @@ function servicioLibre(l,anio,ref,kind){ // una línea con fecha + palabra de se
   return {tipo:tp,kind:kd,from:fr,to:to,f:f,raw:l};
 }
 
+var RE_TELX=/\s*[-–:,]?\s*(?:tel\.?|cel\.?)?\s*\+?\d[\d\s\-]{6,}\d(?=\s*(?:[-–,]|[xX]\s*\d|$))/i;
+function titularXN(l){ // "Natalia Sosa x 6", "Natalia Sosa - +598... x 6", "Natalia Sosa x6 - +598..."
+  if(/\d{1,2}\/\d{1,2}/.test(l))return null;
+  var tel=null,mt=l.match(/\+\d[\d\s\-]{6,}\d/);if(mt){tel=mt[0];l=l.replace(RE_TELX,' ');}
+  l=l.replace(/\s{2,}/g,' ').replace(/[\s\-–,]+$/,'').trim();
+  var m=l.match(/^([A-Za-zÁÉÍÓÚÑáéíóúñüÜ'´\.\- ]{3,60}?)\s*[xX]\s*(\d{1,2})\s*(?:pax\w*|personas)?$/i)||l.match(/^([A-Za-zÁÉÍÓÚÑáéíóúñüÜ'´\.\- ]{3,60}?)\s*\(\s*(\d{1,2})\s*(?:pax\w*|personas)\s*\)$/i);
+  if(!m||/^(base|ciudad|precio|menor)/i.test(m[1]))return null;
+  return {nombre:m[1].replace(/[\s\-–]+$/,'').trim(),n:+m[2],tel:tel};
+}
 /* ---- Solicitud de servicios ---- */
 function parseServicios(txt){
   var warns=[],lines=txt.split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean);
@@ -326,6 +335,7 @@ function parseServicios(txt){
       }else{svs.push({tipo:'exc',titulo:aplicarGlosario(titleCase(cuerpo)),f:f,raw:l});}
       return;
     }
+    var tx=titularXN(l);if(tx){paxTxt=titleCase(tx.nombre);paxN=tx.n;return;}
     var mp=l.match(/^(.+?)\s*[xX]\s*(\d+)\s*$/)||l.match(/^([A-Za-zÁÉÍÓÚÑáéíóúñ' ]{3,60}?)\s*\(\s*(\d+)\s*pax/i);
     if(mp&&/^(base|ciudad|precio|menor)/i.test(mp[1]))mp=null;
     if(mp&&!/\d\/\d/.test(l)){paxTxt=titleCase(mp[1]);paxN=+mp[2];return;}
@@ -371,6 +381,7 @@ function parseServicios(txt){
     if(g){svs.push(g);return;}
     if(/\b(traslados?|transfers?|tfr|trf)\b/i.test(l)){if(/privad/i.test(l))kind='privado';else if(/regular|compartid/i.test(l))kind='regular';}
   });
+  if(!paxTxt)rawL.some(function(l){var tx=titularXN(l);if(tx){paxTxt=titleCase(tx.nombre);paxN=tx.n;}return !!tx;});
   if(hdrDest)dest=hdrDest;
   var destTitulo='';
   if(cadena){
@@ -421,7 +432,7 @@ function parseServicios(txt){
       var nm=[];TB.ciudades.forEach(function(c){var n=nombreDestino(c);if(nm.indexOf(n)<0)nm.push(n);});
       if(nm.length>1)destTitulo=nm.length===2?nm.join(' y '):nm.slice(0,-1).join(', ')+' y '+nm[nm.length-1];}
   }
-  var mtel=txt.match(/(?:n[uú]mero\s+de\s+)?(?:contacto|tel[eé]fono|celular|cel|whatsapp)\s*(?:del?\s+pasajero)?\s*:?\s*(\+?\d[\d\s\-]{6,}\d)/i)||txt.match(/^[A-Za-zÁÉÍÓÚÑáéíóúñ' ]{4,60}?\s*[-–:,]\s*(\+\d[\d\s\-]{6,}\d)\s*$/m);
+  var mtel=txt.match(/(?:n[uú]mero\s+de\s+)?(?:contacto|tel[eé]fono|celular|cel|whatsapp)\s*(?:del?\s+pasajero)?\s*:?\s*(\+?\d[\d\s\-]{6,}\d)/i)||txt.match(/^[A-Za-zÁÉÍÓÚÑáéíóúñ' ]{4,60}?\s*(?:[xX]\s*\d{1,2}\s*)?[-–:,]\s*(\+\d[\d\s\-]{6,}\d)\s*(?:[xX]\s*\d{1,2})?\s*$/m);
   return {dest:dest,destTitulo:destTitulo,svs:svs.concat(hotelSvs),paxTxt:paxTxt,paxN:paxN,paxLista:paxLista,vuelosL:VL,tel:mtel?mtel[1].replace(/\s+/g,' ').trim():'',warns:warns,anio:anio,opTxt:opTxt,hoteles:hoteles};
 }
 

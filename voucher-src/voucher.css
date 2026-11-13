@@ -275,3 +275,12 @@ button:disabled{opacity:.45;cursor:default}
 .v-ink .bye{margin:6mm 0 2mm}
 .v-ink .bye b{font:italic 800 9mm/1.1 'Playfair Display',Georgia,serif;color:var(--g)}
 .v-ink .bye span{font:600 2.6mm/1.4 Inter,sans-serif;letter-spacing:.3em;color:#333;margin-top:1.2mm}
+
+/* quién presta el servicio: logo + nombre */
+.prst{flex-wrap:wrap}
+.prst .pv{display:flex;align-items:center;gap:12px}
+.prst .pv b{font:700 15px/1.2 Montserrat,sans-serif;letter-spacing:0;text-transform:none;color:#0e3d3b}
+.prst .pv img+b{padding-left:12px;border-left:1px solid #cfe5e1}
+.v-ink .prst .pv b{font:700 4mm/1.2 Inter,sans-serif;color:#0b2f2a}
+.v-ink .prst .pv{gap:3mm}
+.v-ink .prst .pv img+b{padding-left:3mm;border-left:.3mm solid #b9d3cf}

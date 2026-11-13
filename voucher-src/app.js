@@ -106,7 +106,9 @@ function render(){
   var pr=OPERADORES.filter(function(o){return o.id===$('prs').value;})[0]||null;
   var opSel=OPERADORES.filter(function(o){return o.id===$('op').value;})[0],ct=opSel&&opSel.contacto&&!state.opUpload?opSel.contacto:null;
   var CONT=ct?'<div class="opct" contenteditable><b>'+esc(ct.razon)+'</b>'+(ct.dir?'<span>'+esc(ct.dir)+'</span>':'')+(ct.tel?'<span>Tel. '+esc(ct.tel)+'</span>':'')+(ct.emerg?'<span class="em">Tel. emergencia: '+esc(ct.emerg)+'</span>':'')+'</div>':'';
-  var PREST=pr?'<div class="prst"><span>Servicio prestado por</span>'+im(pr.logo,'prlogo',pr.nombre)+'</div>':'';
+  // quién presta el servicio: el prestador si se eligió; si no, el operador (logo + nombre, para que quede claro)
+  var quien=pr?{logo:pr.logo,nombre:pr.nombre}:(opSel&&!state.opUpload?{logo:opSel.logo,nombre:opSel.nombre}:(state.opTxt?{logo:null,nombre:state.opTxt}:(state.opUpload&&op?{logo:op,nombre:''}:null)));
+  var PREST=quien?'<div class="prst"><span class="pk">'+(v.items.filter(function(x){return !x.off;}).length>1?'Servicios prestados por':'Servicio prestado por')+'</span><div class="pv">'+(quien.logo?im(quien.logo,'prlogo',quien.nombre):'')+(quien.nombre?'<b contenteditable>'+esc(quien.nombre)+'</b>':'')+'</div></div>':'';
   var LOGOS=im(hv,'lg hvlogo','Hiperviajes')+(hasOp?'<i></i>'+opHtml('lg2 oplogo'):'');
   var cls={foto:'v-foto',ink:'v-ink',dig:'v-dig2'}[state.ver];
   var titulo=(v.destNombre||'Destino')+(v.pais?'':'' );
