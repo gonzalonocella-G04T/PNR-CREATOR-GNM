@@ -128,7 +128,7 @@ function render(){
       '<div class="row"><div class="tt"><small><i></i>VOUCHER DE SERVICIOS<i></i></small><b contenteditable style="font-size:'+((v.destNombre||'').length>22?10:(v.destNombre||'').length>14?12.5:15.5)+'mm">'+esc(titleCase(v.destNombre||''))+'</b>'+
       '<svg class="sw" viewBox="0 0 300 16" preserveAspectRatio="none"><path d="M6 12C80 3 210 1 294 8" fill="none" stroke="url(#swg)" stroke-width="3.2" stroke-linecap="round"/><defs><linearGradient id="swg" x1="0" x2="1"><stop offset="0" stop-color="#0D6B5E"/><stop offset="1" stop-color="#3FA37C"/></linearGradient></defs></svg>'+
       (v.pais?'<span><svg viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0113 0c0 4.8-6.5 11-6.5 11z" fill="currentColor"/><circle cx="12" cy="10" r="2.4" fill="#fff"/></svg><em contenteditable>'+esc(v.pais.toUpperCase())+'</em></span>':'')+'</div>'+
-      (sel?im('sellos/'+sel.f,'st duo',''):'')+'</div>'+
+      '</div>'+ // sin sello en la versión para imprimir: no suma y compite con el título
       '<svg class="iw" viewBox="0 0 600 24" preserveAspectRatio="none"><path d="M0 14C100 2 200 2 300 12S500 24 600 8" fill="none" stroke="#0D6B5E" stroke-width="1.2" opacity=".55"/><path d="M0 19C110 9 210 9 310 17S500 26 600 14" fill="none" stroke="#0D6B5E" stroke-width=".8" opacity=".35"/></svg></div>';
   }
   if(state.ver==='dig'){

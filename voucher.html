@@ -313,7 +313,7 @@ button:disabled{opacity:.45;cursor:default}
 .srvh label{flex:1}
 .clr{flex:none;margin:0 0 4px;padding:4px 12px;border:1px solid #C9ECE8;border-radius:999px;background:#fff;color:#b3261e;font:600 12px Inter,sans-serif;cursor:pointer}
 .clr:hover{background:#fdf1f0;border-color:#f0c9c5}
-</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 15/11 20:09</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
+</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 15/11 20:28</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
 <div class="wrap"><aside class="panel">
 <div class="srvh"><label for="serv">Solicitud / confirmación de servicios (con los vuelos)</label><button type="button" id="clr" class="clr" title="Borra el texto, los servicios cargados a mano, pasajeros, observaciones y el voucher">Limpiar</button></div>
 <textarea id="serv" placeholder="Traslado regular in + out El Calafate&#10;Nombre Apellido x2&#10;Llegada: Aeropuerto … - Hotel …  dd/mm/aaaa&#10;Salida: Hotel … - Aeropuerto …  dd/mm/aaaa&#10;&#10;Excursión … dd/mm/aaaa&#10;&#10;Vuelos: líneas del PNR o “22/02 MVD-RIO 17:45 H2 1815”"></textarea>
@@ -1023,7 +1023,7 @@ function render(){
       '<div class="row"><div class="tt"><small><i></i>VOUCHER DE SERVICIOS<i></i></small><b contenteditable style="font-size:'+((v.destNombre||'').length>22?10:(v.destNombre||'').length>14?12.5:15.5)+'mm">'+esc(titleCase(v.destNombre||''))+'</b>'+
       '<svg class="sw" viewBox="0 0 300 16" preserveAspectRatio="none"><path d="M6 12C80 3 210 1 294 8" fill="none" stroke="url(#swg)" stroke-width="3.2" stroke-linecap="round"/><defs><linearGradient id="swg" x1="0" x2="1"><stop offset="0" stop-color="#0D6B5E"/><stop offset="1" stop-color="#3FA37C"/></linearGradient></defs></svg>'+
       (v.pais?'<span><svg viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0113 0c0 4.8-6.5 11-6.5 11z" fill="currentColor"/><circle cx="12" cy="10" r="2.4" fill="#fff"/></svg><em contenteditable>'+esc(v.pais.toUpperCase())+'</em></span>':'')+'</div>'+
-      (sel?im('sellos/'+sel.f,'st duo',''):'')+'</div>'+
+      '</div>'+ // sin sello en la versión para imprimir: no suma y compite con el título
       '<svg class="iw" viewBox="0 0 600 24" preserveAspectRatio="none"><path d="M0 14C100 2 200 2 300 12S500 24 600 8" fill="none" stroke="#0D6B5E" stroke-width="1.2" opacity=".55"/><path d="M0 19C110 9 210 9 310 17S500 26 600 14" fill="none" stroke="#0D6B5E" stroke-width=".8" opacity=".35"/></svg></div>';
   }
   if(state.ver==='dig'){
