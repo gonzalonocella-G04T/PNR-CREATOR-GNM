@@ -7,6 +7,9 @@ function ciudadAp(c){if(!c)return '';var d=typeof ciudadPorCodigo==='function'?c
 function vueloHtml(q,ico){
   var al=q.al||(typeof AIRN!=='undefined'&&AIRN[q.aero])||'',num=(q.aero+' '+q.num).trim();
   var ruta=q.from&&q.to?ciudadAp(q.from)+' ('+q.from+') → '+ciudadAp(q.to)+' ('+q.to+')':(q.to?'Llega a '+ciudadAp(q.to)+' ('+q.to+')':(q.from?'Sale de '+ciudadAp(q.from)+' ('+q.from+')':''));
+  // al pasajero le importa una sola hora: llegada del vuelo en el IN, salida del vuelo en el OUT
+  if(q.dir==='in'&&q.arr)return vueloHtml(Object.assign({},q,{dep:'',dir:'',man:true}),ico);
+  if(q.dir==='out'&&q.dep)return vueloHtml(Object.assign({},q,{arr:'',dir:'',man:true}),ico);
   var hs=q.dep&&q.arr?'<span>Sale <b>'+q.dep+'</b></span><span>Llega <b>'+q.arr+(q.sig?' (+1)':'')+'</b></span>':(q.dep?(q.man?'<span>Sale <b>'+q.dep+'</b></span>':'<span><b>'+q.dep+' hs</b></span>'):(q.arr?'<span>Llega <b>'+q.arr+'</b></span>':''));
   return '<div class="fl">'+(ico||'')+'<div class="fx" contenteditable><b>'+esc(al?al+' · '+num:'Vuelo '+num)+'</b>'+(ruta?'<span>'+esc(ruta)+'</span>':'')+'</div>'+(hs?'<div class="fh" contenteditable>'+hs+'</div>':'')+'</div>';
 }
@@ -341,6 +344,13 @@ function initManual(){
   $('mPax').onchange=function(){generar();};
   [].forEach.call(document.querySelectorAll('#man input[type=text],#man input[type=date],#man input[type=time]'),function(el){if(el.id!=='mPax')el.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();mAgregar();}});});
 }
+function limpiarTodo(){
+  $('serv').value='';$('mPax').value='';$('obs').value='';state.obsAuto='';$('dtit').value='';$('dest').value='';
+  state.manual=[];state.ocultos={};mLimpiar();mLista();
+  $('op').value='';state.opLogo=null;state.opUpload=false;$('opf').value='';state.opTxt='';state.opAuto=false;
+  state.prsManual=false;$('prs').value='';state.fotoUp=null;state.fotoUpOk=false;$('fotof').value='';
+  state.v=null;mostrarWarns();listaItems();render();$('serv').focus();
+}
 function generar(){
   state.autoAbajo=false;
   var hayTxt=!!$('serv').value.trim();
@@ -409,6 +419,7 @@ function init(){
   $('go').onclick=function(){generar();};
   $('dest').onchange=function(){if($('serv').value.trim()||state.manual.length)generar();};
   initManual();
+  $('clr').onclick=limpiarTodo;
   ['serv'].forEach(function(id){
     var el=$(id),pegado=false;
     el.addEventListener('paste',function(){pegado=true;state.prsManual=false;setTimeout(function(){pegado=false;if($('serv').value.trim())generar();},0);});

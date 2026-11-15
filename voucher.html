@@ -307,9 +307,15 @@ button:disabled{opacity:.45;cursor:default}
 .mli button.x{color:#b3261e}
 .mli.ed{border-color:var(--sky);background:#e8f7f4}
 .itm .ed{margin-left:auto;border:0;background:none;color:var(--sky);cursor:pointer;font-size:11.5px;font-weight:700;padding:0 2px;white-space:nowrap}
-</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 15/11 19:54</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
+
+/* botón limpiar */
+.srvh{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+.srvh label{flex:1}
+.clr{flex:none;margin:0 0 4px;padding:4px 12px;border:1px solid #C9ECE8;border-radius:999px;background:#fff;color:#b3261e;font:600 12px Inter,sans-serif;cursor:pointer}
+.clr:hover{background:#fdf1f0;border-color:#f0c9c5}
+</style></head><body><header class="top"><h1>Voucher de servicios</h1><span class="hint" style="margin:0">Traslados y excursiones + vuelos → voucher listo para el pasajero</span><span class="hint" style="margin:0 0 0 auto;font-size:11px">versión 15/11 20:07</span><a href="index.html" style="margin-left:16px">← Volver a Tu Itinerario</a></header>
 <div class="wrap"><aside class="panel">
-<label for="serv">Solicitud / confirmación de servicios (con los vuelos)</label>
+<div class="srvh"><label for="serv">Solicitud / confirmación de servicios (con los vuelos)</label><button type="button" id="clr" class="clr" title="Borra el texto, los servicios cargados a mano, pasajeros, observaciones y el voucher">Limpiar</button></div>
 <textarea id="serv" placeholder="Traslado regular in + out El Calafate&#10;Nombre Apellido x2&#10;Llegada: Aeropuerto … - Hotel …  dd/mm/aaaa&#10;Salida: Hotel … - Aeropuerto …  dd/mm/aaaa&#10;&#10;Excursión … dd/mm/aaaa&#10;&#10;Vuelos: líneas del PNR o “22/02 MVD-RIO 17:45 H2 1815”"></textarea>
 <p class="hint">Pegá todo junto: servicios, pasajeros y vuelos (del PNR o escritos a mano). Los vuelos se asocian solos a cada traslado por fecha, ruta y compañía.</p>
 <details id="man" class="man"><summary>Cargar servicios a mano <span>paso a paso, solo o junto con el texto</span></summary>
@@ -896,6 +902,9 @@ function ciudadAp(c){if(!c)return '';var d=typeof ciudadPorCodigo==='function'?c
 function vueloHtml(q,ico){
   var al=q.al||(typeof AIRN!=='undefined'&&AIRN[q.aero])||'',num=(q.aero+' '+q.num).trim();
   var ruta=q.from&&q.to?ciudadAp(q.from)+' ('+q.from+') → '+ciudadAp(q.to)+' ('+q.to+')':(q.to?'Llega a '+ciudadAp(q.to)+' ('+q.to+')':(q.from?'Sale de '+ciudadAp(q.from)+' ('+q.from+')':''));
+  // al pasajero le importa una sola hora: llegada del vuelo en el IN, salida del vuelo en el OUT
+  if(q.dir==='in'&&q.arr)return vueloHtml(Object.assign({},q,{dep:'',dir:'',man:true}),ico);
+  if(q.dir==='out'&&q.dep)return vueloHtml(Object.assign({},q,{arr:'',dir:'',man:true}),ico);
   var hs=q.dep&&q.arr?'<span>Sale <b>'+q.dep+'</b></span><span>Llega <b>'+q.arr+(q.sig?' (+1)':'')+'</b></span>':(q.dep?(q.man?'<span>Sale <b>'+q.dep+'</b></span>':'<span><b>'+q.dep+' hs</b></span>'):(q.arr?'<span>Llega <b>'+q.arr+'</b></span>':''));
   return '<div class="fl">'+(ico||'')+'<div class="fx" contenteditable><b>'+esc(al?al+' · '+num:'Vuelo '+num)+'</b>'+(ruta?'<span>'+esc(ruta)+'</span>':'')+'</div>'+(hs?'<div class="fh" contenteditable>'+hs+'</div>':'')+'</div>';
 }
@@ -1230,6 +1239,13 @@ function initManual(){
   $('mPax').onchange=function(){generar();};
   [].forEach.call(document.querySelectorAll('#man input[type=text],#man input[type=date],#man input[type=time]'),function(el){if(el.id!=='mPax')el.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();mAgregar();}});});
 }
+function limpiarTodo(){
+  $('serv').value='';$('mPax').value='';$('obs').value='';state.obsAuto='';$('dtit').value='';$('dest').value='';
+  state.manual=[];state.ocultos={};mLimpiar();mLista();
+  $('op').value='';state.opLogo=null;state.opUpload=false;$('opf').value='';state.opTxt='';state.opAuto=false;
+  state.prsManual=false;$('prs').value='';state.fotoUp=null;state.fotoUpOk=false;$('fotof').value='';
+  state.v=null;mostrarWarns();listaItems();render();$('serv').focus();
+}
 function generar(){
   state.autoAbajo=false;
   var hayTxt=!!$('serv').value.trim();
@@ -1298,6 +1314,7 @@ function init(){
   $('go').onclick=function(){generar();};
   $('dest').onchange=function(){if($('serv').value.trim()||state.manual.length)generar();};
   initManual();
+  $('clr').onclick=limpiarTodo;
   ['serv'].forEach(function(id){
     var el=$(id),pegado=false;
     el.addEventListener('paste',function(){pegado=true;state.prsManual=false;setTimeout(function(){pegado=false;if($('serv').value.trim())generar();},0);});
