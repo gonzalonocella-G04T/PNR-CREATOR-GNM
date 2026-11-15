@@ -265,7 +265,9 @@ function servicioLibre(l,anio,ref,kind){ // una línea con fecha + palabra de se
   var tp=fr&&to?(esA(fr)?'in':(esA(to)?'out':(dirIn?'in':(dirOut?'out':'tr')))):(dirIn?'in':(dirOut?'out':(aero?'in':null)));
   if(!tp)return null;
   if(!fr||!to){fr=tp==='in'?'Aeropuerto':'__HOTEL__';to=tp==='in'?'__HOTEL__':'Aeropuerto';}
-  return {tipo:tp,kind:kd,from:fr,to:to,f:f,raw:l};
+  var mv=l.match(/(?:^|[\s\-–(])((?:[A-Z]{2}|[A-Z]\d|\d[A-Z]))\s?(\d{2,4})(?=[\s\-–),.]|$)/);
+  var vref=mv&&typeof AIRN!=='undefined'&&AIRN[mv[1].toUpperCase()]?{aero:mv[1].toUpperCase(),num:mv[2]}:null;
+  return {tipo:tp,kind:kd,from:fr,to:to,f:f,raw:l,vref:vref};
 }
 
 var RE_TELX=/\s*[-–:,]?\s*(?:tel\.?|cel\.?)?\s*\+?\d[\d\s\-]{6,}\d(?=\s*(?:[-–,]|[xX]\s*\d|$))/i;
@@ -487,7 +489,7 @@ function armarVoucher(txtServ,txtVuelos){
       if(!cand.length)cand=porFecha.filter(function(v){return !v.from&&!v.dir;});
       if(!cand.length&&porFecha.length===1)cand=porFecha;
       cand.sort(function(a,b){return s.tipo==='in'?((b.arr||b.dep)>(a.arr||a.dep)?1:-1):((a.dep>b.dep)?1:-1);});
-      if(cand.length){it.vuelo=vObj(cand[0]);if(cand.length>1)warns.push('Hay más de un vuelo el '+s.f.d+'/'+s.f.m+' para el traslado '+s.tipo.toUpperCase()+': tomé el '+cand[0].aero+' '+cand[0].num+', revisalo.');}
+      if(cand.length){it.vuelo=vObj(cand[0]);if(!it.vuelo.from&&!it.vuelo.to&&codes.length){if(s.tipo==='in')it.vuelo.to=codes[0];else it.vuelo.from=codes[0];}if(cand.length>1)warns.push('Hay más de un vuelo el '+s.f.d+'/'+s.f.m+' para el traslado '+s.tipo.toUpperCase()+': tomé el '+cand[0].aero+' '+cand[0].num+', revisalo.');}
       else warns.push('No encontré vuelo para el traslado '+s.tipo.toUpperCase()+' del '+s.f.d+'/'+s.f.m+'.');
     }
     items.push(it);

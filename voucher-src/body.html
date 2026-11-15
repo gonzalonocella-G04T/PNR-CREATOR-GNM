@@ -3,6 +3,31 @@
 <label for="serv">Solicitud / confirmación de servicios (con los vuelos)</label>
 <textarea id="serv" placeholder="Traslado regular in + out El Calafate&#10;Nombre Apellido x2&#10;Llegada: Aeropuerto … - Hotel …  dd/mm/aaaa&#10;Salida: Hotel … - Aeropuerto …  dd/mm/aaaa&#10;&#10;Excursión … dd/mm/aaaa&#10;&#10;Vuelos: líneas del PNR o “22/02 MVD-RIO 17:45 H2 1815”"></textarea>
 <p class="hint">Pegá todo junto: servicios, pasajeros y vuelos (del PNR o escritos a mano). Los vuelos se asocian solos a cada traslado por fecha, ruta y compañía.</p>
+<details id="man" class="man"><summary>Cargar servicios a mano <span>paso a paso, solo o junto con el texto</span></summary>
+<div class="mf">
+<label for="mTipo">Tipo de servicio</label>
+<select id="mTipo"><option value="in">Traslado de llegada (In)</option><option value="out">Traslado de salida (Out)</option><option value="tr">Traslado inter-hoteles</option><option value="exc">Excursión / Paseo</option></select>
+<div class="r2"><div><label for="mFecha">Fecha</label><input type="date" id="mFecha"></div><div><label for="mHora">Hora del servicio <i>(opcional)</i></label><input type="time" id="mHora"></div></div>
+<div class="cond" data-t="in out tr">
+<label for="mKind">Modalidad</label><select id="mKind"><option value="Regular">Regular (compartido)</option><option value="Privado">Privado</option></select>
+<div class="r2"><div><label for="mDesde">Desde</label><input type="text" id="mDesde"></div><div><label for="mHasta">Hasta</label><input type="text" id="mHasta"></div></div>
+</div>
+<div class="cond" data-t="in out">
+<div class="r2"><div><label for="mVuelo">Vuelo</label><input type="text" id="mVuelo" placeholder="Ej.: H2 169" autocomplete="off"></div><div><label for="mVHora" id="mVHoraL">Hora de llegada del vuelo</label><input type="time" id="mVHora"></div></div>
+<label for="mAero">Aerolínea <i>(se completa sola con el código, podés cambiarla)</i></label><input type="text" id="mAero">
+<p class="hint" id="mVInfo"></p>
+</div>
+<div class="cond" data-t="exc">
+<label for="mDur">Duración</label><select id="mDur"><option value="">Sin especificar</option><option value="Medio día">Medio día</option><option value="Día completo">Día completo</option></select>
+<label for="mExc">Nombre o detalle del paseo</label><input type="text" id="mExc" placeholder="Ej.: City tour con Valparaíso y Viña del Mar">
+</div>
+<label for="mDet">Detalle adicional <i>(opcional: punto de encuentro, incluye, etc.)</i></label><input type="text" id="mDet">
+<div class="btns"><button class="p" id="mAdd" type="button">Agregar al voucher</button><button class="s" id="mCancel" type="button" hidden>Cancelar edición</button></div>
+<p class="merr" id="mErr"></p>
+</div>
+<div id="mList"></div>
+<label for="mPax">Pasajeros <i>(si el texto no los trae)</i></label><input type="text" id="mPax" placeholder="Ej.: Natalia Sosa x 6 · o nombres separados por coma">
+</details>
 <label for="op">Operador</label><select id="op"></select>
 <label for="prs">Prestador del servicio (opcional)</label><select id="prs"></select>
 <p class="hint">Los logos viven en la carpeta <b>operadores/</b>. Si no está, subí uno suelto:</p>
