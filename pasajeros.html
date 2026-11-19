@@ -1,0 +1,1920 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Datos del pasajero · Hiperviajes</title><link rel="icon" href="pax-fav/favicon.ico?v=1" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="pax-fav/favicon-32.png?v=1"><link rel="icon" type="image/png" sizes="192x192" href="pax-fav/icon-192.png?v=1"><link rel="apple-touch-icon" href="pax-fav/apple-touch-icon.png?v=1"><meta name="theme-color" content="#19C0AA"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600&display=swap"><style>:root{--navy:#174B4F;--sky:#148D7E;--sky2:#19C0AA;--ink:#1A474B;--ink2:#465F5C;--line:#D9EEEC;--line2:#C9ECE8;--bg:#F3FBFA;--amber:#FFF6E0;--amberL:#F0D79A;--amberI:#6B4E00;--red:#FDECEC;--redL:#F2B8B5;--redI:#8C1D18;--ok:#E9F8F4;--okL:#BFE8DF;--okI:#0B6B5C}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink);font-size:14px}
+button,input,select,textarea{font:inherit;color:inherit}
+.top{background:#fff;border-bottom:3px solid #0C9581;padding:12px 20px;display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap}
+.top .logo{border-radius:7px}
+.top h1{margin:0;font-family:Oswald,sans-serif;font-weight:600;font-size:22px;letter-spacing:.5px;color:var(--navy)}
+.top .ver{margin:0 0 0 auto;font-size:11px}
+.top .volver{font-size:13px;color:#1B6368;text-decoration:none;font-weight:600}
+.wrap{display:grid;grid-template-columns:minmax(290px,350px) 1fr;gap:18px;padding:18px;max-width:1500px;margin:0 auto}
+@media(max-width:980px){.wrap{grid-template-columns:1fr}}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;align-self:start;position:sticky;top:12px}
+@media(max-width:980px){.panel{position:static}}
+label{display:block;font-size:12px;font-weight:600;margin:14px 0 5px;color:var(--navy)}
+label i,.hint i{font-style:normal;font-weight:400;color:var(--ink2)}
+.panel label:first-child{margin-top:0}
+textarea,select,input[type=text],input[type=date],input[type=email],input[type=tel],.panel input:not([type]){width:100%;border:1px solid var(--line2);border-radius:8px;padding:8px 9px;background:#fff;min-width:0}
+textarea{min-height:130px;resize:vertical;font:12.5px/1.45 ui-monospace,Menlo,Consolas,monospace}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sky);box-shadow:0 0 0 3px rgba(20,141,126,.18)}
+:focus-visible{outline:3px solid rgba(20,141,126,.45);outline-offset:2px}
+.hint{font-size:12px;color:var(--ink2);margin:6px 0 0;line-height:1.4}
+.hint code,.mh code{background:#EEF7F5;border-radius:4px;padding:0 3px;font-size:11.5px}
+.priv{display:flex;gap:6px;align-items:center;color:var(--okI)}
+button{font-weight:600;font-size:13px;border-radius:8px;padding:9px 14px;border:1px solid var(--sky);cursor:pointer;line-height:1.1}
+button:disabled{opacity:.45;cursor:default}
+button.p{background:var(--sky);color:#fff}button.p:hover{background:#0F786B}
+button.s{background:#fff;color:var(--sky)}button.s:hover:not(:disabled){background:#EEF8F6}
+button.sm{padding:6px 10px;font-size:12px}
+button.clr{margin-left:auto;border-color:#D7C9C9;color:#8A5A5A}
+button.lnk{border:0;padding:0;background:none;color:var(--sky);text-decoration:underline;font-weight:600}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.seg{display:flex;border:1px solid var(--sky);border-radius:9px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:#fff;color:var(--sky);flex:1;padding:9px 6px}
+.seg button.on{background:var(--sky);color:#fff}
+.drop{border:2px dashed #9FD8CF;border-radius:12px;background:#F7FDFC;padding:16px 12px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:background .15s,border-color .15s}
+.drop b{color:var(--navy);font-size:14px}
+.drop span{font-size:12px;color:var(--ink2);line-height:1.5}
+.drop.sobre{background:#E4F7F3;border-color:var(--sky)}
+.cola{list-style:none;margin:8px 0 0;padding:0}
+.cola li{font-size:12px;display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;background:#F6FAF9;margin-top:5px}
+.cola li .nom{font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cola li .est{color:var(--ink2);flex:1}
+.cola li.ok{background:var(--ok);color:var(--okI)}.cola li.err{background:var(--red);color:var(--redI)}.cola li.warn{background:var(--amber);color:var(--amberI)}
+.cola li button{padding:3px 7px;font-size:11px}
+.spin{width:12px;height:12px;border:2px solid #BFE3DC;border-top-color:var(--sky);border-radius:50%;animation:g .8s linear infinite;flex:none}
+@keyframes g{to{transform:rotate(360deg)}}
+details.opc{margin-top:16px;border-top:1px solid var(--line);padding-top:10px}
+details.opc summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--navy)}
+label.chk{display:flex;gap:8px;align-items:flex-start;font-weight:600;cursor:pointer}
+label.chk input{margin-top:2px;accent-color:var(--sky)}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.main{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,470px);gap:18px;align-items:start;min-width:0}
+@media(max-width:1250px){.main{grid-template-columns:1fr}}
+.colh{display:flex;align-items:center;gap:10px;margin:2px 0 10px;min-height:30px}
+.colh h2{margin:0;font-size:15px;color:var(--navy);font-family:Oswald,sans-serif;font-weight:600;letter-spacing:.4px}
+.colh .cnt{font-family:Inter,sans-serif;font-size:12px;color:var(--ink2);font-weight:500}
+.colh button{margin-left:auto}
+.outcol{position:sticky;top:12px}
+@media(max-width:1250px){.outcol{position:static}}
+.vacio{background:#fff;border:1px dashed var(--line2);border-radius:12px;padding:28px 20px;text-align:center;color:var(--ink2);line-height:1.6}
+.vacio b{color:var(--navy)}
+/* tarjeta de pasajero */
+.pax{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.pax.marca{animation:m 1.2s ease}
+@keyframes m{0%{box-shadow:0 0 0 4px rgba(25,192,170,.45)}100%{box-shadow:0 0 0 0 rgba(25,192,170,0)}}
+.ph{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.ph .num{font-family:ui-monospace,Menlo,monospace;font-weight:700;background:var(--navy);color:#fff;border-radius:6px;padding:3px 7px;font-size:12px}
+.ph .who{font-weight:700;color:var(--navy);font-size:14.5px;letter-spacing:.2px}
+.ph .tag{font-size:11px;font-weight:600;border-radius:999px;padding:3px 8px;background:#EEF4F3;color:var(--ink2)}
+.ph .tag.ok{background:var(--ok);color:var(--okI)}.ph .tag.warn{background:var(--amber);color:var(--amberI)}
+.ph .del{margin-left:auto;border-color:#E3D3D3;color:#8A5A5A;padding:5px 9px;font-size:12px}
+.pgrid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px 10px}
+.pgrid>div{min-width:0}
+.pgrid input.mal{border-color:#E2B33C;box-shadow:0 0 0 2px #FBE7B3}
+.pgrid label{margin:6px 0 3px;font-size:11px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.3px}
+.pgrid input,.pgrid select{width:100%;padding:7px 8px;font-size:13.5px;border:1px solid var(--line2);border-radius:8px;background:#fff;min-width:0}
+.pgrid input.nm{font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+.c2{grid-column:span 2}.c3{grid-column:span 3}.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c12{grid-column:span 12}
+@media(max-width:640px){.c2,.c3,.c4{grid-column:span 6}.c5,.c6{grid-column:span 12}}
+.nomrow{grid-column:span 12;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px;align-items:end}
+.mover{display:flex;gap:3px;padding-bottom:4px}
+.mover button{padding:5px 7px;font-size:12px;border-color:var(--line2);color:var(--sky)}
+.sx{display:flex;gap:0;border:1px solid var(--line2);border-radius:8px;overflow:hidden;height:34px}
+.sx button{flex:1;border:0;border-radius:0;background:#fff;color:var(--ink2);padding:0 8px}
+.sx button.on{background:var(--navy);color:#fff}
+.sx.falta{border-color:#E2B33C;box-shadow:0 0 0 2px #FBE7B3}
+.small{font-size:11.5px;color:var(--ink2);margin-top:3px}
+.avisos{list-style:none;margin:10px 0 0;padding:0}
+.avisos li{font-size:12px;border-radius:8px;padding:6px 9px;margin-top:5px;background:var(--amber);border:1px solid var(--amberL);color:var(--amberI)}
+.avisos li.err{background:var(--red);border-color:var(--redL);color:var(--redI)}
+.avisos li.ok{background:var(--ok);border-color:var(--okL);color:var(--okI)}
+.thumbs{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
+.thumbs img{max-height:54px;border-radius:6px;border:1px solid var(--line);cursor:zoom-in;background:#fff}
+.thumbs img.mz{max-height:40px;max-width:100%}
+.thumbs button{padding:5px 9px;font-size:12px}
+/* comandos */
+.out{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.sec{margin-bottom:14px}
+.sec:last-child{margin-bottom:2px}
+.sech{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.sech b{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--navy)}
+.sech button{margin-left:auto;padding:4px 9px;font-size:11.5px}
+.ln{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:1px solid var(--line);background:#FBFEFD;border-radius:8px;padding:7px 9px;margin-top:4px;font:600 13px/1.35 ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;color:#0E3438;cursor:pointer;overflow-wrap:anywhere}
+.ln:hover{border-color:var(--sky);background:#F0FAF8}
+.ln .cp{margin-left:auto;flex:none;font:600 11px Inter,sans-serif;color:var(--sky);opacity:.7}
+.ln.hecho{background:#F3F6F6;color:#6A8583}
+.ln.hecho .cp{color:var(--okI);opacity:1}
+.ln .nota{font:500 11px Inter,sans-serif;color:var(--ink2);white-space:nowrap}
+.ln.falta{cursor:default;background:var(--amber);border-color:var(--amberL);color:var(--amberI);font-family:Inter,sans-serif;font-weight:500;font-size:12px}
+.nota-gds{font-size:11.5px;color:var(--ink2);background:#F6FAF9;border-radius:8px;padding:7px 9px;margin:0 0 12px;line-height:1.45}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:9px 16px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* modal de zona manual / imagen grande */
+.modal{position:fixed;inset:0;background:rgba(14,40,42,.55);display:flex;align-items:center;justify-content:center;z-index:40;padding:16px}
+.mbox{background:#fff;border-radius:14px;padding:14px 16px;max-width:min(1100px,96vw);max-height:94vh;display:flex;flex-direction:column;gap:6px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.mh{display:flex;align-items:center;gap:10px}
+.mh b{color:var(--navy);font-size:15px}
+.mh .x{margin-left:auto;border:0;background:none;font-size:24px;color:var(--ink2);padding:0 6px}
+.mcan{position:relative;overflow:auto;max-height:76vh;border-radius:8px;background:#EEF4F3;touch-action:none}
+.mcan canvas{display:block;max-width:100%;cursor:crosshair}
+.msel{position:absolute;border:2px solid var(--sky2);background:rgba(25,192,170,.18);pointer-events:none}
+
+#fviaje.mal{border-color:#E2B33C;box-shadow:0 0 0 2px #FBE7B3}
+</style></head><body><header class="top">
+  <img src="pax-fav/favicon-32.png?v=1" alt="" width="30" height="30" class="logo">
+  <h1>Datos del pasajero</h1>
+  <span class="hint" style="margin:0">Pasaporte, cédula o texto → nombres, DOCS, FOID y contactos para el GDS</span>
+  <span class="hint ver">versión 19/11 16:30</span>
+  <a href="index.html" class="volver">← Volver a Tu Itinerario</a>
+</header>
+<div class="wrap">
+  <aside class="panel">
+    <label>GDS</label>
+    <div class="seg" id="gds" role="group" aria-label="GDS"><button type="button" data-g="A" class="on">Amadeus</button><button type="button" data-g="S">Sabre</button></div>
+
+    <label for="file">Pasaporte o cédula <i>(foto, captura o PDF; uno o varios)</i></label>
+    <div id="drop" class="drop" tabindex="0" role="button" aria-label="Cargar archivos del pasaporte o la cédula">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#148D7E" stroke-width="1.6" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="9" cy="9" r="2.2"/><path d="M13 8h4M13 11h3M7 15.5h10M7 18h10" stroke-dasharray="1.2 1.2"/></svg>
+      <b>Arrastrá los archivos acá</b>
+      <span>o <button type="button" id="elegir" class="lnk">elegilos de la computadora</button><br>También podés pegar una captura con Ctrl+V</span>
+      <input type="file" id="file" accept="image/*,.pdf,application/pdf" multiple hidden>
+    </div>
+    <p class="hint priv"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Se lee en este navegador: las imágenes no se suben a ningún lado.</p>
+    <p class="hint">Del pasaporte se lee la franja de abajo con los <code>&lt;&lt;&lt;</code>; de la cédula, el dorso.</p>
+    <ul id="cola" class="cola"></ul>
+
+    <label for="txt">…o pegá los datos en texto</label>
+    <textarea id="txt" placeholder="Mail, WhatsApp o planilla de Excel, por ejemplo:&#10;Nombre: Gonzalo Andrés Nocella Massaferro&#10;Fecha de nacimiento: 05/11/1986&#10;Pasaporte: D345678 · Vto.: 12/05/2030&#10;Mail: … · Cel: 098 584 260"></textarea>
+    <div class="btns">
+      <button type="button" class="p" id="leer">Leer texto</button>
+      <button type="button" class="s" id="manual">+ Pasajero a mano</button>
+      <button type="button" class="s clr" id="limpiar">Limpiar todo</button>
+    </div>
+
+    <details class="opc" id="opc">
+      <summary>Opciones</summary>
+      <label class="chk"><input type="checkbox" id="docsComp"><span>DOCS con los datos del documento <i>(APIS completo: número, país y vencimiento)</i></span></label>
+      <label for="fviaje">Fecha del viaje <i>(para niños, infantes y vencimientos)</i></label>
+      <input type="text" id="fviaje" placeholder="dd/mm/aaaa (si se deja vacío, se usa hoy)" inputmode="numeric" maxlength="11" autocomplete="off">
+      <div class="r2">
+        <div><label for="titF">Título de mujer adulta</label><select id="titF"><option value="MRS">MRS</option><option value="MS">MS</option></select></div>
+        <div><label for="codpais">Código de país del celular</label><input type="text" id="codpais" value="598" inputmode="numeric" maxlength="4"></div>
+      </div>
+    </details>
+  </aside>
+
+  <main class="main">
+    <section class="paxcol">
+      <div class="colh"><h2>Pasajeros <span id="npax" class="cnt"></span></h2></div>
+      <div id="paxs"><div class="vacio" id="vacio"><b>Todavía no hay pasajeros.</b><br>Cargá la foto o el PDF del pasaporte, o pegá los datos en texto.</div></div>
+    </section>
+    <section class="outcol">
+      <div class="colh"><h2 id="outT">Comandos para Amadeus</h2><button type="button" class="s sm" id="copTodo" disabled>Copiar todo</button></div>
+      <div id="out" class="out"><p class="hint">Los comandos aparecen acá a medida que cargás pasajeros.</p></div>
+    </section>
+  </main>
+</div>
+
+<div id="modal" class="modal" hidden>
+  <div class="mbox" role="dialog" aria-modal="true" aria-labelledby="mT">
+    <div class="mh"><b id="mT">Marcá la zona de lectura</b><button type="button" class="x" id="mCerrar" aria-label="Cerrar">×</button></div>
+    <p class="hint" id="mHint">Arrastrá un rectángulo sobre las líneas con <code>&lt;&lt;&lt;</code> (abajo en el pasaporte, en el dorso de la cédula).</p>
+    <div class="mcan"><canvas id="mCanvas"></canvas><div id="mSel" class="msel" hidden></div></div>
+    <div class="btns"><button type="button" class="s" id="mGirar">Girar 90°</button><span class="hint" id="mEstado" style="margin:0 0 0 auto"></span></div>
+  </div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>var PAISES={"ABW":["AW","Aruba"],"AFG":["AF","Afganistán"],"AGO":["AO","Angola"],"AIA":["AI","Anguila"],"ALA":["AX","Islas Äland"],"ALB":["AL","Albania"],"AND":["AD","Andorra"],"ARE":["AE","Emiratos Árabes Unidos"],"ARG":["AR","Argentina"],"ARM":["AM","Armenia"],"ASM":["AS","Samoa Estadounidense"],"ATA":["AQ","Antártida"],"ATF":["TF","Territorios Franceses del Sur"],"ATG":["AG","Antigua y Barbuda"],"AUS":["AU","Australia"],"AUT":["AT","Austria"],"AZE":["AZ","Azerbaiyán"],"BDI":["BI","Burundi"],"BEL":["BE","Bélgica"],"BEN":["BJ","Benín"],"BES":["BQ","Islas BES (Caribe Neerlandés)"],"BFA":["BF","Burquina Faso"],"BGD":["BD","Bangladés"],"BGR":["BG","Bulgaria"],"BHR":["BH","Baréin"],"BHS":["BS","Bahamas"],"BIH":["BA","Bosnia y Herzegovina"],"BLM":["BL","San Bartolomé"],"BLR":["BY","Bielorrusia"],"BLZ":["BZ","Belice"],"BMU":["BM","Islas Bermudas"],"BOL":["BO","Bolivia"],"BRA":["BR","Brasil"],"BRB":["BB","Barbados"],"BRN":["BN","Brunei Darussalam"],"BTN":["BT","Bután"],"BVT":["BV","Isla Bouvet"],"BWA":["BW","Botsuana"],"CAF":["CF","República Centroafricana"],"CAN":["CA","Canadá"],"CCK":["CC","Islas Cocos (Keeling)"],"CHE":["CH","Suiza"],"CHL":["CL","Chile"],"CHN":["CN","China"],"CIV":["CI","Costa de Marfíl"],"CMR":["CM","Camerún"],"COD":["CD","Congo, República Democrática del"],"COG":["CG","Congo"],"COK":["CK","Islas Cook"],"COL":["CO","Colombia"],"COM":["KM","Comores, Islas"],"CPV":["CV","Cabo Verde"],"CRI":["CR","Costa Rica"],"CUB":["CU","Cuba"],"CUW":["CW","Curazao"],"CXR":["CX","Isla de Navidad"],"CYM":["KY","Islas Caimán"],"CYP":["CY","Chipre"],"CZE":["CZ","Chequia"],"DEU":["DE","Alemania"],"DJI":["DJ","Yibuti"],"DMA":["DM","Dominica"],"DNK":["DK","Dinamarca"],"DOM":["DO","República Dominicana"],"DZA":["DZ","Algeria"],"ECU":["EC","Ecuador"],"EGY":["EG","Egipto"],"ERI":["ER","Eritrea"],"ESH":["EH","Sahara Occidental"],"ESP":["ES","España"],"EST":["EE","Estonia"],"ETH":["ET","Etiopía"],"FIN":["FI","Finlandia"],"FJI":["FJ","Fiyi"],"FLK":["FK","Islas Falkland (Malvinas)"],"FRA":["FR","Francia"],"FRO":["FO","Islas Feroe"],"FSM":["FM","Micronesia, Estados Federados de"],"GAB":["GA","Gabón"],"GBR":["GB","Reino Unido"],"GEO":["GE","Georgia"],"GGY":["GG","Guernsey"],"GHA":["GH","Ghana"],"GIB":["GI","Gibraltar"],"GIN":["GN","Guinea"],"GLP":["GP","Guadalupe"],"GMB":["GM","Gambia"],"GNB":["GW","Guinea-Bisáu"],"GNQ":["GQ","Guinea Ecuatorial"],"GRC":["GR","Grecia"],"GRD":["GD","Granada"],"GRL":["GL","Groenlandia"],"GTM":["GT","Guatemala"],"GUF":["GF","Guayana Francesa"],"GUM":["GU","Guam"],"GUY":["GY","Guyana"],"HKG":["HK","Hong Kong"],"HMD":["HM","Isla Heard e Islas McDonald"],"HND":["HN","Honduras"],"HRV":["HR","Croacia"],"HTI":["HT","Haití"],"HUN":["HU","Hungría"],"IDN":["ID","Indonesia"],"IMN":["IM","Isla de Man"],"IND":["IN","India"],"IOT":["IO","Territorio Británico del Océano Índico"],"IRL":["IE","Irlanda"],"IRN":["IR","Irán"],"IRQ":["IQ","Irak"],"ISL":["IS","Islandia"],"ISR":["IL","Israel"],"ITA":["IT","Italia"],"JAM":["JM","Jamaica"],"JEY":["JE","Jersey"],"JOR":["JO","Jordania"],"JPN":["JP","Japón"],"KAZ":["KZ","Kazajistán"],"KEN":["KE","Kenia"],"KGZ":["KG","Kirguistán"],"KHM":["KH","Camboya"],"KIR":["KI","Kiribati"],"KNA":["KN","San Cristóbal y Nieves"],"KOR":["KR","Corea del Sur"],"KWT":["KW","Kuwait"],"LAO":["LA","Laos"],"LBN":["LB","Líbano"],"LBR":["LR","Liberia"],"LBY":["LY","Libia"],"LCA":["LC","Santa Lucía"],"LIE":["LI","Liechtenstein"],"LKA":["LK","Sri Lanka"],"LSO":["LS","Lesoto"],"LTU":["LT","Lituania"],"LUX":["LU","Luxemburgo"],"LVA":["LV","Letonia"],"MAC":["MO","Macao"],"MAF":["MF","San Martín (zona francesa)"],"MAR":["MA","Marruecos"],"MCO":["MC","Mónaco"],"MDA":["MD","Moldavia"],"MDG":["MG","Madagascar"],"MDV":["MV","Islas Maldivas"],"MEX":["MX","México"],"MHL":["MH","Islas Marshall"],"MKD":["MK","Macedonia del Norte"],"MLI":["ML","Malí"],"MLT":["MT","Malta"],"MMR":["MM","Birmania"],"MNE":["ME","Montenegro"],"MNG":["MN","Mongolia"],"MNP":["MP","Islas Marianas del Norte"],"MOZ":["MZ","Mozambique"],"MRT":["MR","Mauritania"],"MSR":["MS","Montserrat"],"MTQ":["MQ","Martinica"],"MUS":["MU","Mauricio"],"MWI":["MW","Malaui"],"MYS":["MY","Malasia"],"MYT":["YT","Mayotte"],"NAM":["NA","Namibia"],"NCL":["NC","Nueva Caledonia"],"NER":["NE","Niger"],"NFK":["NF","Isla Norfolk"],"NGA":["NG","Nigeria"],"NIC":["NI","Nicaragua"],"NIU":["NU","Niue"],"NLD":["NL","Países Bajos"],"NOR":["NO","Noruega"],"NPL":["NP","Nepal"],"NRU":["NR","Nauru"],"NZL":["NZ","Nueva Zelanda"],"OMN":["OM","Omán"],"PAK":["PK","Pakistán"],"PAN":["PA","Panamá"],"PCN":["PN","Pitcairn"],"PER":["PE","Perú"],"PHL":["PH","Filipinas"],"PLW":["PW","Palaos"],"PNG":["PG","Papúa Nueva Guinea"],"POL":["PL","Polonia"],"PRI":["PR","Puerto Rico"],"PRK":["KP","Corea del Norte"],"PRT":["PT","Portugal"],"PRY":["PY","Paraguay"],"PSE":["PS","Palestina, Estado de"],"PYF":["PF","Polinesia Francesa"],"QAT":["QA","Catar"],"REU":["RE","Reunión"],"ROU":["RO","Rumanía"],"RUS":["RU","Federación Rusa"],"RWA":["RW","Ruanda"],"SAU":["SA","Arabia Saudí"],"SDN":["SD","Sudán"],"SEN":["SN","Senegal"],"SGP":["SG","Singapur"],"SGS":["GS","Islas Georgias del Sur y Sándwich del Sur"],"SHN":["SH","Santa Elena, Ascensión y Tristán de Acuña"],"SJM":["SJ","Svalbard y Jan Mayen"],"SLB":["SB","Islas Salomón"],"SLE":["SL","Sierra Leona"],"SLV":["SV","El Salvador"],"SMR":["SM","San Marino"],"SOM":["SO","Somalia"],"SPM":["PM","San Pedro y Miquelon"],"SRB":["RS","Serbia"],"SSD":["SS","Sudán del Sur"],"STP":["ST","Santo Tomé y Príncipe"],"SUR":["SR","Surinám"],"SVK":["SK","Eslovaquia"],"SVN":["SI","Eslovenia"],"SWE":["SE","Suecia"],"SWZ":["SZ","Esuatini"],"SXM":["SX","Isla de San Martín (zona holandesa)"],"SYC":["SC","Seychelles"],"SYR":["SY","Siria"],"TCA":["TC","Islas Turcas y Caicos"],"TCD":["TD","Chad"],"TGO":["TG","Togo"],"THA":["TH","Tailandia"],"TJK":["TJ","Tayikistán"],"TKL":["TK","Tokelau"],"TKM":["TM","Turkmenistán"],"TLS":["TL","Timor Oriental"],"TON":["TO","Tonga"],"TTO":["TT","Trinidad y Tobago"],"TUN":["TN","Tunez"],"TUR":["TR","Turquía"],"TUV":["TV","Tuvalu"],"TWN":["TW","Taiwán"],"TZA":["TZ","Tanzania"],"UGA":["UG","Uganda"],"UKR":["UA","Ucrania"],"UMI":["UM","Islas Ultramarinas Menores de Estados Unidos"],"URY":["UY","Uruguay"],"USA":["US","Estados Unidos"],"UZB":["UZ","Uzbekistán"],"VAT":["VA","Santa Sede (Ciudad Estado del Vaticano)"],"VCT":["VC","San Vicente y las Granadinas"],"VEN":["VE","Venezuela"],"VGB":["VG","Islas Vírgenes, Británicas"],"VIR":["VI","Islas Vírgenes, de EEUU."],"VNM":["VN","Vietnam"],"VUT":["VU","Vanuatu"],"WLF":["WF","Wallis y Futuna"],"WSM":["WS","Samoa"],"YEM":["YE","Yemen"],"ZAF":["ZA","Sudáfrica"],"ZMB":["ZM","Zambia"],"ZWE":["ZW","Zimbabue"],"D":["DE","Alemania"],"GBD":["GB","Reino Unido"],"GBN":["GB","Reino Unido"],"GBO":["GB","Reino Unido"],"GBP":["GB","Reino Unido"],"GBS":["GB","Reino Unido"],"RKS":["XK","Kosovo"]};
+/* ===== Datos de apoyo: gentilicios y nombres de pila frecuentes (para separar nombre y apellido en texto libre) ===== */
+var GENTILICIOS = {
+  URY: 'URUGUAY URUGUAYA URUGUAYO URUGUAYAN ORIENTAL URUGUAIO URUGUAIA',
+  ARG: 'ARGENTINA ARGENTINO ARGENTINE ARGENTINIAN',
+  BRA: 'BRASIL BRAZIL BRASILEÑA BRASILEÑO BRASILERA BRASILERO BRASILEIRO BRASILEIRA BRAZILIAN',
+  CHL: 'CHILE CHILENA CHILENO CHILEAN',
+  PRY: 'PARAGUAY PARAGUAYA PARAGUAYO PARAGUAYAN PARAGUAIO',
+  BOL: 'BOLIVIA BOLIVIANA BOLIVIANO BOLIVIAN',
+  PER: 'PERU PERUANA PERUANO PERUVIAN',
+  COL: 'COLOMBIA COLOMBIANA COLOMBIANO COLOMBIAN',
+  VEN: 'VENEZUELA VENEZOLANA VENEZOLANO VENEZUELAN',
+  ECU: 'ECUADOR ECUATORIANA ECUATORIANO ECUADORIAN',
+  MEX: 'MEXICO MEXICANA MEXICANO MEXICAN',
+  CUB: 'CUBA CUBANA CUBANO CUBAN',
+  DOM: 'DOMINICANA DOMINICANO',
+  PAN: 'PANAMA PANAMEÑA PANAMEÑO PANAMANIAN',
+  CRI: 'COSTARRICENSE COSTA RICA',
+  GTM: 'GUATEMALA GUATEMALTECA GUATEMALTECO',
+  HND: 'HONDURAS HONDUREÑA HONDUREÑO',
+  SLV: 'SALVADOREÑA SALVADOREÑO',
+  NIC: 'NICARAGUA NICARAGUENSE',
+  USA: 'USA EEUU EE.UU. ESTADOUNIDENSE NORTEAMERICANA NORTEAMERICANO AMERICAN ESTADOS UNIDOS',
+  CAN: 'CANADA CANADIENSE CANADIAN',
+  ESP: 'ESPAÑA ESPAÑOLA ESPAÑOL SPAIN SPANISH',
+  ITA: 'ITALIA ITALIANA ITALIANO ITALY ITALIAN',
+  PRT: 'PORTUGAL PORTUGUESA PORTUGUES PORTUGUÉS PORTUGUESE',
+  FRA: 'FRANCIA FRANCESA FRANCES FRANCÉS FRANCE FRENCH',
+  DEU: 'ALEMANIA ALEMANA ALEMAN ALEMÁN GERMANY GERMAN',
+  GBR: 'REINO UNIDO BRITANICA BRITANICO BRITÁNICA BRITÁNICO BRITISH INGLESA INGLES',
+  IRL: 'IRLANDA IRLANDESA IRLANDES IRISH',
+  CHE: 'SUIZA SUIZO SWISS',
+  AUT: 'AUSTRIA AUSTRIACA AUSTRIACO',
+  BEL: 'BELGICA BELGA',
+  NLD: 'PAISES BAJOS HOLANDA HOLANDESA HOLANDES NEERLANDESA NEERLANDES DUTCH',
+  SWE: 'SUECIA SUECA SUECO',
+  NOR: 'NORUEGA NORUEGO',
+  DNK: 'DINAMARCA DANESA DANES',
+  FIN: 'FINLANDIA FINLANDESA FINLANDES',
+  POL: 'POLONIA POLACA POLACO',
+  RUS: 'RUSIA RUSA RUSO RUSSIAN',
+  UKR: 'UCRANIA UCRANIANA UCRANIANO',
+  GRC: 'GRECIA GRIEGA GRIEGO',
+  ISR: 'ISRAEL ISRAELI ISRAELÍ',
+  LBN: 'LIBANO LIBANESA LIBANES',
+  CHN: 'CHINA CHINO CHINESE',
+  JPN: 'JAPON JAPÓN JAPONESA JAPONES JAPANESE',
+  KOR: 'COREA COREANA COREANO KOREAN',
+  IND: 'INDIA INDIO HINDU INDIAN',
+  AUS: 'AUSTRALIA AUSTRALIANA AUSTRALIANO',
+  NZL: 'NUEVA ZELANDA NEOZELANDESA NEOZELANDES',
+  ZAF: 'SUDAFRICA SUDAFRICANA SUDAFRICANO'
+};
+
+var NOMBRES_PILA = ('AARON ABEL ABIGAIL ABRIL ADA ADELA ADELINA ADOLFO ADRIAN ADRIANA AGUSTIN AGUSTINA AIDA AINARA AITANA ALAN ALBA ALBERTO ALBINA ALEJANDRA ALEJANDRO ALEJO ALEXANDER ALEXANDRA ALEXIS ALFONSO ALFREDO ALICIA ALINA ALMA ALMUDENA ALONSO ALVARO AMALIA AMANDA AMBAR AMELIA AMPARO ANA ANABEL ANABELLA ANALIA ANASTASIA ANDREA ANDRES ANDRESA ANGEL ANGELA ANGELES ANGELICA ANGELINA ANIBAL ANTONELLA ANTONIA ANTONIO APARICIO ARACELI ARIADNA ARIANA ARIEL ARMANDO ARTURO AUGUSTO AURELIO AURORA AXEL AYELEN BALTASAR BARBARA BARTOLOME BASILIO BAUTISTA BEATRIZ BELEN BELINDA BENICIO BENITO BENJAMIN BERNARDO BERNARDA BETINA BIANCA BLANCA BRAULIO BRENDA BRUNO BRUNA CAMILA CAMILO CANDELA CANDELARIA CARINA CARLA CARLOS CARMELA CARMEN CAROLINA CASANDRA CATALINA CAYETANO CECILIA CELESTE CELIA CESAR CINTIA CIRO CLARA CLARISA CLAUDIA CLAUDIO CLEMENTE CONCEPCION CONSTANZA CONSUELO CORINA CRISTIAN CRISTINA CRISTOBAL CYNTHIA DAMIAN DANIEL DANIELA DANTE DARIO DAVID DAYANA DEBORA DELFINA DELIA DIANA DIEGO DOLORES DOMINGO DOMINIQUE DORA EDGARDO EDITH EDUARDO ELBA ELENA ELIANA ELIAS ELISA ELISABET ELIZABETH ELOISA ELSA EMANUEL EMILIA EMILIANO EMILIO EMMA ENRIQUE ENZO ERIC ERICA ERIKA ERNESTO ESTEBAN ESTEFANIA ESTELA ESTHER EUGENIA EUGENIO EVA EVANGELINA EZEQUIEL FABIAN FABIANA FABIO FABRICIO FACUNDO FATIMA FEDERICO FELIPE FELIX FERMIN FERNANDA FERNANDO FIDEL FLAVIA FLAVIO FLORENCIA FLORENCIO FRANCISCA FRANCISCO FRANCO GABRIEL GABRIELA GASPAR GASTON GERARDO GERMAN GERONIMO GILBERTO GIMENA GINA GIOVANNA GISELA GISELLE GLADYS GLORIA GONZALO GRACIELA GREGORIO GRETA GUADALUPE GUIDO GUILLERMINA GUILLERMO GUSTAVO HECTOR HELENA HERNAN HERNANDO HILDA HORACIO HUGO IGNACIO INES INGRID IRENE IRIS ISAAC ISABEL ISABELA ISABELLA ISIDORO ISMAEL IVAN IVANA IVONNE JACINTO JACQUELINE JAIME JAVIER JAZMIN JENNIFER JERONIMO JESICA JESSICA JESUS JIMENA JOAQUIN JOEL JONATAN JONATHAN JORGE JOSE JOSEFA JOSEFINA JUAN JUANA JUDITH JULIA JULIAN JULIANA JULIETA JULIO JUSTINA JUSTO KARINA KAREN KARLA LAURA LAUREANO LAUTARO LEANDRO LEILA LEO LEON LEONARDO LEONEL LEONOR LETICIA LIA LIDIA LILIANA LISANDRO LOLA LORENA LORENZO LOURDES LUANA LUCAS LUCIA LUCIANA LUCIANO LUCIO LUIS LUISA LUJAN LUZ MAGDALENA MAIA MALENA MANUEL MANUELA MAR MARA MARCELA MARCELO MARCIA MARCO MARCOS MARGARITA MARIA MARIANA MARIANO MARIELA MARINA MARIO MARISA MARISOL MARTA MARTHA MARTIN MARTINA MATEO MATIAS MAURICIO MAXIMILIANO MAXIMO MAYRA MELANIE MELINA MELISA MERCEDES MIA MICAELA MIGUEL MILAGROS MILENA MIRANDA MIRIAM MIRTA MOISES MONICA NADIA NAHUEL NATALIA NATALIO NAZARENO NELSON NESTOR NICOLAS NICOLE NIEVES NOELIA NORA NORBERTO NORMA OCTAVIO OFELIA OLGA OLIVIA OMAR ORLANDO OSCAR OSVALDO PABLO PALOMA PAMELA PAOLA PASCUAL PATRICIA PATRICIO PAULA PAULINA PAULO PEDRO PILAR PRISCILA RAFAEL RAMIRO RAMON RAQUEL RAUL REBECA REGINA RENATA RENATO RICARDO ROBERTO ROCIO RODOLFO RODRIGO ROGELIO ROLANDO ROMAN ROMINA ROSA ROSALIA ROSANA ROSARIO RUBEN RUTH SABRINA SALVADOR SAMANTA SAMUEL SANDRA SANTIAGO SANTINO SARA SEBASTIAN SELENA SERGIO SILVANA SILVIA SIMON SOFIA SOLANGE SOLEDAD SONIA STELLA SUSANA TADEO TAMARA TATIANA TERESA TOBIAS TOMAS ULISES URSULA VALENTIN VALENTINA VALERIA VANESA VANINA VERONICA VICENTE VICTOR VICTORIA VIOLETA VIRGINIA VIVIANA WALTER XIMENA YAMILA YANINA YESICA ZOE ' +
+  // portugués / italiano / inglés frecuentes
+  'ANTONIO JOAO JOSE PAULO PEDRO LUIZ CARLOS MARCOS RAFAELA THIAGO TIAGO GUILHERME GUSTAVO VINICIUS LEONARDO MATHEUS FELIPE ARTHUR HEITOR DAVI LORENZO BEATRIZ LUIZA GIOVANNA GIULIA ALESSANDRO ALESSANDRA FRANCESCO GIUSEPPE GIOVANNI MARCO LUCA MATTEO STEFANO PAOLO ROBERTA SIMONE CHIARA ' +
+  'JOHN JAMES ROBERT MICHAEL WILLIAM DAVID RICHARD JOSEPH THOMAS CHARLES CHRISTOPHER DANIEL MATTHEW ANTHONY MARK STEVEN PAUL ANDREW JOSHUA KEVIN BRIAN GEORGE EDWARD RONALD TIMOTHY JASON JEFFREY RYAN JACOB GARY NICHOLAS ERIC JONATHAN STEPHEN LARRY JUSTIN SCOTT BRANDON BENJAMIN SAMUEL FRANK GREGORY PATRICK PETER HENRY JACK MARY PATRICIA JENNIFER LINDA ELIZABETH BARBARA SUSAN JESSICA SARAH KAREN NANCY LISA BETTY MARGARET SANDRA ASHLEY KIMBERLY EMILY DONNA MICHELLE CAROL AMANDA MELISSA DEBORAH STEPHANIE REBECCA LAURA SHARON CYNTHIA KATHLEEN AMY SHIRLEY ANGELA HELEN ANNA BRENDA EMMA OLIVIA SOPHIA CHARLOTTE GRACE CHLOE LUCY ALICE ANNE KATE').split(' ');
+/* ===== Lectura de la zona MRZ (ICAO 9303): pasaportes (TD3), cédulas (TD1) y TD2 =====
+   Valida dígitos verificadores y corrige confusiones típicas del OCR (O/0, I/1, S/5…). */
+var MRZ = (function () {
+  var W = [7, 3, 1];
+  function val(c) {
+    if (c === '<') return 0;
+    var k = c.charCodeAt(0);
+    if (k >= 48 && k <= 57) return k - 48;
+    if (k >= 65 && k <= 90) return k - 55;
+    return -1;
+  }
+  function cd(s) {
+    var t = 0;
+    for (var i = 0; i < s.length; i++) { var v = val(s[i]); if (v < 0) return -1; t += v * W[i % 3]; }
+    return t % 10;
+  }
+  // Dígito verificador: acepta '<' sólo si el campo está vacío (ICAO lo permite en campos opcionales)
+  function ok(field, d) {
+    if (d === '<') return /^<*$/.test(field);
+    return /^[0-9]$/.test(d) && cd(field) === +d;
+  }
+  var TO_DIG = { O: '0', Q: '0', D: '0', U: '0', I: '1', L: '1', J: '1', Z: '2', S: '5', B: '8', G: '6', T: '7', A: '4' };
+  var TO_ALF = { '0': 'O', '1': 'I', '2': 'Z', '5': 'S', '8': 'B', '6': 'G', '4': 'A', '7': 'T' };
+  var ALT = { '0': 'OD', 'O': '0D', 'D': '0O', 'Q': '0O', '1': 'IL', 'I': '1L', 'L': '1I', '2': 'Z', 'Z': '2', '5': 'S', 'S': '5', '8': 'B', 'B': '8', '6': 'G', 'G': '6', '4': 'A', 'A': '4', '7': 'T', 'T': '7' };
+  function dig(s) { return s.replace(/[^0-9<]/g, function (c) { return TO_DIG[c] || c; }); }
+  function alf(s) { return s.replace(/[0-9]/g, function (c) { return TO_ALF[c] || c; }); }
+
+  // Limpia una línea leída por OCR: mayúsculas, sin espacios, símbolos parecidos a '<' → '<'
+  function clean(line) {
+    var s = String(line || '').toUpperCase()
+      .replace(/[«‹＜〈(\[{]/g, '<')
+      .replace(/\s+/g, '')
+      .replace(/[^A-Z0-9<]/g, '');
+    return s;
+  }
+  // En zonas de relleno el OCR a veces lee K o C en lugar de '<': sólo se corrigen si están
+  // entre rellenos (o al final de la línea), nunca al comienzo de un nombre (CARMEN, KARINA…)
+  function fillers(s) {
+    var a = s.split(''), cambio = true;
+    while (cambio) {
+      cambio = false;
+      for (var i = 1; i < a.length; i++) {
+        if ((a[i] === 'K' || a[i] === 'C') && a[i - 1] === '<' && (i === a.length - 1 || a[i + 1] === '<') && (i < 2 || a[i - 2] === '<')) { a[i] = '<'; cambio = true; }
+      }
+    }
+    return a.join('');
+  }
+
+  // ---- fechas ----
+  var hoy = new Date();
+  function fecha(yymmdd, tipo) {
+    if (!/^\d{6}$/.test(yymmdd)) return null;
+    var yy = +yymmdd.slice(0, 2), mm = +yymmdd.slice(2, 4), dd = +yymmdd.slice(4, 6);
+    if (mm < 1 || mm > 12 || dd < 1 || dd > 31) return null;
+    var y;
+    if (tipo === 'nac') { y = 2000 + yy; if (new Date(y, mm - 1, dd) > hoy) y -= 100; }
+    else y = 2000 + yy;
+    var d = new Date(y, mm - 1, dd);
+    if (d.getMonth() !== mm - 1) return null;
+    return { y: y, m: mm, d: dd };
+  }
+
+  // ---- nombres ----
+  function nombre(campo) {
+    var s = fillers(campo).replace(/<+$/, '');
+    var full = !/<$/.test(campo); // campo completo sin relleno al final → posible truncamiento
+    var i = s.indexOf('<<');
+    var ap = i < 0 ? s : s.slice(0, i), no = i < 0 ? '' : s.slice(i + 2);
+    function fix(t) { return t.replace(/</g, ' ').replace(/\s+/g, ' ').replace(/[0-9]/g, function (c) { return TO_ALF[c] || ''; }).trim(); }
+    return { apellidos: fix(ap), nombres: fix(no), truncado: full && s.length >= campo.length - 1 };
+  }
+
+  // Corrige UNA confusión del OCR en un campo alfanumérico. Sólo se acepta si cierra el dígito del campo
+  // y además el verificador general, y si hay una única variante posible (si no, queda sin verificar).
+  function repara(field, d, general) {
+    if (ok(field, d)) return field;
+    var hits = [];
+    for (var i = 0; i < field.length; i++) {
+      var alts = ALT[field[i]];
+      if (!alts) continue;
+      for (var x = 0; x < alts.length; x++) {
+        var f1 = field.slice(0, i) + alts[x] + field.slice(i + 1);
+        if (ok(f1, d) && general(f1)) hits.push(f1);
+      }
+    }
+    return hits.length === 1 ? hits[0] : null;
+  }
+
+  // Letras confundibles (B, O, I, S, Z, G…) entre dígitos: si el verificador sigue cerrando con el dígito, se usa el dígito
+  var L2D = { B: '8', O: '0', D: '0', Q: '0', I: '1', L: '1', S: '5', Z: '2', G: '6' };
+  function preferirDigitos(field, d, general) {
+    var a = field.split(''), cambios = [];
+    for (var i = 1; i < a.length; i++) {
+      var sig = i + 1 < a.length ? a[i + 1] : '<';
+      if (L2D[a[i]] && /[0-9]/.test(a[i - 1]) && (/[0-9<]/.test(sig) || L2D[sig])) cambios.push(i);
+    }
+    if (!cambios.length) return field;
+    var b = a.slice(); cambios.forEach(function (i) { b[i] = L2D[a[i]]; });
+    var f = b.join('');
+    return ok(f, d) && general(f) ? f : field;
+  }
+
+  // Ajusta el largo de una línea probando quitar/agregar un caracter donde más checks cierren
+  function largo(l, n, puntaje) {
+    if (l.length === n) return l;
+    var best = null, bs = -1, cands = [];
+    if (l.length > n) {
+      var t = l;
+      while (t.length > n + 1 && /<$/.test(t)) t = t.slice(0, -1);
+      if (t.length === n) cands.push(t);
+      if (t.length === n + 1) for (var i = 0; i < t.length; i++) cands.push(t.slice(0, i) + t.slice(i + 1));
+      if (!cands.length) cands.push(l.slice(0, n));
+    } else {
+      var u = l;
+      if (u.length === n - 1) for (var j = 0; j <= u.length; j++) cands.push(u.slice(0, j) + '<' + u.slice(j));
+      while (u.length < n) u += '<';
+      cands.push(u);
+    }
+    for (var k = 0; k < cands.length; k++) { var s = puntaje(cands[k]); if (s > bs) { bs = s; best = cands[k]; } }
+    return best;
+  }
+
+  function sexo(c) { c = c === 'H' ? 'M' : c; return c === 'M' || c === 'F' ? c : (c === '<' || c === 'X' ? 'X' : ''); }
+
+  // ---------- TD3 (pasaporte: 2 líneas de 44) ----------
+  function scoreTD3(l2) {
+    var s = 0, x = dig;
+    if (ok(l2.slice(0, 9), l2[9])) s++;
+    if (ok(x(l2.slice(13, 19)), x(l2[19]))) s++;
+    if (ok(x(l2.slice(21, 27)), x(l2[27]))) s++;
+    if (ok(l2.slice(28, 42), l2[42])) s++;
+    var comp = l2.slice(0, 10) + x(l2.slice(13, 20)) + x(l2.slice(21, 28)) + l2.slice(28, 43);
+    if (ok(comp, x(l2[43]))) s += 2;
+    return s;
+  }
+  function td3(l1, l2) {
+    l1 = fillers(l1); l2 = fillers(l2);
+    if (l1.length < 40 || l2.length < 40) return null;
+    l1 = l1.length > 44 ? l1.slice(0, 44) : (l1 + '<<<<<<<<').slice(0, 44);
+    l2 = largo(l2, 44, scoreTD3);
+    var tipo = l1.slice(0, 2), emisor = alf(l1.slice(2, 5));
+    if (tipo[0] !== 'P') return null;
+    var doc = l2.slice(0, 9), dDoc = dig(l2[9]);
+    var nac = alf(l2.slice(10, 13));
+    var fn = dig(l2.slice(13, 19)), dFn = dig(l2[19]);
+    var sx = l2[20];
+    var fv = dig(l2.slice(21, 27)), dFv = dig(l2[27]);
+    var pers = l2.slice(28, 42), dPers = l2[42] === '<' ? '<' : dig(l2[42]);
+    var dComp = dig(l2[43]);
+    function gen(dc, pe) { return ok(dc + dDoc + fn + dFn + fv + dFv + pe + dPers, dComp); }
+    var docR = repara(doc, dDoc, function (f) { return gen(f, pers); });
+    if (docR) docR = preferirDigitos(docR, dDoc, function (f) { return gen(f, pers); });
+    var persR = repara(pers, dPers, function (f) { return gen(docR || doc, f); });
+    var chk = {
+      numero: !!docR, nacimiento: ok(fn, dFn), vencimiento: ok(fv, dFv), personal: !!persR
+    };
+    doc = docR || doc; pers = persR || pers;
+    chk.general = gen(doc, pers);
+    var nm = nombre(l1.slice(5));
+    return armar('TD3', tipo, emisor, doc, nac, fn, sx, fv, pers, nm, chk, [l1, l2]);
+  }
+
+  // ---------- TD1 (cédulas tipo tarjeta: 3 líneas de 30) ----------
+  function scoreTD1(l2) {
+    var s = 0;
+    if (ok(dig(l2.slice(0, 6)), dig(l2[6]))) s++;
+    if (ok(dig(l2.slice(8, 14)), dig(l2[14]))) s++;
+    return s;
+  }
+  function td1(l1, l2, l3) {
+    l1 = fillers(l1); l2 = fillers(l2); l3 = fillers(l3 || '');
+    if (l1.length < 26 || l2.length < 26) return null;
+    l1 = l1.length > 30 ? l1.slice(0, 30) : (l1 + '<<<<<<').slice(0, 30);
+    l2 = largo(l2, 30, scoreTD1);
+    l3 = l3.length > 30 ? l3.slice(0, 30) : (l3 + '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<').slice(0, 30);
+    var tipo = l1.slice(0, 2);
+    if (!/^[IAC]/.test(tipo)) return null;
+    var emisor = alf(l1.slice(2, 5));
+    var doc = l1.slice(5, 14), dDoc = l1[14], opt1 = l1.slice(15, 30);
+    var numOK;
+    if (dDoc === '<' && /[0-9]/.test(opt1)) { // número largo: sigue en el opcional hasta el primer '<'
+      var m = opt1.match(/^([A-Z0-9]*)([0-9])</) || opt1.match(/^([A-Z0-9]*)([0-9])$/);
+      if (m) { doc = doc + m[1]; dDoc = m[2]; }
+    }
+    var fn = dig(l2.slice(0, 6)), dFn = dig(l2[6]), sx = l2[7], fv = dig(l2.slice(8, 14)), dFv = dig(l2[14]);
+    var nac = alf(l2.slice(15, 18)), opt2 = l2.slice(18, 29), dComp = dig(l2[29]);
+    var docOrig = doc;
+    function gen1(dc) { var l1b = l1.slice(0, 5) + l1.slice(5).replace(docOrig, dc); return ok(l1b.slice(5, 30) + fn + dFn + fv + dFv + opt2, dComp); }
+    var docR = repara(doc, dig(dDoc), gen1);
+    if (docR) docR = preferirDigitos(docR, dig(dDoc), gen1);
+    numOK = !!docR; doc = docR || doc;
+    var chk = { numero: numOK, nacimiento: ok(fn, dFn), vencimiento: ok(fv, dFv), general: gen1(doc) };
+    var nm = nombre(l3);
+    var r = armar('TD1', tipo, emisor, doc, nac, fn, sx, fv, (opt1 + '<' + opt2), nm, chk, [l1, l2, l3]);
+    return r;
+  }
+
+  // ---------- TD2 (2 líneas de 36) ----------
+  function scoreTD2(l2) {
+    var s = 0;
+    if (ok(l2.slice(0, 9), l2[9])) s++;
+    if (ok(dig(l2.slice(13, 19)), dig(l2[19]))) s++;
+    if (ok(dig(l2.slice(21, 27)), dig(l2[27]))) s++;
+    if (ok(l2.slice(0, 10) + dig(l2.slice(13, 20)) + dig(l2.slice(21, 28)) + l2.slice(28, 35), dig(l2[35]))) s += 2;
+    return s;
+  }
+  function td2(l1, l2) {
+    l1 = fillers(l1); l2 = fillers(l2);
+    if (l1.length < 32 || l2.length < 32) return null;
+    l1 = l1.length > 36 ? l1.slice(0, 36) : (l1 + '<<<<<<').slice(0, 36);
+    l2 = largo(l2, 36, scoreTD2);
+    var tipo = l1.slice(0, 2);
+    if (!/^[PIAC]/.test(tipo)) return null;
+    var emisor = alf(l1.slice(2, 5));
+    var doc = l2.slice(0, 9), dDoc = dig(l2[9]), nac = alf(l2.slice(10, 13));
+    var fn = dig(l2.slice(13, 19)), dFn = dig(l2[19]), sx = l2[20], fv = dig(l2.slice(21, 27)), dFv = dig(l2[27]);
+    var opt = l2.slice(28, 35), dComp = dig(l2[35]);
+    function gen2(dc) { return ok(dc + dDoc + fn + dFn + fv + dFv + opt, dComp); }
+    var docR = repara(doc, dDoc, gen2);
+    if (docR) docR = preferirDigitos(docR, dDoc, gen2);
+    var chk = { numero: !!docR, nacimiento: ok(fn, dFn), vencimiento: ok(fv, dFv) };
+    doc = docR || doc;
+    chk.general = gen2(doc);
+    return armar('TD2', tipo, emisor, doc, nac, fn, sx, fv, opt, nombre(l1.slice(5)), chk, [l1, l2]);
+  }
+
+  function armar(fmt, tipo, emisor, doc, nac, fn, sx, fv, opcional, nm, chk, lineas) {
+    var n = 0, t = 0;
+    for (var k in chk) { t++; if (chk[k]) n++; }
+    return {
+      formato: fmt,
+      tipoDoc: tipo.replace(/<$/, ''),
+      esPasaporte: tipo[0] === 'P',
+      emisor: emisor.replace(/<+$/, ''),
+      numero: doc.replace(/</g, ''),
+      nacionalidad: nac.replace(/<+$/, ''),
+      nacimiento: fecha(fn, 'nac'),
+      sexo: sexo(sx),
+      vencimiento: fecha(fv, 'venc'),
+      opcional: opcional.replace(/</g, ' ').replace(/\s+/g, ' ').trim(),
+      apellidos: nm.apellidos,
+      nombres: nm.nombres,
+      truncado: nm.truncado,
+      checks: chk,
+      verificado: n === t,
+      puntos: n,
+      total: t,
+      lineas: lineas
+    };
+  }
+
+  // Busca MRZ dentro de un texto (pegado o devuelto por el OCR). Devuelve todas las encontradas, en orden.
+  function mejor(cs) {
+    cs = cs.filter(Boolean);
+    cs.sort(function (x, y) { return (y.puntos / y.total) - (x.puntos / x.total) || y.puntos - x.puntos; });
+    return cs[0] || null;
+  }
+  function buscar(texto) {
+    var ls = String(texto || '').split(/\r?\n/).map(clean).filter(function (l) { return l.length >= 20; });
+    var res = [];
+    for (var i = 0; i < ls.length; i++) {
+      var a = ls[i], b = ls[i + 1], c = ls[i + 2];
+      if (!b) break;
+      var cs = [];
+      if (a.length >= 40 && b.length >= 40 && /^P/.test(a)) cs.push(td3(a, b));
+      if (a.length >= 26 && a.length <= 34 && b.length >= 26 && b.length <= 34 && /^[IAC]/.test(a)) cs.push(td1(a, b, c));
+      if (a.length >= 32 && a.length <= 39 && b.length >= 32 && b.length <= 39 && /^[PIAC]/.test(a)) cs.push(td2(a, b));
+      var r = mejor(cs);
+      if (r && r.puntos >= 1) { res.push(r); i += r.formato === 'TD1' ? 2 : 1; }
+    }
+    // MRZ pegada en una sola línea (88 caracteres de pasaporte o 90 de cédula seguidos)
+    if (!res.length) {
+      var todo = clean(String(texto || '').replace(/\r?\n/g, ''));
+      var re = /P[A-Z<][A-Z<]{3}[A-Z]/g, m;
+      while ((m = re.exec(todo))) {
+        if (todo.length - m.index < 86) break;
+        var t3 = td3(todo.slice(m.index, m.index + 44), todo.slice(m.index + 44, m.index + 88));
+        if (t3 && t3.puntos >= 3) { res.push(t3); re.lastIndex = m.index + 88; }
+      }
+      if (!res.length) {
+        var re1 = /[IAC][A-Z<][A-Z]{3}[A-Z0-9<]{25}/g;
+        while ((m = re1.exec(todo))) {
+          if (todo.length - m.index < 88) break;
+          var t1 = td1(todo.slice(m.index, m.index + 30), todo.slice(m.index + 30, m.index + 60), todo.slice(m.index + 60, m.index + 90));
+          if (t1 && t1.puntos >= 2) { res.push(t1); re1.lastIndex = m.index + 90; }
+        }
+      }
+    }
+    return res;
+  }
+
+  return { buscar: buscar, td3: td3, td1: td1, td2: td2, cd: cd, clean: clean };
+})();
+if (typeof module !== 'undefined') module.exports = MRZ;
+/* ===== Ubicación de la zona MRZ en una foto o escaneo =====
+   Trabaja sobre píxeles (ImageData o {data,width,height} RGBA). Busca bloques de texto oscuro,
+   largos y densos (las 2 o 3 líneas de la MRZ), calcula su inclinación y devuelve recortes enderezados. */
+var ZONA = (function () {
+  function gris(img, maxLado) {
+    var W = img.width, H = img.height, s = Math.min(1, maxLado / Math.max(W, H));
+    var w = Math.max(1, Math.round(W * s)), h = Math.max(1, Math.round(H * s));
+    var g = new Uint8Array(w * h), d = img.data;
+    for (var y = 0; y < h; y++) {
+      var y0 = Math.floor(y / s), y1 = Math.min(H, Math.floor((y + 1) / s)); if (y1 <= y0) y1 = y0 + 1;
+      for (var x = 0; x < w; x++) {
+        var x0 = Math.floor(x / s), x1 = Math.min(W, Math.floor((x + 1) / s)); if (x1 <= x0) x1 = x0 + 1;
+        var t = 0, n = 0;
+        for (var yy = y0; yy < y1; yy += 1 + ((y1 - y0) >> 2)) for (var xx = x0; xx < x1; xx += 1 + ((x1 - x0) >> 2)) {
+          var i = (yy * W + xx) * 4; t += d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114; n++;
+        }
+        g[y * w + x] = t / n;
+      }
+    }
+    return { g: g, w: w, h: h, s: s };
+  }
+  // Píxeles más oscuros que su entorno (umbral local con imagen integral)
+  function mascara(G, rad, C) {
+    var g = G.g, w = G.w, h = G.h, I = new Float64Array((w + 1) * (h + 1));
+    for (var y = 0; y < h; y++) { var f = 0; for (var x = 0; x < w; x++) { f += g[y * w + x]; I[(y + 1) * (w + 1) + x + 1] = I[y * (w + 1) + x + 1] + f; } }
+    var m = new Uint8Array(w * h);
+    for (y = 0; y < h; y++) {
+      var a = Math.max(0, y - rad), b = Math.min(h, y + rad + 1);
+      for (x = 0; x < w; x++) {
+        var c = Math.max(0, x - rad), e = Math.min(w, x + rad + 1);
+        var sum = I[b * (w + 1) + e] - I[a * (w + 1) + e] - I[b * (w + 1) + c] + I[a * (w + 1) + c];
+        var mean = sum / ((b - a) * (e - c));
+        m[y * w + x] = g[y * w + x] < mean - C ? 1 : 0;
+      }
+    }
+    return m;
+  }
+  // Dilatación / erosión binaria con cuadrado (separable)
+  function morf(m, w, h, r, dil) {
+    var t = new Uint8Array(w * h), o = new Uint8Array(w * h), x, y, k, v;
+    for (y = 0; y < h; y++) for (x = 0; x < w; x++) {
+      v = dil ? 0 : 1;
+      for (k = Math.max(0, x - r); k <= Math.min(w - 1, x + r); k++) { if (dil) { if (m[y * w + k]) { v = 1; break; } } else if (!m[y * w + k]) { v = 0; break; } }
+      t[y * w + x] = v;
+    }
+    for (x = 0; x < w; x++) for (y = 0; y < h; y++) {
+      v = dil ? 0 : 1;
+      for (k = Math.max(0, y - r); k <= Math.min(h - 1, y + r); k++) { if (dil) { if (t[k * w + x]) { v = 1; break; } } else if (!t[k * w + x]) { v = 0; break; } }
+      o[y * w + x] = v;
+    }
+    return o;
+  }
+  // Componentes conexas con momentos (orientación y largo de cada bloque)
+  function bloques(m, raw, w, h) {
+    var lab = new Int32Array(w * h), out = [], st = new Int32Array(w * h), id = 0;
+    for (var p = 0; p < w * h; p++) {
+      if (!m[p] || lab[p]) continue;
+      id++; var sp = 0; st[sp++] = p; lab[p] = id;
+      var n = 0, sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0, tinta = 0;
+      while (sp) {
+        var q = st[--sp], qx = q % w, qy = (q - qx) / w;
+        n++; sx += qx; sy += qy; sxx += qx * qx; syy += qy * qy; sxy += qx * qy; tinta += raw[q];
+        if (qx > 0 && m[q - 1] && !lab[q - 1]) { lab[q - 1] = id; st[sp++] = q - 1; }
+        if (qx < w - 1 && m[q + 1] && !lab[q + 1]) { lab[q + 1] = id; st[sp++] = q + 1; }
+        if (qy > 0 && m[q - w] && !lab[q - w]) { lab[q - w] = id; st[sp++] = q - w; }
+        if (qy < h - 1 && m[q + w] && !lab[q + w]) { lab[q + w] = id; st[sp++] = q + w; }
+      }
+      if (n < 80) continue;
+      var cx = sx / n, cy = sy / n, vxx = sxx / n - cx * cx, vyy = syy / n - cy * cy, vxy = sxy / n - cx * cy;
+      var tr = vxx + vyy, det = vxx * vyy - vxy * vxy, disc = Math.sqrt(Math.max(0, tr * tr / 4 - det));
+      var l1 = tr / 2 + disc, l2 = Math.max(1e-6, tr / 2 - disc);
+      var ang = 0.5 * Math.atan2(2 * vxy, vxx - vyy);
+      var L = Math.sqrt(12 * l1), A = Math.sqrt(12 * l2);
+      out.push({ cx: cx, cy: cy, ang: ang, largo: L, ancho: A, area: n, relleno: n / (L * A), tinta: tinta / n });
+    }
+    return out;
+  }
+  // Junta líneas paralelas, de largo parecido y vecinas (las 2 o 3 líneas de una MRZ) en un bloque
+  function agrupar(ls) {
+    var usados = {}, grupos = [];
+    for (var i = 0; i < ls.length; i++) {
+      if (usados[i]) continue;
+      var a = ls[i], g = [a], ix = [i];
+      var nx = -Math.sin(a.ang), ny = Math.cos(a.ang), tx = Math.cos(a.ang), ty = Math.sin(a.ang);
+      for (var j = 0; j < ls.length; j++) {
+        if (j === i || usados[j]) continue;
+        var b = ls[j], da = Math.abs(Math.atan2(Math.sin(b.ang - a.ang), Math.cos(b.ang - a.ang)));
+        da = Math.min(da, Math.PI - da);
+        var r = b.largo / a.largo, dx = b.cx - a.cx, dy = b.cy - a.cy;
+        var perp = Math.abs(dx * nx + dy * ny), along = Math.abs(dx * tx + dy * ty);
+        if (da < 0.06 && r > 0.7 && r < 1.4 && perp < 3.2 * (g.length) * Math.max(a.ancho, b.ancho) && along < 0.15 * a.largo) { g.push(b); ix.push(j); }
+      }
+      if (g.length > 1) {
+        ix.forEach(function (k) { usados[k] = 1; });
+        var cx = 0, cy = 0, L = 0, An = 0;
+        g.forEach(function (b) { cx += b.cx / g.length; cy += b.cy / g.length; L = Math.max(L, b.largo); An = Math.max(An, b.ancho); });
+        var lo = 1e9, hi = -1e9;
+        g.forEach(function (b) { var p = (b.cx - cx) * nx + (b.cy - cy) * ny; lo = Math.min(lo, p); hi = Math.max(hi, p); });
+        grupos.push({ cx: cx + nx * (lo + hi) / 2, cy: cy + ny * (lo + hi) / 2, ang: a.ang, largo: L, ancho: (hi - lo) + An, lineas: g.length });
+      }
+    }
+    return grupos;
+  }
+  // Extiende una línea a lo largo de su eje mientras haya tinta (incluye los rellenos '<' sueltos)
+  function extender(b, raw, w, h, lado) {
+    var tx = Math.cos(b.ang), ty = Math.sin(b.ang), nx = -ty, ny = tx, half = Math.max(2, b.ancho * 0.6);
+    var gapMax = lado * 0.05, paso = 1;
+    function hay(t) {
+      for (var v = -half; v <= half; v += 1) {
+        var x = Math.round(b.cx + t * tx + v * nx), y = Math.round(b.cy + t * ty + v * ny);
+        if (x < 0 || y < 0 || x >= w || y >= h) return -1;
+        if (raw[y * w + x]) return 1;
+      }
+      return 0;
+    }
+    function lado_(sg) {
+      var t = 0, ult = 0, gap = 0;
+      while (gap < gapMax) { t += paso * sg; var k = hay(t); if (k < 0) break; if (k) { ult = t; gap = 0; } else gap += paso; }
+      return ult;
+    }
+    var a = lado_(-1), z = lado_(1);
+    var mid = (a + z) / 2;
+    return { cx: b.cx + mid * tx, cy: b.cy + mid * ty, ang: b.ang, largo: Math.max(b.largo, z - a), ancho: b.ancho, area: b.area, relleno: b.relleno, tinta: b.tinta };
+  }
+  // Devuelve candidatos ordenados (en coordenadas de la imagen original)
+  function candidatos(img) {
+    var G = gris(img, 1000), w = G.w, h = G.h, lado = Math.max(w, h), res = [];
+    [50, 30].forEach(function (C) {
+      var raw = mascara(G, Math.round(lado * 0.03), C);
+      var r = Math.max(2, Math.round(lado * 0.006));
+      var m = morf(morf(raw, w, h, r, true), w, h, r, false);
+      var ls = bloques(m, raw, w, h).filter(function (b) {
+        return b.largo > lado * 0.07 && b.largo / b.ancho > 3.5 && b.ancho > lado * 0.006 && b.relleno > 0.5 && b.tinta > 0.12 && b.tinta < 0.65;
+      }).map(function (b) { return extender(b, raw, w, h, lado); }).filter(function (b) {
+        return b.largo > lado * 0.12 && b.largo / b.ancho > 6;
+      });
+      ls.sort(function (a, b) { return b.largo - a.largo; });
+      var gs = agrupar(ls);
+      gs.sort(function (a, b) { return b.largo - a.largo; });
+      gs.forEach(function (g) { res.push(g); });
+      ls.slice(0, 3).forEach(function (b) { res.push({ cx: b.cx, cy: b.cy, ang: b.ang, largo: b.largo, ancho: b.ancho * 4, lineas: 1 }); });
+    });
+    // sin repetidos (mismo centro aproximado)
+    var out = [];
+    res.forEach(function (c) {
+      if (out.some(function (o) { return Math.hypot(o.cx - c.cx, o.cy - c.cy) < lado * 0.02 && Math.abs(o.largo - c.largo) < lado * 0.05; })) return;
+      out.push(c);
+    });
+    return out.slice(0, 5).map(function (b) {
+      return { cx: b.cx / G.s, cy: b.cy / G.s, ang: b.ang, largo: b.largo / G.s, ancho: b.ancho / G.s, lineas: b.lineas };
+    });
+  }
+  // Recorte enderezado (muestreo bilineal) → {data,width,height} RGBA en gris
+  function recorte(img, c, extra, anchoSalida, vuelta) {
+    var L = c.largo * (1 + (extra || 0.08)), A = c.ancho * 1.35 + c.largo * 0.03;
+    var esc = anchoSalida / L, ow = Math.round(L * esc), oh = Math.max(20, Math.round(A * esc));
+    var W = img.width, H = img.height, d = img.data, o = new Uint8ClampedArray(ow * oh * 4);
+    var ang = c.ang + (vuelta ? Math.PI : 0), co = Math.cos(ang), si = Math.sin(ang);
+    function L_(k) { return d[k] * 0.299 + d[k + 1] * 0.587 + d[k + 2] * 0.114; }
+    for (var y = 0; y < oh; y++) for (var x = 0; x < ow; x++) {
+      var u = (x - ow / 2) / esc, v = (y - oh / 2) / esc;
+      var X = c.cx + u * co - v * si, Y = c.cy + u * si + v * co;
+      var x0 = Math.floor(X), y0 = Math.floor(Y), fx = X - x0, fy = Y - y0, val = 255;
+      if (x0 >= 0 && y0 >= 0 && x0 < W - 1 && y0 < H - 1) {
+        var i = (y0 * W + x0) * 4;
+        val = L_(i) * (1 - fx) * (1 - fy) + L_(i + 4) * fx * (1 - fy) + L_(i + W * 4) * (1 - fx) * fy + L_(i + W * 4 + 4) * fx * fy;
+      }
+      var j = (y * ow + x) * 4; o[j] = o[j + 1] = o[j + 2] = val; o[j + 3] = 255;
+    }
+    return { data: o, width: ow, height: oh };
+  }
+  // Recorte rectangular libre (selección manual del usuario), en gris y ampliado
+  function rect(img, x, y, w, h, anchoSalida) {
+    return recorte(img, { cx: x + w / 2, cy: y + h / 2, ang: 0, largo: w, ancho: Math.max(1, (h - w * 0.03) / 1.35) }, 0.001, anchoSalida || 1500, false);
+  }
+  return { candidatos: candidatos, recorte: recorte, rect: rect };
+})();
+if (typeof module !== 'undefined') module.exports = ZONA;
+/* ===== Lectura de datos de pasajeros en texto libre =====
+   Acepta mails, WhatsApp, fichas con etiquetas ("Nombre:", "Pasaporte:"…), planillas copiadas de Excel
+   y líneas MRZ pegadas. Devuelve pasajeros con avisos de lo que conviene revisar. */
+var TEXTO = (function () {
+  var MRZr = typeof MRZ !== 'undefined' ? MRZ : (typeof require !== 'undefined' ? require('./mrz.js') : null);
+  var TT = { 'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u', 'à': 'a', 'è': 'e', 'ì': 'i', 'ò': 'o', 'ù': 'u', 'â': 'a', 'ê': 'e', 'î': 'i', 'ô': 'o', 'û': 'u', 'ä': 'a', 'ë': 'e', 'ï': 'i', 'ö': 'o', 'ü': 'u', 'ã': 'a', 'õ': 'o', 'ñ': 'n', 'ç': 'c', 'å': 'a', 'ø': 'o', 'ý': 'y', 'ÿ': 'y', 'ß': 's' };
+  var NP = {}, GENT = [];
+  (typeof NOMBRES_PILA !== 'undefined' ? NOMBRES_PILA : []).forEach(function (n) { if (n) NP[n] = 1; });
+  var G0 = typeof GENTILICIOS !== 'undefined' ? GENTILICIOS : {};
+  Object.keys(G0).forEach(function (k) {
+    var t = sinTildes(G0[k]).toUpperCase();
+    ['ESTADOS UNIDOS', 'REINO UNIDO', 'COSTA RICA', 'PAISES BAJOS', 'NUEVA ZELANDA'].forEach(function (frase) {
+      if (t.indexOf(frase) >= 0) { GENT.push([frase, k]); t = t.replace(frase, ' '); }
+    });
+    t.split(/\s+/).forEach(function (w) { if (w) GENT.push([w.replace(/\.$/, ''), k]); });
+  });
+  GENT.sort(function (a, b) { return b[0].length - a[0].length; });
+
+  function sinTildes(s) {
+    return String(s || '').replace(/[áéíóúàèìòùâêîôûäëïöüãõñçåøýÿßÁÉÍÓÚÀÈÌÒÙÂÊÎÔÛÄËÏÖÜÃÕÑÇÅØÝ]/g, function (c) {
+      var l = c.toLowerCase(), r = TT[l] || l; return c === l ? r : r.toUpperCase();
+    });
+  }
+  function N(s) { return sinTildes(s).toUpperCase(); }
+  // Nombre apto para GDS: sin tildes, guiones → espacio, sin apóstrofos ni signos
+  function limpiaNombre(s) {
+    return N(s).replace(/['’`´]/g, '').replace(/[-‐–_.]/g, ' ').replace(/[^A-Z ]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  // ---------- fechas ----------
+  var MES = { ENE: 1, ENERO: 1, JAN: 1, JANUARY: 1, JANEIRO: 1, FEB: 2, FEBRERO: 2, FEBRUARY: 2, FEV: 2, FEVEREIRO: 2, MAR: 3, MARZO: 3, MARCH: 3, MARCO: 3, ABR: 4, ABRIL: 4, APR: 4, APRIL: 4, MAY: 5, MAYO: 5, MAI: 5, MAIO: 5, JUN: 6, JUNIO: 6, JUNE: 6, JUNHO: 6, JUL: 7, JULIO: 7, JULY: 7, JULHO: 7, AGO: 8, AGOSTO: 8, AUG: 8, AUGUST: 8, SEP: 9, SEPT: 9, SET: 9, SEPTIEMBRE: 9, SETIEMBRE: 9, SEPTEMBER: 9, SETEMBRO: 9, OCT: 10, OCTUBRE: 10, OCTOBER: 10, OUT: 10, OUTUBRO: 10, NOV: 11, NOVIEMBRE: 11, NOVEMBER: 11, NOVEMBRO: 11, DIC: 12, DICIEMBRE: 12, DEC: 12, DECEMBER: 12, DEZ: 12, DEZEMBRO: 12 };
+  var HOY = new Date();
+  function valida(y, m, d) { var t = new Date(y, m - 1, d); return t.getFullYear() === y && t.getMonth() === m - 1 && t.getDate() === d; }
+  function anio(yy, tipo, m, d) {
+    if (yy >= 100) return yy;
+    if (tipo === 'venc') return 2000 + yy;
+    var y = 2000 + yy;
+    if (new Date(y, m - 1, d) > HOY) y -= 100;
+    return y;
+  }
+  var RE_F1 = /(^|[^\d])(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4}|\d{2})(?!\d)/g;
+  var RE_F2 = /(^|[^\d])(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})(?!\d)/g;
+  var RE_F3 = /(^|[^\dA-Z])(\d{1,2})\s*(?:DE\s+)?([A-Z]{3,10})\.?(?:\s*\/\s*[A-Z]{3,10}\.?)?\s*(?:DE\s+|DEL\s+)?(\d{4}|\d{2})(?!\d)/g;
+  // Devuelve [{y,m,d,i,l,yy2}] sobre texto normalizado (mayúsculas sin tildes)
+  function fechas(T, tipo) {
+    var out = [], m;
+    RE_F1.lastIndex = 0;
+    while ((m = RE_F1.exec(T))) {
+      var d = +m[2], mo = +m[3], yr = +m[4], swap = false;
+      if (mo > 12 && d <= 12) { var t = d; d = mo; mo = t; swap = true; }
+      var y = anio(yr, tipo, mo, d);
+      if (mo >= 1 && mo <= 12 && valida(y, mo, d)) out.push({ y: y, m: mo, d: d, i: m.index + m[1].length, l: m[0].length - m[1].length, corto: m[4].length === 2, invertida: swap });
+    }
+    RE_F2.lastIndex = 0;
+    while ((m = RE_F2.exec(T))) {
+      var y2 = +m[2], m2 = +m[3], d2 = +m[4];
+      if (valida(y2, m2, d2)) out.push({ y: y2, m: m2, d: d2, i: m.index + m[1].length, l: m[0].length - m[1].length });
+    }
+    RE_F3.lastIndex = 0;
+    while ((m = RE_F3.exec(T))) {
+      var mes = MES[m[3]];
+      if (!mes) continue;
+      var d3 = +m[2], y3 = anio(+m[4], tipo, mes, d3);
+      if (valida(y3, mes, d3)) out.push({ y: y3, m: mes, d: d3, i: m.index + m[1].length, l: m[0].length - m[1].length, corto: m[4].length === 2 });
+    }
+    out.sort(function (a, b) { return a.i - b.i; });
+    return out.filter(function (f, k) { return !k || f.i >= out[k - 1].i + out[k - 1].l; });
+  }
+  function fechaTipo(f, tipo) { // recalcula el siglo de un año de 2 cifras según el tipo de fecha
+    if (!f || !f.corto) return f;
+    var yy = f.y % 100; return { y: anio(yy, tipo, f.m, f.d), m: f.m, d: f.d };
+  }
+
+  // ---------- teléfonos, mails, documentos ----------
+  function telefono(raw, pais) {
+    pais = pais || '598';
+    var s = String(raw || '').trim(), plus = /^\+/.test(s), d = s.replace(/\D/g, ''), av = '';
+    if (/^00/.test(d)) { d = d.slice(2); plus = true; }
+    if (!d) return null;
+    if (plus) return { num: d, aviso: '' };
+    if (pais === '598') {
+      if (/^598\d{8}$/.test(d)) return { num: d, aviso: '' };
+      if (/^09\d{7}$/.test(d)) return { num: '598' + d.slice(1), aviso: '' };
+      if (/^9\d{7}$/.test(d)) return { num: '598' + d, aviso: '' };
+      if (/^[24]\d{7}$/.test(d)) return { num: '598' + d, aviso: 'Parece un teléfono fijo; el CTCM es para celular' };
+    }
+    if (d.length >= 11) return { num: d, aviso: 'Verificá el código de país del teléfono' };
+    return { num: pais + d.replace(/^0/, ''), aviso: 'Verificá el teléfono: se agregó el código ' + pais };
+  }
+  var RE_MAIL = /[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/gi;
+  var RE_TEL = /(?:\+|00)?\d[\d\s().\-]{6,}\d/g;
+  var RE_CI = /(^|[^\d.])(\d{1}\.?\d{3}\.?\d{3}\s?[-‐–]\s?\d|\d\.\d{3}\.\d{3}\d)(?![\d])/g;
+  function ciValida(num) {
+    var d = String(num).replace(/\D/g, '');
+    if (d.length < 7 || d.length > 8) return false;
+    var base = d.slice(0, -1), dv = +d.slice(-1);
+    while (base.length < 7) base = '0' + base;
+    var w = '2987634', t = 0;
+    for (var i = 0; i < 7; i++) t += (+base[i]) * (+w[i]);
+    return (10 - t % 10) % 10 === dv;
+  }
+  function pais(texto) {
+    var T = ' ' + N(texto).replace(/[^A-Z ]/g, ' ') + ' ';
+    for (var i = 0; i < GENT.length; i++) if (T.indexOf(' ' + GENT[i][0] + ' ') >= 0) return GENT[i][1];
+    var m = T.match(/ ([A-Z]{3}) /);
+    if (m && typeof PAISES !== 'undefined' && PAISES[m[1]]) return m[1];
+    return '';
+  }
+
+  // ---------- etiquetas ----------
+  var ETQ = [
+    ['completoAN', /\b(?:APELLIDOS?\s*(?:Y|,|\/)\s*NOMBRES?|SURNAME\s*(?:AND|,|\/)\s*(?:GIVEN\s*)?NAMES?)\b/],
+    ['completo', /\b(?:NOMBRES?\s*(?:Y|,)\s*APELLIDOS?|NOMBRE\s+COMPLETO|NOME\s+COMPLETO|FULL\s+NAME|PASAJER[OA]|PAX|TITULAR|PASSENGER(?:\s+NAME)?)\b/],
+    ['apellidos', /\b(?:PRIMER\s+APELLIDO|SEGUNDO\s+APELLIDO|APELLIDOS?|SURNAMES?|LAST\s*NAME|FAMILY\s+NAME|APELIDOS?|SOBRENOMES?)\b(?:\s*\/\s*(?:SURNAMES?|APELLIDOS?|LAST\s*NAME))?/],
+    ['nombres', /\b(?:PRIMER\s+NOMBRE|SEGUNDO\s+NOMBRE|NOMBRES?|GIVEN\s+NAMES?|FIRST\s*NAMES?|NOMES?|PRENOMS?)\b(?:\s*\/\s*(?:GIVEN\s+NAMES?|NAMES?|NOMBRES?|FIRST\s*NAME))?/],
+    ['nac', /\b(?:FECHA\s+DE\s+NACIMIENTO|FECHA\s+(?:DE\s+)?NAC(?:IMIENTO)?\.?|NAC\.|F(?:EC)?\.?\s*(?:DE\s+)?NAC(?:IMIENTO)?\.?|NACIMIENTO|NACID[OA](?:\s+EL)?|DATE\s+OF\s+BIRTH|BIRTH\s*DATE|BIRTHDATE|D\.?O\.?B\.?|DATA\s+DE\s+NASCIMENTO|NASCIMENTO|F\.\s*N\.)(?=[^A-Z]|$)(?:\s*\/\s*DATE\s+OF\s+BIRTH)?/],
+    ['venc', /\b(?:FECHA\s+DE\s+(?:VENCIMIENTO|EXPIRACION|CADUCIDAD)|VENCIMIENTO|VENCE|VTO\.?|VALIDO\s+HASTA|VALIDEZ|DATE\s+OF\s+EXPIRY|EXPIRY(?:\s+DATE)?|EXPIRATION(?:\s+DATE)?|EXPIRA|VALIDADE|DATA\s+DE\s+VALIDADE)(?=[^A-Z]|$)(?:\s*\/\s*DATE\s+OF\s+EXPIRY)?/],
+    ['emi', /\b(?:FECHA\s+DE\s+(?:EMISION|EXPEDICION)|EMISION|EXPEDICION|EXPEDIDO|DATE\s+OF\s+ISSUE|ISSUE\s+DATE|DATA\s+DE\s+EMISSAO|EMITIDO)(?=[^A-Z]|$)(?:\s*\/\s*DATE\s+OF\s+ISSUE)?/],
+    ['pp', /\b(?:N(?:RO|UMERO|º|°|O)?\.?\s*(?:DE\s+)?PASAPORTE|PASAPORTE(?:\s*N(?:RO|UMERO|º|°|O)?\.?)?|PASSPORT(?:\s*(?:NO|NUMBER|NBR|N[º°]))?\.?|PASSAPORTE|PASAP\.?|PSPT|PPT|PP(?=\s*[:#]?\s*[A-Z]{0,3}\d))(?=[^A-Z]|$)/],
+    ['ci', /\b(?:C[EÉ]DULA(?:\s+DE\s+IDENTIDAD)?|C\.\s?I\.?|CI|DOCUMENTO(?:\s+DE\s+IDENTIDAD)?|DOC\.?|DNI|D\.N\.I\.?|RG|IDENTIDAD|ID\s*CARD|RUT)(?=[^A-Z]|$)(?:\s*N(?:RO|UMERO|º|°)?\.?)?/],
+    ['nacion', /\b(?:NACIONALIDAD|NATIONALITY|NACIONALIDADE|CIUDADANIA|CITIZENSHIP)\b(?:\s*\/\s*NATIONALITY)?/],
+    ['sexo', /\b(?:SEXO|SEX|GENERO|GENDER)\b(?:\s*\/\s*SEX)?/],
+    ['mail', /\b(?:E-?MAIL|MAIL|CORREO(?:\s+ELECTRONICO)?)\b/],
+    ['tel', /\b(?:CELULAR|CEL|MOVIL|MOBILE|TEL(?:EFONO|EFONE|F)?|PHONE|WHATSAPP|WSP|WPP|WA|CONTACTO)\b\.?/]
+  ];
+  var STOP = { HOLA: 1, BUENAS: 1, BUENOS: 1, BUEN: 1, DIA: 1, DIAS: 1, TARDES: 1, NOCHES: 1, DATOS: 1, DATO: 1, SALUDOS: 1, GRACIAS: 1, SR: 1, SRA: 1, SRTA: 1, MR: 1, MRS: 1, MS: 1, MISS: 1, MSTR: 1, ADULTO: 1, MENOR: 1, NINO: 1, NINA: 1, INFANTE: 1, BEBE: 1, VIAJA: 1, VIAJAN: 1, VUELO: 1, VUELOS: 1, RESERVA: 1, PASAJEROS: 1, ADJUNTO: 1, ENVIO: 1, ABRAZO: 1, ATTE: 1, ATENTAMENTE: 1, CORDIALES: 1, URUGUAY: 1, ARGENTINA: 1, MONTEVIDEO: 1, ESPOSA: 1, ESPOSO: 1, HIJO: 1, HIJA: 1, HIJOS: 1, MAMA: 1, PAPA: 1, Y: 1, E: 1, CON: 1, PARA: 1, POR: 1, EL: 1, LA: 1, LOS: 1, LAS: 1, DE: 1, DEL: 1, MI: 1, SU: 1, TE: 1, LE: 1, PASO: 1, SON: 1, ES: 1 };
+  var PART = { DE: 1, DEL: 1, LA: 1, LAS: 1, LOS: 1, DA: 1, DAS: 1, DO: 1, DOS: 1, DI: 1, VAN: 1, VON: 1, DER: 1, DEN: 1, MC: 1, MAC: 1, SAN: 1, SANTA: 1 };
+
+  // Separa "nombres apellidos" escritos de corrido. orden: 'NA' (nombre primero) o 'AN' (apellido primero)
+  function separar(texto, orden) {
+    var orig = String(texto).trim().split(/\s+/).filter(Boolean);
+    var w = orig.map(function (x) { return limpiaNombre(x); }).filter(Boolean);
+    if (!w.length) return null;
+    // APELLIDO/NOMBRE (formato GDS) o "Apellido, Nombre"
+    var sl = String(texto).match(/^\s*([^\/,]+)[\/,]\s*([^\/,]+?)\s*(?:\b(?:MRS|MR|MS|MISS|MSTR)\b\.?)?\s*$/i);
+    if (sl) return { apellidos: limpiaNombre(sl[1]), nombres: limpiaNombre(sl[2].replace(/\b(MRS|MR|MS|MISS|MSTR)\b\.?/i, '')), dudoso: false };
+    if (w.length === 1) return { apellidos: w[0], nombres: '', dudoso: true };
+    // mayúsculas sostenidas entre palabras en minúscula: las MAYÚSCULAS son los apellidos (estilo "Gonzalo NOCELLA")
+    var caps = orig.map(function (x) { return x.length > 1 && x === x.toUpperCase() && /[A-ZÁÉÍÓÚÑ]/.test(x); });
+    var nCaps = caps.filter(Boolean).length;
+    if (nCaps && nCaps < orig.length && w.length === orig.length) {
+      var a = [], n = [];
+      orig.forEach(function (x, k) { (caps[k] ? a : n).push(w[k]); });
+      return { apellidos: a.join(' '), nombres: n.join(' '), dudoso: false };
+    }
+    // unidades: las partículas (de, del, da, van…) van con la palabra siguiente
+    var u = [];
+    for (var k = 0; k < w.length; k++) {
+      if (PART[w[k]] && k < w.length - 1) { var j = k, g = []; while (j < w.length - 1 && PART[w[j]]) g.push(w[j++]); g.push(w[j]); u.push({ t: g.join(' '), cab: w[j] }); k = j; }
+      else u.push({ t: w[k], cab: w[k] });
+    }
+    if (u.length === 1) return { apellidos: u[0].t, nombres: '', dudoso: true };
+    var esN = u.map(function (x) { return !!NP[x.cab]; });
+    var g2;
+    if (orden === 'AN') {
+      g2 = 0; for (var r = u.length - 1; r > 0 && esN[r]; r--) g2++;
+      if (!g2) g2 = u.length >= 4 ? 2 : 1;
+      return { apellidos: u.slice(0, u.length - g2).map(t).join(' '), nombres: u.slice(u.length - g2).map(t).join(' '), dudoso: !esN[u.length - 1] || u.length > 2 };
+    }
+    g2 = 0; while (g2 < u.length - 1 && esN[g2]) g2++;
+    if (u.length === 2) g2 = 1;
+    else if (u.length === 3) g2 = esN[1] ? 2 : 1;
+    else if (!g2 || (g2 === 1 && u.length === 4)) g2 = 2;
+    if (g2 > u.length - 1) g2 = u.length - 1;
+    var dud = u.length > 2 || !esN[0];
+    return { apellidos: u.slice(g2).map(t).join(' '), nombres: u.slice(0, g2).map(t).join(' '), dudoso: dud };
+    function t(x) { return x.t; }
+  }
+
+  // ---------- un bloque = un pasajero ----------
+  function bloque(txt, pais0) {
+    var T = N(txt), usado = new Uint8Array(T.length), p = { avisos: [] }, hits = [];
+    ETQ.forEach(function (e) {
+      var re = new RegExp(e[1].source, 'g'), m;
+      while ((m = re.exec(T))) {
+        if (m[0].length === 0) { re.lastIndex++; continue; }
+        if (hits.some(function (h) { return m.index < h.f && m.index + m[0].length > h.i; })) continue;
+        hits.push({ t: e[0], i: m.index, f: m.index + m[0].length });
+      }
+    });
+    hits.sort(function (a, b) { return a.i - b.i; });
+    function marcar(i, f) { for (var k = i; k < f; k++) usado[k] = 1; }
+    hits.forEach(function (h, k) {
+      var fin = k + 1 < hits.length ? hits[k + 1].i : T.length;
+      var nl = T.indexOf('\n', h.f); if (nl >= 0 && nl < fin) {
+        // valor en la misma línea; si está vacía, se toma la línea siguiente
+        if (!T.slice(h.f, nl).replace(/[\s:=\-–.#°º]/g, '')) { var nl2 = T.indexOf('\n', nl + 1); fin = Math.min(fin, nl2 < 0 ? T.length : nl2); }
+        else fin = nl;
+      }
+      var vi = h.f; while (vi < fin && /[\s:=\-–.#°º]/.test(T[vi])) vi++;
+      h.vi = vi; h.vf = fin; h.v = txt.slice(vi, fin).trim(); h.V = T.slice(vi, fin).trim();
+      marcar(h.i, h.f);
+    });
+    var orden = 'NA';
+    hits.forEach(function (h) {
+      var V = h.V, v = h.v;
+      if (!V) return;
+      if (h.t === 'apellidos') { p.apellidos = ((p.apellidos ? p.apellidos + ' ' : '') + limpiaNombre(v.split(/\s{2,}|\t|[|;]/)[0])).trim(); marcar(h.vi, h.vf); }
+      else if (h.t === 'nombres') { p.nombres = ((p.nombres ? p.nombres + ' ' : '') + limpiaNombre(v.split(/\s{2,}|\t|[|;]/)[0])).trim(); marcar(h.vi, h.vf); }
+      else if (h.t === 'completo' || h.t === 'completoAN') {
+        var val = v.split(/\s{2,}|\t|[|;]| - /)[0].replace(/\b(?:sr|sra|srta|mr|mrs|ms)\b\.?/ig, '').replace(/^\s*\d+\s*/, '');
+        var m = val.match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñÇçÃãÕõÂâÊêÔô'’\-\/, ]+/);
+        if (m && m[0].trim().split(/\s+/).length >= 1) { p.completo = m[0].trim(); orden = h.t === 'completoAN' ? 'AN' : 'NA'; marcar(h.vi, h.vi + val.length); }
+      }
+      else if (h.t === 'nac' || h.t === 'venc' || h.t === 'emi') {
+        var fs = fechas(V, h.t === 'nac' ? 'nac' : 'venc');
+        if (fs.length) { if (h.t === 'nac') p.nacimiento = fs[0]; else if (h.t === 'venc') p.vencimiento = fs[0]; marcar(h.vi, h.vi + fs[0].i + fs[0].l); if (fs[0].invertida) p.avisos.push('Fecha con mes y día invertidos: verificala'); }
+      }
+      else if (h.t === 'pp') {
+        var mm = V.match(/(?:^|[^A-Z0-9])([A-Z]{1,3}[\s\-]?\d{5,10}|\d{6,10}[A-Z]?|[A-Z0-9]*\d[A-Z0-9]*)(?![A-Z0-9])/);
+        if (mm) { var num = mm[1].replace(/[\s\-]/g, ''); if (num.length >= 5 && num.length <= 12) { p.pasaporte = num; var pz0 = pais(V.slice(0, V.indexOf(mm[1]))); if (pz0) p.ppPais = pz0; marcar(h.vi, h.vi + V.indexOf(mm[1]) + mm[1].length); } }
+      }
+      else if (h.t === 'ci') {
+        var mc = V.match(/\d[\d.\s]{4,12}\s*[-‐–]?\s*\d|[A-Z]{0,2}\d{5,10}/);
+        if (mc) { p.ci = mc[0].replace(/[^A-Z0-9]/g, ''); marcar(h.vi, h.vi + V.indexOf(mc[0]) + mc[0].length); }
+      }
+      else if (h.t === 'nacion') { var pa = pais(V.split(/\s{2,}|\t|[|;,]/)[0]); if (pa) { p.nacionalidad = pa; marcar(h.vi, h.vf); } }
+      else if (h.t === 'sexo') {
+        var sx = V.match(/^\s*(MASCULINO|FEMENINO|HOMBRE|MUJER|MALE|FEMALE|VARON|M|F|H|X)\b/);
+        if (sx) { var c = sx[1][0]; p.sexo = c === 'F' || sx[1] === 'MUJER' ? 'F' : (c === 'M' || c === 'H' || c === 'V' ? 'M' : 'X'); marcar(h.vi, h.vi + sx[0].length); }
+      }
+      else if (h.t === 'mail') { var me = v.match(RE_MAIL); if (me) { p.email = me[0]; marcar(h.vi, h.vi + v.indexOf(me[0]) + me[0].length); } }
+      else if (h.t === 'tel') { var mt = v.match(/(?:\+|00)?\d[\d\s().\-]{6,}\d/); if (mt) { p.telRaw = mt[0]; marcar(h.vi, h.vi + v.indexOf(mt[0]) + mt[0].length); } }
+    });
+    // ---- datos sin etiqueta ----
+    if (!p.sexo) {
+      var ms = /(?:^|[^A-Z])(MASCULINO|FEMENINO|VARON|MUJER|HOMBRE|MALE|FEMALE|SRTA|SRA|SR|MRS|MR|MISS|MSTR|MS)(?=[^A-Z]|$)/.exec(T);
+      if (ms) p.sexo = /^(FEMENINO|MUJER|FEMALE|SRTA|SRA|MRS|MISS|MS)$/.test(ms[1]) ? 'F' : 'M';
+    }
+    function libre(re, fn) {
+      re.lastIndex = 0; var m;
+      while ((m = re.exec(txt))) {
+        var i = m.index, f = i + m[0].length, ok = true;
+        for (var k = i; k < f; k++) if (usado[k]) { ok = false; break; }
+        if (ok && fn(m, i, f) !== false) marcar(i, f);
+      }
+    }
+    libre(new RegExp(RE_MAIL.source, 'gi'), function (m) { if (p.email) return false; p.email = m[0]; });
+    libre(new RegExp(RE_CI.source, 'g'), function (m, i, f) {
+      var raw = m[2]; if (!ciValida(raw)) return false;
+      if (!p.ci) p.ci = raw.replace(/\D/g, '');
+      for (var k = i; k < f; k++) usado[k] = 1; return false;
+    });
+    // fechas sueltas: pasada → nacimiento, futura → vencimiento
+    var fl = fechas(T, 'nac');
+    fl.forEach(function (f) {
+      for (var k = f.i; k < f.i + f.l; k++) if (usado[k]) return;
+      var dt = new Date(f.y, f.m - 1, f.d);
+      if (dt < HOY && !p.nacimiento) { p.nacimiento = f; p.fechaSuelta = 1; }
+      else if (dt < HOY && p.fechaSuelta) p.fechaSuelta = 2;
+      else if (dt >= HOY || (f.corto && !p.vencimiento && p.nacimiento)) { if (!p.vencimiento) p.vencimiento = fechaTipo(f, 'venc'); }
+      else return;
+      marcar(f.i, f.i + f.l);
+    });
+    libre(/(?:^|[^A-Z0-9])([A-Z]{1,3}\d{6,9})(?![A-Z0-9])/g, function (m, i, f) {
+      if (p.pasaporte) return false;
+      p.pasaporte = m[1]; p.ppSuelto = 1;
+      for (var k = i; k < f; k++) usado[k] = 1; return false;
+    });
+    libre(new RegExp(RE_TEL.source, 'g'), function (m) {
+      if (p.telRaw) return false;
+      var d = m[0].replace(/\D/g, '');
+      if (d.length < 8 || d.length > 15) return false;
+      if (/^\d{1,2}[.\-\/]\d{1,2}[.\-\/]\d{2,4}$/.test(m[0].trim())) return false;
+      p.telRaw = m[0];
+    });
+    if (!p.apellidos && !p.nombres && !p.completo) {
+      var mg = /(?:^|[^A-Z])([A-Z][A-Z ]{1,40})\/([A-Z][A-Z ]{1,40}?)(?:\s+(MRS|MR|MS|MISS|MSTR))?(?=[^A-Z]|$)/.exec(T);
+      if (mg && !/\d/.test(mg[0])) { var ok2 = true; for (var q = mg.index; q < mg.index + mg[0].length; q++) if (usado[q]) ok2 = false; if (ok2) { p.apellidos = limpiaNombre(mg[1]); p.nombres = limpiaNombre(mg[2]); marcar(mg.index, mg.index + mg[0].length); } }
+    }
+    // nombre sin etiqueta: primera secuencia de 2+ palabras con mayúscula inicial que no sean palabras comunes
+    if (!p.apellidos && !p.nombres && !p.completo) {
+      var libreTxt = '';
+      for (var k = 0; k < txt.length; k++) libreTxt += usado[k] ? '|' : txt[k];
+      var lineas = libreTxt.split(/\n|[,;|•·]| - | – /);
+      for (var li = 0; li < lineas.length && !p.completo; li++) {
+        var ws = lineas[li].replace(/^\s*\d+\s*[).\-–]?\s*/, '').split(/\s+/).filter(Boolean), run = [];
+        for (var wi = 0; wi <= ws.length; wi++) {
+          var x = ws[wi] ? ws[wi].replace(/[.,:;!?)]+$/, '').replace(/^[(¿¡"']+/, '') : '', X = x ? limpiaNombre(x) : '';
+          var corta = ws[wi] && /[.,:;!?]$/.test(ws[wi]);
+          var esPal = x && /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñÇçÃãÕõÂâÊêÔôß'’\-]+$/.test(x);
+          var mayus = x && (/^[A-ZÁÉÍÓÚÜÑÇÃÕÂÊÔ]/.test(x) || (PART[X] && run.length));
+          if (esPal && mayus && X && (!STOP[X] || (PART[X] && run.length)) && !MES[X]) { run.push(x); if (!corta) continue; }
+          while (run.length && PART[limpiaNombre(run[run.length - 1])]) run.pop();
+          if (run.length >= 2) { p.completo = run.join(' '); break; }
+          run = [];
+        }
+      }
+    }
+    if (!p.nacionalidad && p.ppPais) p.nacionalidad = p.ppPais;
+    delete p.ppPais;
+    if (!p.nacionalidad) {
+      var resto = ''; for (var z = 0; z < T.length; z++) resto += usado[z] ? ' ' : T[z];
+      var pz = pais(resto.replace(/\b(?:[A-Z]{3})\b/g, ' '));
+      if (pz) p.nacionalidad = pz;
+    }
+    // "Nombre: Juan Pérez García" sin etiqueta de apellido → es el nombre completo
+    if (p.nombres && !p.apellidos && !p.completo && p.nombres.split(' ').length >= 2) { p.completo = p.nombres; p.nombres = ''; }
+    // ---- armado ----
+    if (p.completo && !(p.apellidos && p.nombres)) {
+      var s = separar(p.completo, orden);
+      if (s) {
+        if (!p.apellidos) p.apellidos = s.apellidos;
+        if (!p.nombres) p.nombres = s.nombres;
+        if (s.dudoso) p.dudoso = true;
+      }
+    }
+    if (p.telRaw) { var tl = telefono(p.telRaw, pais0); if (tl) { p.telefono = tl.num; if (tl.aviso) p.avisos.push(tl.aviso); } }
+    if (p.ci && !ciValida(p.ci) && /^\d{7,8}$/.test(p.ci) && (!p.nacionalidad || p.nacionalidad === 'URY')) p.avisos.push('El dígito verificador de la cédula no coincide: revisá el número');
+    if (p.fechaSuelta === 2) p.avisos.push('Había varias fechas sin etiqueta: se tomó la primera como nacimiento, verificala');
+    if (p.ppSuelto) p.avisos.push('El número de pasaporte se tomó sin etiqueta: verificalo');
+    if (p.dudoso) p.avisos.push('Revisá qué palabras son nombres y cuáles apellidos');
+    delete p.telRaw; delete p.completo; delete p.fechaSuelta; delete p.ppSuelto;
+    return p;
+  }
+  function tieneDatos(p) { return !!(p.apellidos || p.nombres || p.pasaporte || p.ci || p.nacimiento); }
+
+  // ---------- planillas (Excel / CSV) ----------
+  function tabla(lineas, sep, pais0) {
+    var cab = lineas[0].split(sep).map(function (c) { return N(c).trim(); });
+    var tipos = cab.map(function (c) {
+      for (var i = 0; i < ETQ.length; i++) { var m = c.match(ETQ[i][1]); if (m && m[0].length >= Math.min(c.length, 3) * 0.6) return ETQ[i][0]; }
+      return '';
+    });
+    if (tipos.filter(Boolean).length < 2) return null;
+    var out = [];
+    lineas.slice(1).forEach(function (l) {
+      if (!l.trim()) return;
+      var cs = l.split(sep), txt = [];
+      cs.forEach(function (c, k) {
+        if (!tipos[k] || !c.trim()) return;
+        var lab = { apellidos: 'Apellidos', nombres: 'Nombres', completo: 'Pasajero', completoAN: 'Apellidos y nombres', nac: 'Fecha de nacimiento', venc: 'Vencimiento', emi: 'Emisión', pp: 'Pasaporte', ci: 'Cédula', nacion: 'Nacionalidad', sexo: 'Sexo', mail: 'Mail', tel: 'Celular' }[tipos[k]];
+        txt.push(lab + ': ' + c.trim());
+      });
+      var p = bloque(txt.join('\n'), pais0);
+      if (tieneDatos(p)) out.push(p);
+    });
+    return out;
+  }
+
+  // ---------- separar el texto en pasajeros ----------
+  function bloques(texto) {
+    var ls = texto.replace(/\r/g, '').split('\n'), bs = [], cur = [];
+    function cerrar() { if (cur.join('').trim()) bs.push(cur.join('\n')); cur = []; }
+    var vistos = {};
+    ls.forEach(function (l) {
+      var L = N(l);
+      if (!l.trim()) { cerrar(); vistos = {}; return; }
+      var nuevo = /^\s*(?:\d{1,2}\s*[).\-–]|(?:PAX|PASAJER[OA])\s*\d+|[-•*]\s)/.test(L);
+      // una etiqueta de nombre que se repite indica otro pasajero
+      var etq = /^\s*(APELLIDOS?|NOMBRES?\s+Y\s+APELLIDOS?|NOMBRE\s+COMPLETO|PASAJER[OA]|NOMBRES?)\b/.exec(L);
+      if (etq) { var k = etq[1].replace(/S$/, ''); if (vistos[k]) nuevo = true; }
+      if (nuevo) { cerrar(); vistos = {}; }
+      if (etq) vistos[etq[1].replace(/S$/, '')] = 1;
+      cur.push(l);
+    });
+    cerrar();
+    // bloques sin etiquetas con varias líneas, cada una con un dato propio → un pasajero por línea
+    var out = [];
+    bs.forEach(function (b) {
+      var lns = b.split('\n').filter(function (l) { return l.trim(); });
+      var hayEtq = ETQ.slice(0, 4).some(function (e) { return e[1].test(N(b)); });
+      var reCi = new RegExp(RE_CI.source);
+      var conDato = lns.filter(function (l) { return fechas(N(l), 'nac').length || /[A-Z]{1,3}\d{6,9}/.test(N(l)) || reCi.test(l); });
+      var soloNombres = lns.length >= 2 && lns.every(function (l) { return /^\s*(?:\d{1,2}\s*[).\-–]\s*)?[A-Za-zÁÉÍÓÚÜÑáéíóúüñÇçÃãÕõÂâÊêÔô'’\-\/]+(?:\s+[A-Za-zÁÉÍÓÚÜÑáéíóúüñÇçÃãÕõÂâÊêÔô'’\-\/]+){1,6}\s*$/.test(l) && !/^\s*(HOLA|BUEN|SALUDOS|GRACIAS)/i.test(sinTildes(l)); });
+      if (!hayEtq && ((lns.length >= 2 && conDato.length >= 2 && conDato.length >= lns.length - 1) || soloNombres)) lns.forEach(function (l) { out.push(l); });
+      else out.push(b);
+    });
+    return out;
+  }
+
+  function parse(texto, opc) {
+    opc = opc || {};
+    var pais0 = opc.codPais || '598';
+    texto = String(texto || '');
+    var res = [], avisos = [];
+    // 1) MRZ pegadas
+    var mrz = MRZr ? MRZr.buscar(texto) : [];
+    mrz.forEach(function (r) { res.push({ mrz: r, avisos: [] }); });
+    if (mrz.length) {
+      var quitar = {};
+      mrz.forEach(function (r) { r.lineas.forEach(function (l) { quitar[l.replace(/<+$/, '')] = 1; }); });
+      texto = texto.split('\n').filter(function (l) {
+        var c = MRZr.clean(l); if (c.length < 20) return true;
+        return !Object.keys(quitar).some(function (q) { return c.replace(/<+$/, '').indexOf(q.slice(0, 20)) >= 0 || q.indexOf(c.replace(/<+$/, '').slice(0, 20)) >= 0; });
+      }).join('\n');
+    }
+    // 2) planilla
+    var ls = texto.replace(/\r/g, '').split('\n').filter(function (l) { return l.trim(); });
+    var tab = null;
+    if (ls.length >= 2) {
+      if (ls[0].split('\t').length >= 3 && ls[1].split('\t').length >= 3) tab = tabla(ls, '\t', pais0);
+      else if (ls[0].split(';').length >= 3 && ls[1].split(';').length >= 3) tab = tabla(ls, ';', pais0);
+    }
+    if (tab) return { pasajeros: res.concat(tab), avisos: avisos };
+    // 3) texto libre
+    var sueltos = [];
+    var DESP = /^\s*(SALUDOS|SLDS|SDS|GRACIAS|ATTE|ATENTAMENTE|CORDIALES|CORDIALMENTE|ABRAZO|ABRAZOS|BESOS|SALU2|QUEDO|QUEDAMOS)\b/;
+    bloques(texto).forEach(function (b) {
+      var p = bloque(b, pais0);
+      if (DESP.test(N(b)) && !p.pasaporte && !p.ci && !p.nacimiento) return;
+      if (tieneDatos(p)) res.push(p);
+      else if (p.email || p.telefono) sueltos.push(p);
+    });
+    // contactos sin nombre: al pasajero anterior que no tenga, o al único pasajero
+    sueltos.forEach(function (s) {
+      var dest = res.filter(function (p) { return !p.email && !p.telefono; });
+      var d = res.length === 1 ? res[0] : dest[0];
+      if (!d) return;
+      if (s.email && !d.email) d.email = s.email;
+      if (s.telefono && !d.telefono) d.telefono = s.telefono;
+      (s.avisos || []).forEach(function (a) { d.avisos.push(a); });
+    });
+    return { pasajeros: res, avisos: avisos };
+  }
+
+  return { parse: parse, separar: separar, telefono: telefono, ciValida: ciValida, limpiaNombre: limpiaNombre, fechas: fechas, pais: pais, N: N };
+})();
+if (typeof module !== 'undefined') module.exports = TEXTO;
+/* ===== Armado de comandos para Amadeus y Sabre =====
+   Amadeus: NM / SR DOCS / SR FOID / SRCTCE / SRCTCM (asociación /Pn, sólo si hay más de un pasajero)
+   Sabre:   -APELLIDO/NOMBRE / 3DOCS / 3FOID / 3CTCE / 3CTCM (asociación -n.1)               */
+var CMD = (function () {
+  var MES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  function f(d) { return d ? (d.d < 10 ? '0' : '') + d.d + MES[d.m - 1] + String(d.y).slice(-2) : ''; }
+  function mail(e) { return String(e || '').trim().toUpperCase().replace(/@/g, '//').replace(/_/g, '..').replace(/-/g, './'); }
+  function tel(t) { return String(t || '').replace(/\D/g, ''); }
+  function edad(nac, ref) {
+    if (!nac) return null;
+    var a = ref.getFullYear() - nac.y;
+    if (ref.getMonth() + 1 < nac.m || (ref.getMonth() + 1 === nac.m && ref.getDate() < nac.d)) a--;
+    return a;
+  }
+  function tipoPax(p, ref) {
+    if (p.tipoManual) return p.tipoManual;
+    var e = edad(p.nac, ref);
+    if (e === null) return 'ADT';
+    return e < 2 ? 'INF' : (e < 12 ? 'CHD' : 'ADT');
+  }
+  function titulo(p, tipo, tituloF) {
+    if (p.tituloManual) return p.tituloManual;
+    if (tipo === 'INF') return '';
+    if (p.sexo === 'M') return tipo === 'CHD' ? 'MSTR' : 'MR';
+    if (p.sexo === 'F') return tipo === 'CHD' ? 'MISS' : (tituloF || 'MRS');
+    return '';
+  }
+  function cmp(a, b) {
+    var x = a.apellidos || '', y = b.apellidos || '';
+    if (x !== y) return x < y ? -1 : 1;
+    x = a.nombres || ''; y = b.nombres || '';
+    return x < y ? -1 : x > y ? 1 : 0;
+  }
+  function pais2(a3) { return a3 && typeof PAISES !== 'undefined' && PAISES[a3] ? PAISES[a3][0] : ''; }
+
+  // Ordena, numera y asocia infantes a adultos
+  function preparar(lista, o) {
+    var ref = o.fechaViaje || new Date();
+    var ps = lista.map(function (p) { var t = tipoPax(p, ref); return { p: p, tipo: t, edad: edad(p.nac, ref), tit: titulo(p, t, o.tituloF) }; });
+    var con = ps.filter(function (x) { return x.tipo !== 'INF'; }), inf = ps.filter(function (x) { return x.tipo === 'INF'; });
+    // Amadeus muestra los nombres por orden alfabético de apellido; se cargan en ese mismo orden
+    con.sort(function (a, b) { return cmp(a.p, b.p); });
+    con.forEach(function (x, i) { x.n = x.p.numManual ? +x.p.numManual : i + 1; });
+    var adultos = con.filter(function (x) { return x.tipo === 'ADT'; }), avisos = [];
+    inf.forEach(function (x) {
+      var a = x.p.infanteDe ? adultos.filter(function (y) { return y.p.id === x.p.infanteDe; })[0] : null;
+      if (!a) a = adultos.filter(function (y) { return !y.inf && y.p.apellidos && x.p.apellidos && (' ' + x.p.apellidos + ' ').indexOf(' ' + y.p.apellidos.split(' ')[0] + ' ') >= 0; })[0];
+      if (!a) a = adultos.filter(function (y) { return !y.inf; })[0];
+      if (a && !a.inf) { a.inf = x; x.adulto = a; x.n = a.n; }
+      else avisos.push('El infante ' + (x.p.apellidos || '') + ' ' + (x.p.nombres || '') + ' no tiene un adulto libre con quien viajar');
+    });
+    return { con: con, inf: inf, todos: con.concat(inf), avisos: avisos, multi: con.length > 1 || inf.length > 0 };
+  }
+
+  function docData(p) {
+    var usarCI = p.docUsar === 'NI' || (!p.ppNum && p.ciNum);
+    return usarCI
+      ? { foid: 'NI', docs: 'I', num: p.ciNum, em: p.ciEmisor || p.nacionalidad || 'URY', venc: p.ciVenc }
+      : { foid: 'PP', docs: 'P', num: p.ppNum, em: p.ppEmisor || p.nacionalidad || '', venc: p.ppVenc };
+  }
+  function falta(x, campos) { var f2 = []; campos.forEach(function (c) { if (!c[1]) f2.push(c[0]); }); return f2.length ? f2.join(', ') : ''; }
+
+  function generar(lista, o) {
+    o = o || {};
+    var P = preparar(lista, o), S = o.gds === 'S', out = { nombres: [], docs: [], foid: [], ctc: [], extra: [] };
+    function L(sec, t, x, nota) { out[sec].push({ t: t, id: x && x.p.id, nota: nota || '' }); }
+    function F(sec, x, que) { out[sec].push({ t: null, id: x && x.p.id, falta: que }); }
+    function asoc(n) { return S ? '-' + n + '.1' : (P.multi ? '/P' + n : ''); }
+    var ap = function (x) { return x.p.apellidos || ''; }, no = function (x) { return x.p.nombres || ''; };
+
+    // ---- nombres ----
+    P.con.forEach(function (x) {
+      var fl = falta(x, [['apellido', ap(x)], ['nombre', no(x)]]);
+      if (fl) { F('nombres', x, fl); return; }
+      var tit = x.tit ? ' ' + x.tit : '';
+      if (S) {
+        L('nombres', '-' + ap(x) + '/' + no(x) + tit, x);
+      } else {
+        var extra = '';
+        if (x.tipo === 'CHD' && x.p.nac) extra = ' (CHD/' + f(x.p.nac) + ')';
+        if (x.inf) {
+          var i = x.inf, sa = ap(i) === ap(x) ? '' : ap(i);
+          extra = i.p.nac ? ' (INF' + sa + '/' + no(i) + '/' + f(i.p.nac) + ')' : '';
+          if (!i.p.nac) F('nombres', i, 'fecha de nacimiento del infante');
+        }
+        L('nombres', 'NM1' + ap(x) + '/' + no(x) + tit + extra, x);
+      }
+    });
+    if (S) P.inf.forEach(function (x) { if (x.adulto) L('nombres', '-I/' + ap(x) + '/' + no(x), x, 'Infante con ' + no(x.adulto).split(' ')[0]); });
+
+    // ---- DOCS ----
+    P.todos.forEach(function (x) {
+      if (x.tipo === 'INF' && !x.adulto) return;
+      var p = x.p, g = p.sexo === 'M' || p.sexo === 'F' ? p.sexo + (x.tipo === 'INF' ? 'I' : '') : (p.sexo === 'X' ? 'X' : '');
+      var d = docData(p), comp = !!o.docsCompleto;
+      var need = [['fecha de nacimiento', p.nac], ['sexo', g], ['apellido', ap(x)], ['nombre', no(x)]];
+      if (comp) need = need.concat([['número de documento', d.num], ['país emisor', d.em], ['nacionalidad', p.nacionalidad || d.em]]);
+      var fl = falta(x, need);
+      if (fl) { F('docs', x, fl); return; }
+      var nm = no(x).split(' '), first = nm[0], mid = nm.slice(1).join(' ');
+      if (S) {
+        var nmS = ap(x) + '/' + first + (mid ? '/' + mid : '');
+        if (comp) L('docs', '3DOCS/' + d.docs + '/' + d.em + '/' + d.num + '/' + (p.nacionalidad || d.em) + '/' + f(p.nac) + '/' + g + '/' + f(d.venc) + '/' + nmS + asoc(x.n), x);
+        else L('docs', '3DOCS/DB/' + f(p.nac) + '/' + g + '/' + nmS + asoc(x.n), x);
+        if (x.tipo === 'CHD') L('docs', '3CHLD/' + f(p.nac) + asoc(x.n), x, 'Niño');
+        if (x.tipo === 'INF') L('docs', '3INFT/' + ap(x) + '/' + no(x) + '/' + f(p.nac) + asoc(x.n), x, 'Infante');
+      } else {
+        if (comp) L('docs', 'SR DOCS HK1-' + d.docs + '-' + d.em + '-' + d.num + '-' + (p.nacionalidad || d.em) + '-' + f(p.nac) + '-' + g + '-' + f(d.venc) + '-' + ap(x) + '-' + no(x) + asoc(x.n), x);
+        else L('docs', 'SR DOCS HK1-----' + f(p.nac) + '-' + g + '--' + ap(x) + '-' + no(x) + asoc(x.n), x);
+      }
+    });
+
+    // ---- FOID ----
+    P.con.forEach(function (x) {
+      var d = docData(x.p), em2 = pais2(d.em);
+      var fl = falta(x, [['número de documento', d.num], ['país del documento', em2]]);
+      if (fl) { F('foid', x, fl); return; }
+      L('foid', (S ? '3FOID/' : 'SR FOID-') + d.foid + em2 + d.num + asoc(x.n), x);
+    });
+
+    // ---- contactos ----
+    var conCtc = P.con.filter(function (x) { return x.p.email || x.p.tel; });
+    var todos = o.contactoTodos && conCtc.length === 1 && P.con.length > 1;
+    P.con.forEach(function (x) {
+      var src = todos ? conCtc[0] : x;
+      if (todos && S === false && x !== conCtc[0]) return; // en Amadeus sin asociación vale para todos
+      if (!src.p.email && !src.p.tel) return;
+      var a = todos && !S ? '' : asoc(x.n);
+      if (src.p.email) L('ctc', (S ? '3CTCE/' : 'SRCTCE-') + mail(src.p.email) + a, x, todos && !S ? 'Para todos los pasajeros' : '');
+      if (src.p.tel) L('ctc', (S ? '3CTCM/' : 'SRCTCM-') + tel(src.p.tel) + a, x, todos && !S ? 'Para todos los pasajeros' : '');
+    });
+    if (!conCtc.length && P.con.length) out.ctc.push({ t: null, falta: 'mail y celular del pasajero (contacto obligatorio)' });
+
+    return { secciones: out, orden: P.todos, avisos: P.avisos };
+  }
+
+  return { generar: generar, fecha: f, mail: mail, tipoPax: tipoPax, edad: edad, preparar: preparar };
+})();
+if (typeof module !== 'undefined') module.exports = CMD;
+/* ===== Lectura de archivos (fotos, capturas, PDF) en el navegador =====
+   Tesseract.js con un modelo entrenado para MRZ; todo local, sin enviar imágenes a ningún servidor. */
+var OCR = (function () {
+  function url(p) { return new URL(p, location.href).href; }
+  var worker = null, cargando = null, psmActual = '';
+  function script(src) {
+    return new Promise(function (ok, mal) {
+      var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar ' + src)); };
+      document.head.appendChild(s);
+    });
+  }
+  function motor(aviso) {
+    if (worker) return Promise.resolve(worker);
+    if (!cargando) cargando = (async function () {
+      aviso && aviso('Preparando el lector (sólo la primera vez)…');
+      if (typeof Tesseract === 'undefined') await script(url('vendor/ocr/tesseract.min.js'));
+      var w = await Tesseract.createWorker('mrz', 1, {
+        workerPath: url('vendor/ocr/worker.min.js'),
+        corePath: url('vendor/ocr').replace(/\/$/, ''),
+        langPath: url('vendor/ocr/lang').replace(/\/$/, ''),
+        gzip: true,
+        workerBlobURL: false
+      });
+      await w.setParameters({ tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<' });
+      worker = w; return w;
+    })().catch(function (e) { cargando = null; throw e; });
+    return cargando;
+  }
+  async function psm(w, m) { if (psmActual !== m) { await w.setParameters({ tessedit_pageseg_mode: m }); psmActual = m; } }
+  function aCanvas(pix) {
+    var c = document.createElement('canvas'); c.width = pix.width; c.height = pix.height;
+    var id = new ImageData(pix.data instanceof Uint8ClampedArray ? pix.data : new Uint8ClampedArray(pix.data.buffer), pix.width, pix.height);
+    c.getContext('2d').putImageData(id, 0, 0); return c;
+  }
+  async function texto(w, canvas, modo) { await psm(w, modo || '6'); var r = await w.recognize(canvas); return r.data.text || ''; }
+  function mejor(a, b) { if (!a) return b; if (!b) return a; return (b.puntos / b.total > a.puntos / a.total || (b.puntos / b.total === a.puntos / a.total && b.puntos > a.puntos)) ? b : a; }
+
+  // ---- imagen → píxeles ----
+  async function cargarImagen(file, maxLado) {
+    maxLado = maxLado || 2600;
+    var bmp = null;
+    try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+    catch (e) {
+      bmp = await new Promise(function (ok, mal) {
+        var im = new Image(), u = URL.createObjectURL(file);
+        im.onload = function () { ok(im); }; im.onerror = function () { mal(new Error('formato')); }; im.src = u;
+      }).catch(function () { return null; });
+    }
+    if (!bmp) throw new Error(/heic|heif/i.test(file.type + file.name) ? 'Las fotos HEIC del iPhone no se pueden abrir acá: mandala como JPG o sacale una captura.' : 'No se pudo abrir la imagen.');
+    var W = bmp.width, H = bmp.height, s = Math.min(1, maxLado / Math.max(W, H));
+    var c = document.createElement('canvas'); c.width = Math.round(W * s); c.height = Math.round(H * s);
+    var g = c.getContext('2d'); g.drawImage(bmp, 0, 0, c.width, c.height);
+    return c;
+  }
+  function pixeles(canvas) { return canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height); }
+  function rotar(canvas, grados) {
+    var c = document.createElement('canvas'), r = grados % 180 !== 0;
+    c.width = r ? canvas.height : canvas.width; c.height = r ? canvas.width : canvas.height;
+    var g = c.getContext('2d'); g.translate(c.width / 2, c.height / 2); g.rotate(grados * Math.PI / 180); g.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+    return c;
+  }
+
+  // ---- PDF ----
+  var pdfjs = null;
+  async function paginasPDF(file, aviso) {
+    if (!pdfjs) {
+      aviso && aviso('Abriendo el PDF…');
+      pdfjs = await import(url('vendor/pdfjs/pdf.min.mjs'));
+      pdfjs.GlobalWorkerOptions.workerSrc = url('vendor/pdfjs/pdf.worker.min.mjs');
+    }
+    var doc = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise, out = [];
+    for (var i = 1; i <= Math.min(doc.numPages, 6); i++) {
+      var pg = await doc.getPage(i);
+      var tc = await pg.getTextContent(), txt = '';
+      tc.items.forEach(function (it) { txt += it.str + (it.hasEOL ? '\n' : ' '); });
+      var v0 = pg.getViewport({ scale: 1 }), sc = Math.min(4, 2200 / Math.max(v0.width, v0.height));
+      var vp = pg.getViewport({ scale: sc }), c = document.createElement('canvas');
+      c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+      var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+      await pg.render({ canvasContext: g, viewport: vp }).promise;
+      out.push({ canvas: c, texto: txt, pagina: i });
+    }
+    return out;
+  }
+
+  // ---- lectura de la MRZ en una imagen ----
+  async function leerCanvas(canvas, aviso) {
+    var w = await motor(aviso), img = pixeles(canvas), best = null, recorte = null;
+    aviso && aviso('Buscando la zona de lectura…');
+    var cs = ZONA.candidatos(img);
+    for (var k = 0; k < cs.length; k++) {
+      for (var v = 0; v < 2; v++) {
+        var cr = ZONA.recorte(img, cs[k], 0.08, 1500, !!v), cv = aCanvas(cr);
+        var r = MRZ.buscar(await texto(w, cv, '6'))[0];
+        if (r && mejor(best, r) === r) { best = r; recorte = cv; }
+        if (best && best.verificado) return { mrz: best, recorte: recorte };
+      }
+    }
+    // Plan B: la imagen entera, en las 4 orientaciones
+    var rots = [0, 180, 90, 270];
+    for (var j = 0; j < rots.length; j++) {
+      aviso && aviso('Probando otra orientación…');
+      var cvr = rots[j] ? rotar(canvas, rots[j]) : canvas;
+      if (Math.max(cvr.width, cvr.height) > 2000) { var s = 2000 / Math.max(cvr.width, cvr.height), t = document.createElement('canvas'); t.width = cvr.width * s; t.height = cvr.height * s; t.getContext('2d').drawImage(cvr, 0, 0, t.width, t.height); cvr = t; }
+      var r2 = MRZ.buscar(await texto(w, cvr, '3'))[0];
+      if (r2 && (!best || mejor(best, r2) === r2)) { best = r2; recorte = null; }
+      if (best && best.verificado) break;
+    }
+    return { mrz: best, recorte: recorte };
+  }
+  // Recorte elegido a mano por el usuario (rectángulo en coordenadas del canvas):
+  // se amplía la zona marcada, se buscan y enderezan las líneas dentro de ella y se lee
+  async function leerZona(canvas, x, y, ancho, alto) {
+    var w = await motor(), m = 0.04 * ancho;
+    var x0 = Math.max(0, x - m), y0 = Math.max(0, y - m), x1 = Math.min(canvas.width, x + ancho + m), y1 = Math.min(canvas.height, y + alto + m);
+    var esc = Math.min(4, 1800 / (x1 - x0)), sub = document.createElement('canvas');
+    sub.width = Math.round((x1 - x0) * esc); sub.height = Math.round((y1 - y0) * esc);
+    var g = sub.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, sub.width, sub.height);
+    g.imageSmoothingQuality = 'high'; g.drawImage(canvas, x0, y0, x1 - x0, y1 - y0, 0, 0, sub.width, sub.height);
+    var img = pixeles(sub), best = null, recorte = null;
+    var cs = ZONA.candidatos(img);
+    for (var k = 0; k < cs.length && !(best && best.verificado); k++) {
+      for (var v = 0; v < 2; v++) {
+        var cv = aCanvas(ZONA.recorte(img, cs[k], 0.06, 1500, !!v));
+        var r = MRZ.buscar(await texto(w, cv, '6'))[0];
+        if (r && mejor(best, r) === r) { best = r; recorte = cv; }
+        if (best && best.verificado) break;
+      }
+    }
+    for (var u = 0; u < 2 && !(best && best.verificado); u++) {
+      var cv2 = u ? rotar(sub, 180) : sub;
+      var r2 = MRZ.buscar(await texto(w, cv2, '6'))[0];
+      if (r2 && mejor(best, r2) === r2) { best = r2; recorte = cv2; }
+    }
+    return { mrz: best, recorte: recorte };
+  }
+
+  return { motor: motor, cargarImagen: cargarImagen, paginasPDF: paginasPDF, leerCanvas: leerCanvas, leerZona: leerZona };
+})();
+/* ===== Datos del pasajero · interfaz ===== */
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var ST = { pax: [], gds: 'A', docsComp: false, titF: 'MRS', fviaje: '', codpais: '598', hechos: {} };
+  var uid = 1, LIENZOS = {}, ultimo = null;
+  var CONF = ['gds', 'docsComp', 'titF', 'codpais'];
+  try { var g = JSON.parse(localStorage.getItem('hv-pax-conf') || '{}'); CONF.forEach(function (k) { if (g[k] !== undefined) ST[k] = g[k]; }); } catch (e) { }
+  function guardarConf() { try { var o = {}; CONF.forEach(function (k) { o[k] = ST[k]; }); localStorage.setItem('hv-pax-conf', JSON.stringify(o)); } catch (e) { } }
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function iso(d) { return d ? d.y + '-' + (d.m < 10 ? '0' : '') + d.m + '-' + (d.d < 10 ? '0' : '') + d.d : ''; }
+  function deDmy(s) {
+    s = String(s || '').trim(); if (!s) return null;
+    var m = /^(\d{1,2})[\/\-. ](\d{1,2})[\/\-. ](\d{4}|\d{2})$/.exec(s), f = null;
+    if (m) f = { d: +m[1], m: +m[2], y: +m[3] };
+    else { var r = TEXTO.fechas(TEXTO.N(s), 'nac'); if (r.length && r[0].i === 0 && r[0].l >= s.replace(/\s+$/, '').length - 1) f = { d: r[0].d, m: r[0].m, y: r[0].y }; }
+    if (!f) return null;
+    if (f.y < 100) f.y += 2000;
+    var t = new Date(f.y, f.m - 1, f.d);
+    return t.getFullYear() === f.y && t.getMonth() === f.m - 1 && t.getDate() === f.d ? f : null;
+  }
+  function deIso(s) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? { y: +m[1], m: +m[2], d: +m[3] } : null; }
+  function dmy(d) { return d ? (d.d < 10 ? '0' : '') + d.d + '/' + (d.m < 10 ? '0' : '') + d.m + '/' + d.y : ''; }
+  function fecha(d) { return d ? new Date(d.y, d.m - 1, d.d) : null; }
+  function refViaje() { var f = deDmy(ST.fviaje); return f ? fecha(f) : new Date(); }
+  function L(s) { return TEXTO.limpiaNombre(s || ''); }
+  function paisNom(a3) { return a3 && PAISES[a3] ? PAISES[a3][1] : ''; }
+  function toast(t) { var e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(function () { e.classList.remove('on'); }, 1800); }
+  function copiar(t) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t).catch(function () { return viejo(t); });
+    return Promise.resolve(viejo(t));
+    function viejo(x) { var a = document.createElement('textarea'); a.value = x; a.style.position = 'fixed'; a.style.opacity = '0'; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); } catch (e) { } a.remove(); }
+  }
+
+  // ---------- pasajeros desde cada fuente ----------
+  function nuevo(o) {
+    var p = { id: uid++, apellidos: '', nombres: '', sexo: '', nac: null, nacionalidad: '', ppNum: '', ppEmisor: '', ppVenc: null, ciNum: '', ciEmisor: '', ciVenc: null, docUsar: '', email: '', tel: '', tituloManual: '', tipoManual: '', numManual: '', infanteDe: 0, fuentes: [], avisosF: [], ocultos: {}, verificado: null, fotos: [] };
+    for (var k in o) if (o[k] !== undefined && o[k] !== null && o[k] !== '') p[k] = o[k];
+    return p;
+  }
+  function desdeMRZ(r, fuente) {
+    var av = [];
+    var mal = []; if (!r.checks.numero) mal.push('número'); if (!r.checks.nacimiento) mal.push('fecha de nacimiento'); if (!r.checks.vencimiento) mal.push('vencimiento');
+    if (r.checks.general === false && !mal.length) mal.push('control general');
+    if (mal.length) av.push({ t: 'No cerró el dígito verificador de: ' + mal.join(', ') + '. Compará con el documento.', k: 'err' });
+    if (r.truncado) av.push({ t: 'El nombre está cortado en la MRZ: completalo como figura arriba en el documento.', k: 'warn' });
+    if (r.sexo === 'X' || !r.sexo) av.push({ t: 'El documento no indica sexo M/F: elegilo a mano.', k: 'warn' });
+    var o = { apellidos: L(r.apellidos), nombres: L(r.nombres), sexo: r.sexo === 'M' || r.sexo === 'F' ? r.sexo : '', nac: r.nacimiento, nacionalidad: r.nacionalidad, verificado: r.verificado, fuentes: [fuente], avisosF: av };
+    if (r.esPasaporte) {
+      o.ppNum = r.numero; o.ppEmisor = r.emisor; o.ppVenc = r.vencimiento; o.docUsar = 'PP';
+      if (r.emisor === 'URY') { var ci = ciEn(r.opcional); if (ci) { o.ciNum = ci; o.ciEmisor = 'URY'; } }
+    } else {
+      o.ciEmisor = r.emisor; o.ciVenc = r.vencimiento; o.docUsar = 'NI';
+      var c = r.emisor === 'URY' ? ciEn(r.numero + ' ' + r.opcional) : '';
+      o.ciNum = c || r.numero;
+      if (r.emisor === 'URY' && !c) av.push({ t: 'Verificá que el número sea el de la cédula (sin puntos ni guión).', k: 'warn' });
+    }
+    return nuevo(o);
+  }
+  function ciEn(t) {
+    var ds = String(t || '').match(/\d{7,8}/g) || [];
+    for (var i = 0; i < ds.length; i++) if (TEXTO.ciValida(ds[i])) return ds[i];
+    return '';
+  }
+  function desdeTexto(t, fuente) {
+    var av = (t.avisos || []).map(function (a) { return { t: a, k: 'warn' }; });
+    var o = { apellidos: t.apellidos || '', nombres: t.nombres || '', sexo: t.sexo === 'M' || t.sexo === 'F' ? t.sexo : '', nac: t.nacimiento ? { y: t.nacimiento.y, m: t.nacimiento.m, d: t.nacimiento.d } : null, nacionalidad: t.nacionalidad || '', email: t.email || '', tel: t.telefono || '', fuentes: [fuente], avisosF: av };
+    var venc = t.vencimiento ? { y: t.vencimiento.y, m: t.vencimiento.m, d: t.vencimiento.d } : null;
+    if (t.pasaporte) {
+      o.ppNum = t.pasaporte; o.ppVenc = venc; o.docUsar = 'PP';
+      o.ppEmisor = t.nacionalidad || (ST.codpais === '598' ? 'URY' : '');
+      if (!t.nacionalidad && o.ppEmisor) av.push({ t: 'Se tomó el pasaporte como uruguayo (no se indicó el país): verificalo.', k: 'warn' });
+    }
+    if (t.ci) { o.ciNum = t.ci; o.ciEmisor = t.nacionalidad || 'URY'; if (!t.pasaporte) { o.docUsar = 'NI'; o.ciVenc = venc; } }
+    return nuevo(o);
+  }
+  function mismaPersona(a, b) {
+    if (a.ppNum && b.ppNum) return a.ppNum === b.ppNum;
+    if (a.ciNum && b.ciNum && a.ciNum === b.ciNum) return true;
+    var A1 = L(a.apellidos), B1 = L(b.apellidos);
+    if (!A1 || !B1) return false;
+    var na = L(a.nombres).split(' ')[0], nb = L(b.nombres).split(' ')[0];
+    var apOk = A1 === B1 || A1.indexOf(B1 + ' ') === 0 || B1.indexOf(A1 + ' ') === 0;
+    var nOk = na && nb && (na === nb || na.indexOf(nb) === 0 || nb.indexOf(na) === 0);
+    var fOk = !a.nac || !b.nac || iso(a.nac) === iso(b.nac);
+    return apOk && nOk && fOk;
+  }
+  function fusionar(n) {
+    var tieneId = n.apellidos || n.nombres || n.ppNum || n.ciNum;
+    if (!tieneId && (n.email || n.tel)) {
+      var sin = ST.pax.filter(function (p) { return !p.email && !p.tel; });
+      var d = ST.pax.length === 1 ? ST.pax[0] : (sin.length === 1 ? sin[0] : null);
+      if (d) { if (!d.email) d.email = n.email; if (!d.tel) d.tel = n.tel; d.fuentes = d.fuentes.concat(n.fuentes); ultimo = d.id; return d; }
+      return null;
+    }
+    var e = ST.pax.filter(function (p) { return mismaPersona(p, n); })[0];
+    if (!e) { ST.pax.push(n); ultimo = n.id; return n; }
+    var mrz = n.verificado !== null && n.verificado !== undefined;
+    ['sexo', 'nac', 'nacionalidad', 'ppNum', 'ppEmisor', 'ppVenc', 'ciNum', 'ciEmisor', 'ciVenc', 'docUsar', 'email', 'tel'].forEach(function (k) {
+      if (n[k] && (!e[k] || (mrz && /^(sexo|nac|ppNum|ppEmisor|ppVenc|ciVenc)$/.test(k)))) e[k] = n[k];
+    });
+    // nombres: el más completo (la MRZ puede venir cortada)
+    if (L(n.apellidos).length > L(e.apellidos).length) e.apellidos = n.apellidos;
+    if (L(n.nombres).length > L(e.nombres).length) e.nombres = n.nombres;
+    if (mrz) e.verificado = n.verificado;
+    e.fuentes = e.fuentes.concat(n.fuentes);
+    e.avisosF = e.avisosF.concat(n.avisosF.filter(function (a) { return !/nombres y cuáles apellidos/.test(a.t) || !mrz; }));
+    if (mrz) e.avisosF = e.avisosF.filter(function (a) { return !/nombres y cuáles apellidos|como uruguayo/.test(a.t); });
+    e.fotos = e.fotos.concat(n.fotos);
+    ultimo = e.id; return e;
+  }
+
+  // ---------- avisos dinámicos ----------
+  function avisos(p, info) {
+    var a = p.avisosF.filter(function (x, i) { return !p.ocultos[i]; }).map(function (x) { return { t: x.t, k: x.k, i: p.avisosF.indexOf(x) }; });
+    var ref = refViaje(), seis = new Date(ref); seis.setMonth(seis.getMonth() + 6);
+    var tipo = info ? info.tipo : 'ADT';
+    if (!L(p.apellidos)) a.push({ t: 'Falta el apellido.', k: 'err' });
+    if (!L(p.nombres)) a.push({ t: 'Falta el nombre.', k: 'err' });
+    if (!p.sexo) a.push({ t: 'Falta el sexo (M/F) para el DOCS.', k: 'err' });
+    if (!p.nac) a.push({ t: 'Falta la fecha de nacimiento para el DOCS.', k: 'err' });
+    var uso = p.docUsar === 'NI' || (!p.ppNum && p.ciNum) ? 'NI' : 'PP';
+    var v = uso === 'NI' ? p.ciVenc : p.ppVenc;
+    if (v) {
+      var fv = fecha(v);
+      if (fv < ref) a.push({ t: (uso === 'NI' ? 'La cédula' : 'El pasaporte') + ' está VENCIDO (' + dmy(v) + ')' + (ST.fviaje ? ' para la fecha del viaje' : '') + '.', k: 'err' });
+      else if (fv < seis) a.push({ t: 'Vence el ' + dmy(v) + ': menos de 6 meses ' + (ST.fviaje ? 'después del viaje' : 'desde hoy') + '. Varios destinos lo exigen.', k: 'warn' });
+    }
+    if (p.ciNum && (p.ciEmisor || 'URY') === 'URY' && /^\d{7,8}$/.test(p.ciNum) && !TEXTO.ciValida(p.ciNum)) a.push({ t: 'El dígito verificador de la cédula no coincide: revisá el número.', k: 'err' });
+    if (!p.ppNum && !p.ciNum) a.push({ t: 'Sin documento: no se arma el FOID.', k: 'warn' });
+    if (tipo === 'INF' && info && !info.adulto) a.push({ t: 'El infante necesita un adulto con quien viajar.', k: 'err' });
+    if (tipo === 'INF' && info && info.adulto && !p.infanteDe) a.push({ t: 'Se cargó en brazos de ' + nombreDe(info.adulto).trim() + '. Si viaja con otro adulto, elegilo en «Viaja en brazos de».', k: 'ok' });
+    if (p.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email.trim())) a.push({ t: 'El mail no parece válido.', k: 'warn' });
+    return a;
+  }
+
+  // ---------- comandos ----------
+  function limpios() {
+    return ST.pax.map(function (p) {
+      var c = {}; for (var k in p) c[k] = p[k];
+      c.apellidos = L(p.apellidos); c.nombres = L(p.nombres);
+      c.ppNum = String(p.ppNum || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      c.ciNum = String(p.ciNum || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      c.tel = String(p.tel || '').replace(/\D/g, '');
+      c.email = String(p.email || '').trim();
+      return c;
+    });
+  }
+  var ULT = null;
+  function calcular() {
+    ULT = CMD.generar(limpios(), { gds: ST.gds, docsCompleto: ST.docsComp, tituloF: ST.titF, fechaViaje: refViaje(), contactoTodos: true });
+    var info = {};
+    ULT.orden.forEach(function (x) { info[x.p.id] = { n: x.n, tipo: x.tipo, edad: x.edad, tit: x.tit, adulto: x.adulto ? x.adulto.p.id : 0 }; });
+    return info;
+  }
+  var SECS = [['nombres', 'Nombres'], ['docs', 'DOCS'], ['foid', 'FOID'], ['ctc', 'Contactos (CTCE · CTCM)']];
+  function nombreDe(id) { var p = ST.pax.filter(function (x) { return x.id === id; })[0]; return p ? (L(p.nombres).split(' ')[0] || '') + ' ' + (L(p.apellidos).split(' ')[0] || '') : ''; }
+  function renderOut() {
+    $('outT').textContent = 'Comandos para ' + (ST.gds === 'S' ? 'Sabre' : 'Amadeus');
+    var o = $('out');
+    if (!ST.pax.length) { o.innerHTML = '<p class="hint">Los comandos aparecen acá a medida que cargás pasajeros.</p>'; $('copTodo').disabled = true; return; }
+    var h = '<p class="nota-gds">' + (ST.gds === 'S'
+      ? 'Tocá cada línea para copiarla. La asociación <b>-1.1, -2.1…</b> sigue el orden en que se cargan los nombres de esta lista.'
+      : 'Tocá cada línea para copiarla. Amadeus ordena los pasajeros por apellido: los <b>/P1, /P2…</b> siguen ese orden. Si los nombres ya estaban en la reserva, verificá con RT y corregí el N.º en la tarjeta.') + '</p>';
+    var hay = false;
+    SECS.forEach(function (s) {
+      var ls = ULT.secciones[s[0]];
+      if (!ls.length) return;
+      var ok = ls.filter(function (l) { return l.t; });
+      h += '<div class="sec"><div class="sech"><b>' + s[1] + '</b>' + (ok.length > 1 ? '<button type="button" class="s" data-sec="' + s[0] + '">Copiar sección</button>' : '') + '</div>';
+      ls.forEach(function (l) {
+        if (l.t) {
+          hay = true;
+          h += '<button type="button" class="ln' + (ST.hechos[l.t] ? ' hecho' : '') + '" data-t="' + esc(l.t) + '"><span>' + esc(l.t) + '</span>' + (l.nota ? '<span class="nota">' + esc(l.nota) + '</span>' : '') + '<span class="cp">' + (ST.hechos[l.t] ? '✓ copiado' : 'copiar') + '</span></button>';
+        } else h += '<div class="ln falta">Falta ' + esc(l.falta) + (l.id ? ' · ' + esc(nombreDe(l.id)) : '') + '</div>';
+      });
+      h += '</div>';
+    });
+    if (ULT.avisos.length) h += ULT.avisos.map(function (a) { return '<div class="ln falta">' + esc(a) + '</div>'; }).join('');
+    o.innerHTML = h;
+    $('copTodo').disabled = !hay;
+  }
+  function textoSec(k) { return ULT.secciones[k].filter(function (l) { return l.t; }).map(function (l) { return l.t; }); }
+
+  // ---------- tarjetas ----------
+  var DOCS_OPC = '<datalist id="paises">' + Object.keys(PAISES).filter(function (k) { return k.length === 3 && !/^GB[DNOPS]$/.test(k); }).map(function (k) { return '<option value="' + k + '">' + esc(PAISES[k][1]) + '</option>'; }).join('') + '</datalist>';
+  function tarjeta(p, info) {
+    var i = info[p.id] || { tipo: 'ADT', n: '' }, S = ST.gds === 'S';
+    var uso = p.docUsar === 'NI' || (!p.ppNum && p.ciNum) ? 'NI' : 'PP';
+    var adultos = ST.pax.filter(function (q) { return q.id !== p.id && info[q.id] && info[q.id].tipo === 'ADT'; });
+    var h = '<article class="pax" data-id="' + p.id + '">';
+    h += '<div class="ph" data-meta></div>';
+    h += '<div class="pgrid">';
+    h += '<div class="nomrow"><div><label>Apellidos</label><input class="nm" data-f="apellidos" value="' + esc(p.apellidos) + '" autocomplete="off" spellcheck="false"></div>';
+    h += '<div class="mover"><button type="button" data-mv="an" title="Pasar el primer apellido a nombres">◀</button><button type="button" data-mv="na" title="Pasar el último nombre a apellidos">▶</button></div>';
+    h += '<div><label>Nombres</label><input class="nm" data-f="nombres" value="' + esc(p.nombres) + '" autocomplete="off" spellcheck="false"></div></div>';
+    h += '<div class="c3"><label>Sexo</label><div class="sx' + (p.sexo ? '' : ' falta') + '"><button type="button" data-sx="M" class="' + (p.sexo === 'M' ? 'on' : '') + '">M</button><button type="button" data-sx="F" class="' + (p.sexo === 'F' ? 'on' : '') + '">F</button></div></div>';
+    h += '<div class="c4"><label>Nacimiento</label><input data-f="nac" data-fecha="nac" value="' + dmy(p.nac) + '" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" maxlength="11"><div class="small" data-edad></div></div>';
+    h += '<div class="c5"><label>Nacionalidad</label><input data-f="nacionalidad" list="paises" value="' + esc(p.nacionalidad) + '" maxlength="3" autocomplete="off"><div class="small">' + esc(paisNom(p.nacionalidad)) + '</div></div>';
+    h += '<div class="c3"><label>Documento</label><select data-f="docUsar"><option value="PP"' + (uso === 'PP' ? ' selected' : '') + '>Pasaporte</option><option value="NI"' + (uso === 'NI' ? ' selected' : '') + '>Cédula / DNI</option></select></div>';
+    var num = uso === 'NI' ? p.ciNum : p.ppNum, em = uso === 'NI' ? p.ciEmisor : p.ppEmisor, ve = uso === 'NI' ? p.ciVenc : p.ppVenc;
+    h += '<div class="c3"><label>Número</label><input data-f="' + (uso === 'NI' ? 'ciNum' : 'ppNum') + '" value="' + esc(num) + '" autocomplete="off" spellcheck="false" style="text-transform:uppercase"></div>';
+    h += '<div class="c2"><label title="País que emitió el documento">Emisor</label><input data-f="' + (uso === 'NI' ? 'ciEmisor' : 'ppEmisor') + '" list="paises" value="' + esc(em) + '" maxlength="3" autocomplete="off"></div>';
+    h += '<div class="c4"><label>Vencimiento</label><input data-f="' + (uso === 'NI' ? 'ciVenc' : 'ppVenc') + '" data-fecha="venc" value="' + dmy(ve) + '" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" maxlength="11"></div>';
+    h += '<div class="c6"><label>Mail</label><input type="email" data-f="email" value="' + esc(p.email) + '" autocomplete="off" spellcheck="false"></div>';
+    h += '<div class="c6"><label>Celular</label><input type="tel" data-f="tel" value="' + esc(p.tel) + '" autocomplete="off" placeholder="598…"></div>';
+    h += '<div class="c4"><label>Tipo</label><select data-f="tipoManual"><option value="">Automático</option><option value="ADT"' + (p.tipoManual === 'ADT' ? ' selected' : '') + '>Adulto</option><option value="CHD"' + (p.tipoManual === 'CHD' ? ' selected' : '') + '>Niño (2 a 11)</option><option value="INF"' + (p.tipoManual === 'INF' ? ' selected' : '') + '>Infante (menos de 2)</option></select></div>';
+    h += '<div class="c4"><label>Título</label><select data-f="tituloManual"><option value="">Automático</option>' + ['MR', 'MRS', 'MS', 'MSTR', 'MISS'].map(function (t) { return '<option' + (p.tituloManual === t ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select></div>';
+    if (i.tipo === 'INF') h += '<div class="c4"><label>Viaja en brazos de</label><select data-f="infanteDe"><option value="">Automático</option>' + adultos.map(function (q) { return '<option value="' + q.id + '"' + (+p.infanteDe === q.id ? ' selected' : '') + '>' + esc(L(q.nombres).split(' ')[0] + ' ' + L(q.apellidos)) + '</option>'; }).join('') + '</select></div>';
+    else h += '<div class="c4"><label>N.º en la reserva</label><input data-f="numManual" value="' + esc(p.numManual) + '" inputmode="numeric" maxlength="2" placeholder="auto"></div>';
+    h += '</div><ul class="avisos" data-av></ul>';
+    if (p.fotos.length) {
+      h += '<div class="thumbs">';
+      p.fotos.forEach(function (f, k) {
+        if (f.mrz) h += '<img class="mz" src="' + f.mrz + '" alt="Zona leída" data-ver="' + k + '" title="Lo que se leyó (ampliar)">';
+        else if (f.foto) h += '<img src="' + f.foto + '" alt="Documento" data-ver="' + k + '" title="Ver el documento">';
+        if (f.lienzo) h += '<button type="button" class="s" data-rel="' + f.lienzo + '">Marcar la zona a mano</button>';
+      });
+      h += '</div>';
+    }
+    return h + '</article>';
+  }
+  function meta(p, info) {
+    var art = document.querySelector('.pax[data-id="' + p.id + '"]'); if (!art) return;
+    var i = info[p.id] || { tipo: 'ADT' }, S = ST.gds === 'S';
+    var num = i.tipo === 'INF' ? (i.adulto ? 'INF · con ' + (S ? i.n + '.1' : 'P' + i.n) : 'INF') : (S ? i.n + '.1' : 'P' + i.n);
+    var tipoTxt = { ADT: 'Adulto', CHD: 'Niño', INF: 'Infante' }[i.tipo];
+    var src = p.fuentes.filter(function (f, k, a) { return a.indexOf(f) === k; }).join(' · ');
+    var ver = p.verificado === true ? '<span class="tag ok">✓ Documento leído y verificado</span>' : (p.verificado === false ? '<span class="tag warn">Leído con dudas</span>' : '');
+    art.querySelector('[data-meta]').innerHTML = '<span class="num">' + num + '</span><span class="who">' + esc((L(p.apellidos) || '—') + ' / ' + (L(p.nombres) || '—')) + '</span><span class="tag">' + tipoTxt + (i.tit ? ' · ' + i.tit : '') + '</span>' + ver + (src ? '<span class="tag" title="Origen de los datos">' + esc(src) + '</span>' : '') + '<button type="button" class="s del" data-del="' + p.id + '" title="Quitar pasajero">Quitar</button>';
+    var e = art.querySelector('[data-edad]'); if (e) e.textContent = i.edad !== null && i.edad !== undefined ? i.edad + (i.edad === 1 ? ' año' : ' años') + (ST.fviaje ? ' al viajar' : '') : '';
+    var sx = art.querySelector('.sx'); if (sx) sx.classList.toggle('falta', !p.sexo);
+    art.querySelector('[data-av]').innerHTML = avisos(p, i).map(function (a) { return '<li class="' + (a.k === 'err' ? 'err' : (a.k === 'ok' ? 'ok' : '')) + '">' + esc(a.t) + (a.i !== undefined ? ' <button type="button" class="lnk" data-oc="' + a.i + '" title="Ocultar este aviso">ocultar</button>' : '') + '</li>'; }).join('');
+  }
+  function render(todo) {
+    var info = calcular();
+    if (todo) {
+      var c = $('paxs');
+      if (!ST.pax.length) c.innerHTML = '<div class="vacio"><b>Todavía no hay pasajeros.</b><br>Cargá la foto o el PDF del pasaporte, o pegá los datos en texto.</div>';
+      else {
+        var orden = ULT.orden.map(function (x) { return x.p.id; });
+        var ps = ST.pax.slice().sort(function (a, b) { return orden.indexOf(a.id) - orden.indexOf(b.id); });
+        c.innerHTML = ps.map(function (p) { return tarjeta(p, info); }).join('') + DOCS_OPC;
+      }
+      firmaCartas = firma();
+      $('npax').textContent = ST.pax.length ? '(' + ST.pax.length + ')' : '';
+    }
+    ST.pax.forEach(function (p) { meta(p, info); });
+    renderOut();
+    if (todo && ultimo) { var a = document.querySelector('.pax[data-id="' + ultimo + '"]'); if (a) { a.classList.add('marca'); setTimeout(function () { a.classList.remove('marca'); }, 1300); } ultimo = null; }
+  }
+  var tRender = null;
+  function firma() { return JSON.stringify(ULT ? ULT.orden.map(function (x) { return [x.p.id, x.tipo, x.n, x.adulto ? 1 : 0]; }) : []); }
+  var firmaCartas = '';
+  // Mientras se escribe sólo se actualizan encabezados, avisos y comandos (sin reconstruir las tarjetas)
+  function cambio() {
+    clearTimeout(tRender);
+    tRender = setTimeout(function () { render(false); }, 90);
+  }
+  // Reconstruye las tarjetas (orden, tipo) conservando el campo donde estaba el cursor
+  function rehacer() {
+    var a = document.activeElement, art = a && a.closest && a.closest('.pax'), f = a && a.getAttribute && a.getAttribute('data-f');
+    var id = art && art.getAttribute('data-id'), sel = a && typeof a.selectionStart === 'number' ? a.selectionStart : null;
+    render(true);
+    if (id && f) { var n = document.querySelector('.pax[data-id="' + id + '"] [data-f="' + f + '"]'); if (n) { n.focus(); try { if (sel !== null) n.setSelectionRange(sel, sel); } catch (e) { } } }
+  }
+  $('paxs').addEventListener('focusout', function () {
+    setTimeout(function () { calcular(); if (firma() !== firmaCartas) rehacer(); }, 0);
+  });
+  function porId(id) { return ST.pax.filter(function (p) { return p.id === +id; })[0]; }
+
+  // eventos de las tarjetas
+  $('paxs').addEventListener('input', function (e) {
+    var f = e.target.getAttribute('data-f'), art = e.target.closest('.pax'); if (!f || !art) return;
+    var p = porId(art.getAttribute('data-id')), v = e.target.value;
+    if (/^(nac|ppVenc|ciVenc)$/.test(f)) {
+      var fd = deDmy(v);
+      // año de 2 cifras en nacimiento: siglo pasado si quedaría en el futuro
+      if (fd && f === 'nac' && /\d{2}$/.test(v.trim()) && !/\d{4}$/.test(v.trim()) && new Date(fd.y, fd.m - 1, fd.d) > new Date()) fd.y -= 100;
+      p[f] = fd; e.target.classList.toggle('mal', !!v.trim() && !fd);
+    }
+    else if (/^(nacionalidad|ppEmisor|ciEmisor)$/.test(f)) p[f] = v.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
+    else if (f === 'infanteDe') p[f] = +v || 0;
+    else p[f] = v;
+    cambio();
+  });
+  $('paxs').addEventListener('change', function (e) {
+    var f = e.target.getAttribute('data-f'), art = e.target.closest('.pax'); if (!f || !art) return;
+    var p = porId(art.getAttribute('data-id'));
+    if (f === 'apellidos' || f === 'nombres') { p[f] = L(e.target.value); e.target.value = p[f]; }
+    if (/^(nac|ppVenc|ciVenc)$/.test(f) && p[f]) { e.target.value = dmy(p[f]); e.target.classList.remove('mal'); }
+    if (f === 'tel' && p.tel) { var t = TEXTO.telefono(p.tel, ST.codpais); if (t) { p.tel = t.num; e.target.value = t.num; if (t.aviso) toast(t.aviso); } }
+    if (/^(nacionalidad|ppEmisor|ciEmisor)$/.test(f)) { e.target.value = p[f]; if (p[f] && !PAISES[p[f]]) toast('Código de país desconocido: usá el de 3 letras (URY, ARG, BRA…)'); }
+    if (f === 'docUsar' || f === 'tipoManual' || f === 'infanteDe') { rehacer(); return; }
+    cambio();
+  });
+  $('paxs').addEventListener('click', function (e) {
+    var b = e.target.closest('button,img'); if (!b) return;
+    var art = b.closest('.pax'), p = art && porId(art.getAttribute('data-id'));
+    if (b.hasAttribute('data-del')) { ST.pax = ST.pax.filter(function (q) { return q !== p; }); render(true); toast('Pasajero quitado'); return; }
+    if (b.hasAttribute('data-sx')) { p.sexo = b.getAttribute('data-sx'); art.querySelectorAll('[data-sx]').forEach(function (x) { x.classList.toggle('on', x === b); }); cambio(); return; }
+    if (b.hasAttribute('data-mv')) {
+      var A = L(p.apellidos).split(' ').filter(Boolean), N = L(p.nombres).split(' ').filter(Boolean);
+      if (b.getAttribute('data-mv') === 'an' && A.length > 1) N.push(A.shift());
+      else if (b.getAttribute('data-mv') === 'na' && N.length > 1) A.unshift(N.pop());
+      p.apellidos = A.join(' '); p.nombres = N.join(' ');
+      art.querySelector('[data-f=apellidos]').value = p.apellidos; art.querySelector('[data-f=nombres]').value = p.nombres;
+      p.avisosF.forEach(function (a, k) { if (/nombres y cuáles apellidos/.test(a.t)) p.ocultos[k] = 1; });
+      cambio(); return;
+    }
+    if (b.hasAttribute('data-oc')) { p.ocultos[+b.getAttribute('data-oc')] = 1; render(false); return; }
+    if (b.hasAttribute('data-ver')) { var f = p.fotos[+b.getAttribute('data-ver')]; verImagen(f.lienzo && LIENZOS[f.lienzo] ? LIENZOS[f.lienzo] : null, f.mrz || f.foto); return; }
+    if (b.hasAttribute('data-rel')) { zonaManual(b.getAttribute('data-rel'), p.id); return; }
+  });
+
+  // comandos: copiar
+  $('out').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-t')) { var t = b.getAttribute('data-t'); copiar(t).then(function () { ST.hechos[t] = 1; b.classList.add('hecho'); b.querySelector('.cp').textContent = '✓ copiado'; toast('Copiado: ' + t.slice(0, 40)); }); }
+    if (b.hasAttribute('data-sec')) { var ls = textoSec(b.getAttribute('data-sec')); copiar(ls.join('\n')).then(function () { ls.forEach(function (t) { ST.hechos[t] = 1; }); renderOut(); toast(ls.length + ' líneas copiadas'); }); }
+  });
+  $('copTodo').addEventListener('click', function () {
+    var ls = []; SECS.forEach(function (s) { ls = ls.concat(textoSec(s[0])); });
+    copiar(ls.join('\n')).then(function () { ls.forEach(function (t) { ST.hechos[t] = 1; }); renderOut(); toast(ls.length + ' líneas copiadas'); });
+  });
+
+  // ---------- texto ----------
+  function leerTexto() {
+    var t = $('txt').value; if (!t.trim()) { toast('Pegá primero los datos en el recuadro'); return; }
+    var r = TEXTO.parse(t, { codPais: ST.codpais }), n = 0, antes = ST.pax.length;
+    r.pasajeros.forEach(function (x) { var q = x.mrz ? desdeMRZ(x.mrz, 'MRZ pegada') : desdeTexto(x, 'texto'); if (fusionar(q)) n++; });
+    if (!n) { toast('No encontré datos de pasajeros en el texto'); return; }
+    var nuevos = ST.pax.length - antes;
+    render(true);
+    toast(nuevos ? (nuevos === 1 ? 'Se agregó 1 pasajero' : 'Se agregaron ' + nuevos + ' pasajeros') : 'Datos sumados al pasajero existente');
+  }
+  $('leer').addEventListener('click', leerTexto);
+  $('txt').addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); leerTexto(); } });
+  $('manual').addEventListener('click', function () {
+    var p = nuevo({ fuentes: ['a mano'] }); ST.pax.push(p); ultimo = p.id; render(true);
+    var i = document.querySelector('.pax[data-id="' + p.id + '"] [data-f=apellidos]'); if (i) { i.focus(); i.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  });
+  $('limpiar').addEventListener('click', function () {
+    if ((ST.pax.length || $('txt').value) && !confirm('¿Borrar todos los pasajeros cargados y el texto?')) return;
+    ST.pax = []; ST.hechos = {}; $('txt').value = ''; $('cola').innerHTML = ''; LIENZOS = {}; render(true);
+  });
+
+  // ---------- archivos ----------
+  function miniatura(canvas, ancho, tipo) {
+    var s = Math.min(1, ancho / canvas.width), c = document.createElement('canvas');
+    c.width = Math.round(canvas.width * s); c.height = Math.round(canvas.height * s);
+    c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height);
+    return c.toDataURL(tipo || 'image/jpeg', 0.82);
+  }
+  var nLienzo = 0;
+  function itemCola(nombre) {
+    var li = document.createElement('li');
+    li.innerHTML = '<span class="spin"></span><span class="nom">' + esc(nombre) + '</span><span class="est">En espera…</span>';
+    $('cola').appendChild(li);
+    return {
+      li: li, estado: function (t) { li.querySelector('.est').textContent = t; },
+      fin: function (cls, t, extra) { li.className = cls; var sp = li.querySelector('.spin'); if (sp) sp.remove(); li.querySelectorAll('button').forEach(function (b) { b.remove(); }); li.querySelector('.est').textContent = t; if (extra) li.appendChild(extra); }
+    };
+  }
+  function agregarLectura(res, canvas, nombre, it) {
+    var key = 'L' + (++nLienzo); LIENZOS[key] = canvas;
+    if (!res.mrz) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 's'; b.textContent = 'Marcar a mano';
+      b.onclick = function () { zonaManual(key, 0, it); };
+      it.fin('warn', 'No encontré la zona de lectura', b);
+      return;
+    }
+    var p = desdeMRZ(res.mrz, nombre);
+    p.fotos = [{ foto: miniatura(canvas, 420), mrz: res.recorte ? miniatura(res.recorte, 640, 'image/png') : '', lienzo: key }];
+    fusionar(p);
+    it.fin(res.mrz.verificado ? 'ok' : 'warn', (res.mrz.verificado ? '✓ ' : 'Con dudas: ') + L(res.mrz.apellidos).split(' ')[0]);
+    render(true);
+  }
+  var colaTrabajo = Promise.resolve();
+  function procesar(files) {
+    files = Array.prototype.slice.call(files || []).filter(function (f) { return /^image\//.test(f.type) || /pdf$/i.test(f.type) || /\.(pdf|jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(f.name); });
+    if (!files.length) { toast('Elegí imágenes (JPG, PNG) o PDF'); return; }
+    files.forEach(function (f) {
+      var nombre = f.name && !/^image\.(png|jpe?g)$/i.test(f.name) ? f.name : 'captura';
+      var it = itemCola(nombre);
+      colaTrabajo = colaTrabajo.then(async function () {
+        try {
+          if (/pdf$/i.test(f.type) || /\.pdf$/i.test(f.name)) {
+            var pags = await OCR.paginasPDF(f, it.estado), algo = false;
+            for (var k = 0; k < pags.length; k++) {
+              var pg = pags[k], etq = nombre + (pags.length > 1 ? ' (pág. ' + pg.pagina + ')' : '');
+              var tx = pg.texto.trim().length > 40 ? TEXTO.parse(pg.texto, { codPais: ST.codpais }).pasajeros : [];
+              var conMrz = tx.filter(function (x) { return x.mrz; });
+              if (conMrz.length) { conMrz.forEach(function (x) { var q = desdeMRZ(x.mrz, etq); q.fotos = [{ foto: miniatura(pg.canvas, 420), lienzo: (LIENZOS['L' + (++nLienzo)] = pg.canvas, 'L' + nLienzo) }]; fusionar(q); }); algo = true; continue; }
+              it.estado('Leyendo página ' + pg.pagina + '…');
+              var r = await OCR.leerCanvas(pg.canvas, it.estado);
+              if (r.mrz) { agregarLectura(r, pg.canvas, etq, it); algo = true; }
+              else if (tx.length) { tx.forEach(function (x) { fusionar(desdeTexto(x, etq)); }); algo = true; }
+            }
+            if (algo) { it.fin('ok', '✓ Leído'); render(true); }
+            else agregarLectura({ mrz: null }, pags[0].canvas, nombre, it);
+          } else {
+            it.estado('Abriendo…');
+            var cv = await OCR.cargarImagen(f);
+            var res = await OCR.leerCanvas(cv, it.estado);
+            agregarLectura(res, cv, nombre, it);
+          }
+        } catch (err) {
+          console.error(err);
+          it.fin('err', err && err.message ? err.message : 'No se pudo leer el archivo');
+        }
+      });
+    });
+  }
+  $('elegir').addEventListener('click', function (e) { e.stopPropagation(); $('file').click(); });
+  $('drop').addEventListener('click', function () { $('file').click(); });
+  $('drop').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('file').click(); } });
+  $('file').addEventListener('change', function () { procesar(this.files); this.value = ''; });
+  ['dragenter', 'dragover'].forEach(function (t) { $('drop').addEventListener(t, function (e) { e.preventDefault(); $('drop').classList.add('sobre'); }); });
+  ['dragleave', 'drop'].forEach(function (t) { $('drop').addEventListener(t, function () { $('drop').classList.remove('sobre'); }); });
+  $('drop').addEventListener('drop', function (e) { e.preventDefault(); procesar(e.dataTransfer.files); });
+  window.addEventListener('dragover', function (e) { e.preventDefault(); });
+  window.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer && e.dataTransfer.files.length) procesar(e.dataTransfer.files); });
+  document.addEventListener('paste', function (e) {
+    var it = e.clipboardData && e.clipboardData.items, fs = [];
+    for (var i = 0; it && i < it.length; i++) if (it[i].kind === 'file') { var f = it[i].getAsFile(); if (f) fs.push(f); }
+    if (fs.length) { e.preventDefault(); procesar(fs); }
+  });
+
+  // ---------- modal: ver imagen / marcar zona ----------
+  var MZ = { canvas: null, key: '', paxId: 0, it: null, sel: null, modo: '' };
+  function abrirModal(src, modo) {
+    MZ.canvas = src; MZ.modo = modo;
+    var mc = $('mCanvas'), maxW = Math.min(window.innerWidth * 0.9, 1060), maxH = window.innerHeight * 0.72;
+    var s = Math.min(maxW / src.width, maxH / src.height, 1);
+    mc.width = Math.round(src.width * s); mc.height = Math.round(src.height * s);
+    mc.getContext('2d').drawImage(src, 0, 0, mc.width, mc.height);
+    MZ.esc = s; $('mSel').hidden = true; $('mEstado').textContent = '';
+    $('mT').textContent = modo === 'ver' ? 'Documento' : 'Marcá la zona de lectura';
+    $('mHint').hidden = modo === 'ver'; $('mGirar').hidden = modo === 'ver';
+    mc.style.cursor = modo === 'ver' ? 'default' : 'crosshair';
+    $('modal').hidden = false;
+  }
+  function cerrarModal() { $('modal').hidden = true; MZ.canvas = null; }
+  function verImagen(canvas, dataUrl) {
+    if (canvas) { abrirModal(canvas, 'ver'); return; }
+    var im = new Image(); im.onload = function () { var c = document.createElement('canvas'); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); abrirModal(c, 'ver'); }; im.src = dataUrl;
+  }
+  function zonaManual(key, paxId, it) { var c = LIENZOS[key]; if (!c) { toast('La imagen ya no está disponible: cargala de nuevo'); return; } MZ.key = key; MZ.paxId = paxId; MZ.it = it || null; abrirModal(c, 'zona'); }
+  $('mCerrar').addEventListener('click', cerrarModal);
+  $('modal').addEventListener('click', function (e) { if (e.target === $('modal')) cerrarModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('modal').hidden) cerrarModal(); });
+  $('mGirar').addEventListener('click', function () {
+    var s = MZ.canvas, c = document.createElement('canvas'); c.width = s.height; c.height = s.width;
+    var g = c.getContext('2d'); g.translate(c.width / 2, c.height / 2); g.rotate(Math.PI / 2); g.drawImage(s, -s.width / 2, -s.height / 2);
+    LIENZOS[MZ.key] = c; abrirModal(c, 'zona');
+  });
+  (function () {
+    var mc = $('mCanvas'), sel = $('mSel'), ini = null;
+    function pos(e) { var r = mc.getBoundingClientRect(), t = e.touches ? e.touches[0] : e; return { x: Math.max(0, Math.min(r.width, t.clientX - r.left)), y: Math.max(0, Math.min(r.height, t.clientY - r.top)), r: r }; }
+    function down(e) { if (MZ.modo !== 'zona') return; e.preventDefault(); ini = pos(e); sel.hidden = false; mover(e); }
+    function mover(e) {
+      if (!ini) return; e.preventDefault(); var p = pos(e), k = mc.width / p.r.width;
+      var x = Math.min(ini.x, p.x), y = Math.min(ini.y, p.y), w = Math.abs(p.x - ini.x), h = Math.abs(p.y - ini.y);
+      sel.style.left = (x + mc.offsetLeft) + 'px'; sel.style.top = (y + mc.offsetTop) + 'px'; sel.style.width = w + 'px'; sel.style.height = h + 'px';
+      MZ.sel = { x: x * k / MZ.esc, y: y * k / MZ.esc, w: w * k / MZ.esc, h: h * k / MZ.esc };
+    }
+    async function up() {
+      if (!ini) return; ini = null;
+      var s = MZ.sel; if (!s || s.w < 30 || s.h < 10) { sel.hidden = true; return; }
+      $('mEstado').innerHTML = '<span class="spin" style="display:inline-block;vertical-align:middle"></span> Leyendo…';
+      try {
+        var r = await OCR.leerZona(MZ.canvas, s.x, s.y, s.w, s.h);
+        if (!r.mrz) { $('mEstado').textContent = 'No se pudo leer: probá marcando sólo las líneas con <<<, un poco más amplio.'; return; }
+        var p = desdeMRZ(r.mrz, 'zona marcada');
+        p.fotos = [{ foto: miniatura(MZ.canvas, 420), mrz: r.recorte ? miniatura(r.recorte, 640, 'image/png') : '', lienzo: MZ.key }];
+        if (MZ.paxId) { var vie = porId(MZ.paxId); if (vie) ST.pax = ST.pax.filter(function (q) { return q !== vie; }); if (vie) { ['email', 'tel', 'tituloManual', 'tipoManual', 'numManual', 'infanteDe'].forEach(function (k) { if (vie[k]) p[k] = vie[k]; }); } }
+        fusionar(p);
+        if (MZ.it) MZ.it.fin(r.mrz.verificado ? 'ok' : 'warn', (r.mrz.verificado ? '✓ ' : 'Con dudas: ') + L(r.mrz.apellidos).split(' ')[0]);
+        cerrarModal(); render(true); toast(r.mrz.verificado ? 'Leído y verificado' : 'Leído con dudas: revisá los datos');
+      } catch (err) { $('mEstado').textContent = err.message || 'Error al leer'; }
+    }
+    mc.addEventListener('mousedown', down); window.addEventListener('mousemove', mover); window.addEventListener('mouseup', up);
+    mc.addEventListener('touchstart', down, { passive: false }); mc.addEventListener('touchmove', mover, { passive: false }); mc.addEventListener('touchend', up);
+  })();
+
+  // ---------- opciones ----------
+  function sincOpc() {
+    document.querySelectorAll('#gds button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-g') === ST.gds); });
+    $('docsComp').checked = !!ST.docsComp; $('titF').value = ST.titF; $('codpais').value = ST.codpais; $('fviaje').value = ST.fviaje;
+  }
+  $('gds').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; ST.gds = b.getAttribute('data-g'); guardarConf(); sincOpc(); render(true); });
+  $('docsComp').addEventListener('change', function () { ST.docsComp = this.checked; guardarConf(); render(false); });
+  $('titF').addEventListener('change', function () { ST.titF = this.value; guardarConf(); render(false); });
+  $('codpais').addEventListener('change', function () { ST.codpais = this.value.replace(/\D/g, '') || '598'; this.value = ST.codpais; guardarConf(); });
+  $('fviaje').addEventListener('change', function () {
+    var f = deDmy(this.value); this.classList.toggle('mal', !!this.value.trim() && !f);
+    if (f || !this.value.trim()) { ST.fviaje = f ? dmy(f) : ''; this.value = ST.fviaje; render(true); }
+  });
+  sincOpc(); render(true);
+  // precarga del lector en segundo plano cuando la página queda quieta
+  if ('requestIdleCallback' in window) requestIdleCallback(function () { OCR.motor().catch(function () { }); }, { timeout: 6000 });
+})();
+</script></body></html>
