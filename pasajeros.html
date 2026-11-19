@@ -127,7 +127,7 @@ label.chk input{margin-top:2px;accent-color:var(--sky)}
   <img src="pax-fav/favicon-32.png?v=1" alt="" width="30" height="30" class="logo">
   <h1>Datos del pasajero</h1>
   <span class="hint" style="margin:0">Pasaporte, cédula o texto → nombres, DOCS, FOID y contactos para el GDS</span>
-  <span class="hint ver">versión 19/11 16:30</span>
+  <span class="hint ver">versión 19/11 16:31</span>
   <a href="index.html" class="volver">← Volver a Tu Itinerario</a>
 </header>
 <div class="wrap">
@@ -1756,9 +1756,16 @@ var OCR = (function () {
     var p = nuevo({ fuentes: ['a mano'] }); ST.pax.push(p); ultimo = p.id; render(true);
     var i = document.querySelector('.pax[data-id="' + p.id + '"] [data-f=apellidos]'); if (i) { i.focus(); i.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
   });
+  // Confirmación en la misma página (los cuadros confirm() no funcionan en todos los navegadores embebidos)
   $('limpiar').addEventListener('click', function () {
-    if ((ST.pax.length || $('txt').value) && !confirm('¿Borrar todos los pasajeros cargados y el texto?')) return;
-    ST.pax = []; ST.hechos = {}; $('txt').value = ''; $('cola').innerHTML = ''; LIENZOS = {}; render(true);
+    var b = this;
+    if ((ST.pax.length || $('txt').value) && !b.dataset.ok) {
+      b.dataset.ok = '1'; b.textContent = '¿Borrar todo? Tocá de nuevo';
+      clearTimeout(b._t); b._t = setTimeout(function () { delete b.dataset.ok; b.textContent = 'Limpiar todo'; }, 3500);
+      return;
+    }
+    clearTimeout(b._t); delete b.dataset.ok; b.textContent = 'Limpiar todo';
+    ST.pax = []; ST.hechos = {}; $('txt').value = ''; $('cola').innerHTML = ''; LIENZOS = {}; render(true); toast('Se borraron los pasajeros');
   });
 
   // ---------- archivos ----------

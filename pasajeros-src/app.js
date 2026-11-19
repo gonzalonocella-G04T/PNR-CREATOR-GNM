@@ -340,9 +340,16 @@
     var p = nuevo({ fuentes: ['a mano'] }); ST.pax.push(p); ultimo = p.id; render(true);
     var i = document.querySelector('.pax[data-id="' + p.id + '"] [data-f=apellidos]'); if (i) { i.focus(); i.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
   });
+  // Confirmación en la misma página (los cuadros confirm() no funcionan en todos los navegadores embebidos)
   $('limpiar').addEventListener('click', function () {
-    if ((ST.pax.length || $('txt').value) && !confirm('¿Borrar todos los pasajeros cargados y el texto?')) return;
-    ST.pax = []; ST.hechos = {}; $('txt').value = ''; $('cola').innerHTML = ''; LIENZOS = {}; render(true);
+    var b = this;
+    if ((ST.pax.length || $('txt').value) && !b.dataset.ok) {
+      b.dataset.ok = '1'; b.textContent = '¿Borrar todo? Tocá de nuevo';
+      clearTimeout(b._t); b._t = setTimeout(function () { delete b.dataset.ok; b.textContent = 'Limpiar todo'; }, 3500);
+      return;
+    }
+    clearTimeout(b._t); delete b.dataset.ok; b.textContent = 'Limpiar todo';
+    ST.pax = []; ST.hechos = {}; $('txt').value = ''; $('cola').innerHTML = ''; LIENZOS = {}; render(true); toast('Se borraron los pasajeros');
   });
 
   // ---------- archivos ----------
