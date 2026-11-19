@@ -14,11 +14,13 @@ var OCR = (function () {
     if (!cargando) cargando = (async function () {
       aviso && aviso('Preparando el lector (sólo la primera vez)…');
       if (typeof Tesseract === 'undefined') await script(url('vendor/ocr/tesseract.min.js'));
-      var w = await Tesseract.createWorker('mrz', 1, {
+      if (typeof MRZ_MODELO === 'undefined') await script(url('vendor/ocr/lang/mrz-modelo.js'));
+      var b = atob(MRZ_MODELO), datos = new Uint8Array(b.length);
+      for (var i = 0; i < b.length; i++) datos[i] = b.charCodeAt(i);
+      var w = await Tesseract.createWorker([{ code: 'mrz', data: datos }], 1, {
         workerPath: url('vendor/ocr/worker.min.js'),
         corePath: url('vendor/ocr').replace(/\/$/, ''),
-        langPath: url('vendor/ocr/lang').replace(/\/$/, ''),
-        gzip: true,
+        cacheMethod: 'none',
         workerBlobURL: false
       });
       await w.setParameters({ tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<' });

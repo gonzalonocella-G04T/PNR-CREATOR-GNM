@@ -127,7 +127,7 @@ label.chk input{margin-top:2px;accent-color:var(--sky)}
   <img src="pax-fav/favicon-32.png?v=1" alt="" width="30" height="30" class="logo">
   <h1>Datos del pasajero</h1>
   <span class="hint" style="margin:0">Pasaporte, cédula o texto → nombres, DOCS, FOID y contactos para el GDS</span>
-  <span class="hint ver">versión 19/11 16:32</span>
+  <span class="hint ver">versión 19/11 16:50</span>
   <a href="index.html" class="volver">← Volver a Tu Itinerario</a>
 </header>
 <div class="wrap">
@@ -1293,11 +1293,13 @@ var OCR = (function () {
     if (!cargando) cargando = (async function () {
       aviso && aviso('Preparando el lector (sólo la primera vez)…');
       if (typeof Tesseract === 'undefined') await script(url('vendor/ocr/tesseract.min.js'));
-      var w = await Tesseract.createWorker('mrz', 1, {
+      if (typeof MRZ_MODELO === 'undefined') await script(url('vendor/ocr/lang/mrz-modelo.js'));
+      var b = atob(MRZ_MODELO), datos = new Uint8Array(b.length);
+      for (var i = 0; i < b.length; i++) datos[i] = b.charCodeAt(i);
+      var w = await Tesseract.createWorker([{ code: 'mrz', data: datos }], 1, {
         workerPath: url('vendor/ocr/worker.min.js'),
         corePath: url('vendor/ocr').replace(/\/$/, ''),
-        langPath: url('vendor/ocr/lang').replace(/\/$/, ''),
-        gzip: true,
+        cacheMethod: 'none',
         workerBlobURL: false
       });
       await w.setParameters({ tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<' });
