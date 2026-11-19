@@ -402,7 +402,9 @@ var TEXTO = (function () {
       if (tieneDatos(p)) res.push(p);
       else if (p.email || p.telefono) sueltos.push(p);
     });
-    // contactos sin nombre: al pasajero anterior que no tenga, o al único pasajero
+    // contactos sin nombre: al pasajero anterior que no tenga, o al único pasajero.
+    // Si el texto no trae pasajeros, se devuelven solos para sumarlos a los que ya están cargados.
+    if (!res.length) return { pasajeros: sueltos, avisos: avisos };
     sueltos.forEach(function (s) {
       var dest = res.filter(function (p) { return !p.email && !p.telefono; });
       var d = res.length === 1 ? res[0] : dest[0];

@@ -23,5 +23,7 @@ var t = TEXTO.parse('Nombre: Gonzalo Andrés Nocella Massaferro\nFecha de nacimi
 eq('texto con etiquetas', [t.apellidos, t.nombres, t.pasaporte, t.telefono], ['NOCELLA MASSAFERRO', 'GONZALO ANDRES', 'D345678', '59898584260']);
 eq('cédula uruguaya válida', [TEXTO.ciValida('1.234.567-2'), TEXTO.ciValida('1.234.567-8')], [true, false]);
 eq('celular uruguayo', TEXTO.telefono('098 584 260').num, '59898584260');
+var soloCtc = TEXTO.parse('Mail: gnocella@hiperviajes.com.uy\nCel: 098 584 260').pasajeros;
+eq('sólo contactos', [soloCtc.length, soloCtc[0] && soloCtc[0].email, soloCtc[0] && soloCtc[0].telefono], [1, 'gnocella@hiperviajes.com.uy', '59898584260']);
 console.log(fallas ? '\n' + fallas + ' pruebas fallaron' : '\nTodo bien');
 process.exit(fallas ? 1 : 0);
