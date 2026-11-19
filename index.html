@@ -1243,7 +1243,7 @@ function passA(it, calc, o) {
     var lbl = jLabel(calc, ix);
     body += '<table width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#0C7A76" style="border-collapse:separate;background:#0C7A76;background-image:linear-gradient(90deg,#0A6E6C,#17A28F);border-radius:10px"><tr><td style="padding:7px 16px"><table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr>' +
       '<td style="padding:0 10px 0 0;vertical-align:middle"><img src="' + pimg('pass-plane-white.png', o) + '" alt="" width="20" height="20" style="display:block;width:20px;min-width:20px;max-width:none;height:auto;border:0"></td>' +
-      '<td style="' + F + 'padding:0;vertical-align:middle;font-size:15px;color:#FFFFFF;white-space:nowrap"><b style="letter-spacing:0.6px">' + esc(lbl.toUpperCase()) + '</b>&nbsp; · &nbsp;' + esc(U.apCity(j.from)) + ' → ' + esc(U.apCity(j.to)) + '</td></tr></table></td></tr></table>';
+      '<td style="' + F + 'padding:0;vertical-align:middle;font-size:15px;color:#FFFFFF;white-space:nowrap"><b style="letter-spacing:0.6px">' + esc(lbl.toUpperCase()) + '</b>&nbsp; · &nbsp;' + '<span style="' + PB_CITY + '">' + esc(U.apCity(j.from)) + ' → ' + esc(U.apCity(j.to)) + '</span>' + '</td></tr></table></td></tr></table>';
     j.segs.forEach(function (s, k) {
       body += '<div style="height:10px;font-size:1px;line-height:10px">&nbsp;</div>' + card(s, k < j.layovers.length ? j.layovers[k] : null);
     });
@@ -1259,6 +1259,8 @@ function passHTML(it, calc, o) {
   return n <= 2 ? passA(it, calc, o) : (n <= 4 ? passB(it, calc, o) : passC(it, calc, o));
 }
 /* piezas comunes de los boarding pass */
+/* ciudades de la barra de cada tramo (IDA · Origen → Destino): más grandes y en negrita para que se lean sin esfuerzo */
+var PB_CITY = 'font-size:19px;font-weight:bold;letter-spacing:0.2px';
 /* Versión Hiperviajes: misma pieza, pasada al celeste de la marca (#53C0D7) */
 var HVC = { '#1B6368': '#1F8FAA', '#1A474B': '#173F4D', '#465F5C': '#4A5F66', '#345E59': '#36596A', '#C9ECE8': '#C3E7F1', '#0C7A76': '#1E8FAA', '#0A6E6C': '#1B86A0', '#17A28F': '#53C0D7',
   '#F4FEFD': '#F3FBFD', '#E4FCF9': '#C9EDF6', '#E3FCF9': '#E0F4F9', '#EEFDFB': '#ECF8FB', '#F6FDFC': '#F5FBFD', '#DCF3F1': '#D3ECF4', '#D6F3F0': '#CDE8F1', '#E3F4F2': '#E0F0F5',
@@ -1324,7 +1326,7 @@ function passB(it, calc, o) {
     var dw = U.fmtDate(d0).split(' '), dlab = dw[0].charAt(0).toUpperCase() + dw[0].slice(1) + ', ' + dw[1] + ' ' + dw[2] + (d0.y !== firstYear ? ' ' + d0.y : '');
     body += '<table width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#0C7A76" style="border-collapse:separate;background:#0C7A76;background-image:linear-gradient(90deg,#0A6E6C,#17A28F);border-radius:22px"><tr>' +
       '<td style="padding:7px 18px"><table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr><td style="padding:0 12px 0 0;vertical-align:middle">' + pbImg('pass-plane-white.png', o, 22, 22) + '</td>' +
-      '<td style="' + F + 'padding:0;vertical-align:middle;font-size:15px;color:#FFFFFF;white-space:nowrap"><b style="letter-spacing:0.6px">' + esc(lbl.toUpperCase()) + '</b>&nbsp; · &nbsp;' + esc(U.apCity(j.from)) + ' → ' + esc(U.apCity(j.to)) + '</td></tr></table></td>' +
+      '<td style="' + F + 'padding:0;vertical-align:middle;font-size:15px;color:#FFFFFF;white-space:nowrap"><b style="letter-spacing:0.6px">' + esc(lbl.toUpperCase()) + '</b>&nbsp; · &nbsp;' + '<span style="' + PB_CITY + '">' + esc(U.apCity(j.from)) + ' → ' + esc(U.apCity(j.to)) + '</span>' + '</td></tr></table></td>' +
       '</tr></table>' +
       '<div style="height:8px;font-size:1px;line-height:8px">&nbsp;</div>';
     var rows = '';
@@ -1413,7 +1415,7 @@ function passC(it, calc, o) {
     var bBg = o.hv ? '#53C0D7' : '#E3FCF9';
     body += '<table width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="' + bBg + '" style="border-collapse:separate;background:' + bBg + ';' + 'border-radius:10px"><tr>' +
       '<td style="padding:8px 18px"><table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr><td style="padding:0 14px 0 0;vertical-align:middle">' + pbImg(o.hv ? 'pass-plane-white.png' : 'ic-plane-cyan.png', o, 24, 24) + '</td>' +
-      '<td style="' + F + 'padding:0;vertical-align:middle;font-size:16px;color:' + (o.hv ? '#FFFFFF;' + HVTS : PB.NAVY) + ';white-space:nowrap"><b style="letter-spacing:0.5px">' + esc(lbl.toUpperCase()) + '</b>&nbsp; · &nbsp;' + esc(U.apCity(j.from)) + ' → ' + esc(U.apCity(j.to)) + '</td></tr></table></td>' +
+      '<td style="' + F + 'padding:0;vertical-align:middle;font-size:16px;color:' + (o.hv ? '#FFFFFF;' + HVTS : PB.NAVY) + ';white-space:nowrap"><b style="letter-spacing:0.5px">' + esc(lbl.toUpperCase()) + '</b>&nbsp; · &nbsp;' + '<span style="' + PB_CITY + '">' + esc(U.apCity(j.from)) + ' → ' + esc(U.apCity(j.to)) + '</span>' + '</td></tr></table></td>' +
       '<td align="right" style="padding:8px 16px;text-align:right;vertical-align:middle">' + pbImg(o.hv ? 'dots-plane-white.png' : 'dots-plane.png', o, 150, 15, 'margin-left:auto') + '</td></tr></table>' +
       '<div style="height:8px;font-size:1px;line-height:8px">&nbsp;</div>';
     j.segs.forEach(function (s, k) {
