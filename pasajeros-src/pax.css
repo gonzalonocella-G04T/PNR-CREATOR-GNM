@@ -122,3 +122,27 @@ label.chk input{margin-top:2px;accent-color:var(--sky)}
 .msel{position:absolute;border:2px solid var(--sky2);background:rgba(25,192,170,.18);pointer-events:none}
 
 #fviaje.mal{border-color:#E2B33C;box-shadow:0 0 0 2px #FBE7B3}
+
+/* pasos y tandas */
+.preg{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;margin-bottom:12px;font-size:12.5px;font-weight:600;color:var(--navy)}
+.seg-sm{flex:0 0 auto}
+.seg-sm button{padding:6px 11px;font-size:12px;flex:0 0 auto}
+.paso{border:1px solid var(--line);border-radius:10px;padding:10px 11px;margin-bottom:12px;background:#fff}
+.paso.bloq{background:#F6F8F8;border-style:dashed}
+.paso.bloq .pasoh b,.paso.bloq .pn{opacity:.55}
+.paso.listo{padding:8px 11px}
+.pasoh{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.paso.listo .pasoh{margin:0}
+.pasoh b{color:var(--navy);font-size:13.5px}
+.pasoh .ok{font-size:12px;color:var(--okI);font-weight:600}
+.pasoh .lnk{font-size:12px;margin-left:auto}
+.pn{width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none}
+.paso.listo .pn{background:var(--okI)}
+.tanda{border:1px solid var(--line2);border-radius:9px;padding:8px;margin-top:8px;background:#FBFEFD}
+.tanda.hecha{background:#F5F8F8}
+.tandah{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink2);margin-bottom:2px}
+.tandah b{color:var(--navy)}
+.tandah button{margin-left:auto}
+.seclbl{font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--ink2);margin:8px 0 0}
+.aviso-tanda{font-size:12px;border-radius:8px;padding:7px 9px;background:var(--amber);border:1px solid var(--amberL);color:var(--amberI);line-height:1.4}
+.listo-btn{width:100%;margin-top:10px}

@@ -25,5 +25,7 @@ eq('cédula uruguaya válida', [TEXTO.ciValida('1.234.567-2'), TEXTO.ciValida('1
 eq('celular uruguayo', TEXTO.telefono('098 584 260').num, '59898584260');
 var soloCtc = TEXTO.parse('Mail: gnocella@hiperviajes.com.uy\nCel: 098 584 260').pasajeros;
 eq('sólo contactos', [soloCtc.length, soloCtc[0] && soloCtc[0].email, soloCtc[0] && soloCtc[0].telefono], [1, 'gnocella@hiperviajes.com.uy', '59898584260']);
+var grupo = 'Apellido\tNombre\tFecha nac.\tPasaporte\nCABRERA\tNICOLAS\t13/02/1980\tC1234570\nPEREIRA\tVALENTINA\t12/01/1979\tC1234569\nSILVA\tANA\t01/01/1990\tC1234500';
+eq('planilla sin falsas MRZ', TEXTO.parse(grupo).pasajeros.map(function (p) { return p.apellidos; }), ['CABRERA', 'PEREIRA', 'SILVA']);
 console.log(fallas ? '\n' + fallas + ' pruebas fallaron' : '\nTodo bien');
 process.exit(fallas ? 1 : 0);

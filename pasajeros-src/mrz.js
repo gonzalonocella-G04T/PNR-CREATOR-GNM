@@ -255,6 +255,12 @@ var MRZ = (function () {
     cs.sort(function (x, y) { return (y.puntos / y.total) - (x.puntos / x.total) || y.puntos - x.puntos; });
     return cs[0] || null;
   }
+  var ESPECIALES = { UTO: 1, D: 1, XXA: 1, XXB: 1, XXC: 1, XXX: 1, UNO: 1, UNA: 1, UNK: 1, EUE: 1, RKS: 1 };
+  function emisorOk(e) {
+    e = String(e || '').replace(/<+$/, '');
+    if (typeof PAISES === 'undefined') return /^[A-Z]{1,3}$/.test(e);
+    return !!(PAISES[e] || ESPECIALES[e]);
+  }
   function buscar(texto) {
     var ls = String(texto || '').split(/\r?\n/).map(clean).filter(function (l) { return l.length >= 20; });
     var res = [];
@@ -266,7 +272,8 @@ var MRZ = (function () {
       if (a.length >= 26 && a.length <= 34 && b.length >= 26 && b.length <= 34 && /^[IAC]/.test(a)) cs.push(td1(a, b, c));
       if (a.length >= 32 && a.length <= 39 && b.length >= 32 && b.length <= 39 && /^[PIAC]/.test(a)) cs.push(td2(a, b));
       var r = mejor(cs);
-      if (r && r.puntos >= 1) { res.push(r); i += r.formato === 'TD1' ? 2 : 1; }
+      // Una MRZ real siempre tiene rellenos '<' y un país emisor válido: así no se confunde con texto común
+      if (r && r.puntos >= 2 && a.indexOf('<') >= 0 && (b.indexOf('<') >= 0 || r.puntos >= 4) && emisorOk(r.emisor)) { res.push(r); i += r.formato === 'TD1' ? 2 : 1; }
     }
     // MRZ pegada en una sola línea (88 caracteres de pasaporte o 90 de cédula seguidos)
     if (!res.length) {
@@ -275,14 +282,14 @@ var MRZ = (function () {
       while ((m = re.exec(todo))) {
         if (todo.length - m.index < 86) break;
         var t3 = td3(todo.slice(m.index, m.index + 44), todo.slice(m.index + 44, m.index + 88));
-        if (t3 && t3.puntos >= 3) { res.push(t3); re.lastIndex = m.index + 88; }
+        if (t3 && t3.puntos >= 3 && t3.lineas[0].indexOf('<<') >= 0 && emisorOk(t3.emisor)) { res.push(t3); re.lastIndex = m.index + 88; }
       }
       if (!res.length) {
         var re1 = /[IAC][A-Z<][A-Z]{3}[A-Z0-9<]{25}/g;
         while ((m = re1.exec(todo))) {
           if (todo.length - m.index < 88) break;
           var t1 = td1(todo.slice(m.index, m.index + 30), todo.slice(m.index + 30, m.index + 60), todo.slice(m.index + 60, m.index + 90));
-          if (t1 && t1.puntos >= 2) { res.push(t1); re1.lastIndex = m.index + 90; }
+          if (t1 && t1.puntos >= 3 && t1.lineas[0].indexOf('<') >= 0 && emisorOk(t1.emisor)) { res.push(t1); re1.lastIndex = m.index + 90; }
         }
       }
     }
