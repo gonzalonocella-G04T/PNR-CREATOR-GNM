@@ -153,39 +153,48 @@
     ULT.orden.forEach(function (x) { info[x.p.id] = { n: x.n, tipo: x.tipo, edad: x.edad, tit: x.tit, adulto: x.adulto ? x.adulto.p.id : 0 }; });
     return info;
   }
-  // Límites por entrada al pegar varias líneas juntas (Amadeus). Ajustables acá.
-  var LIMITE = { A: { lineas: 24, chars: 260 } };
+  // Límites por entrada de cada GDS (ajustables acá). Amadeus: una línea por comando.
+  // Sabre: los comandos van en una sola entrada, encadenados con § (el separador cuenta como caracter).
+  var LIMITE = {
+    A: { gds: 'Amadeus', lineas: 24, chars: 260, sep: '\n' },
+    S: { gds: 'Sabre', lineas: 0, chars: 250, sep: '§' }
+  };
   var SECS2 = [['docs', 'DOCS'], ['foid', 'FOID'], ['ctc', 'Contactos (CTCE · CTCM)']];
   function nombreDe(id) { var p = ST.pax.filter(function (x) { return x.id === id; })[0]; return p ? (L(p.nombres).split(' ')[0] || '') + ' ' + (L(p.apellidos).split(' ')[0] || '') : ''; }
-  // Arma tandas que entran en una sola entrada (los saltos de línea se cuentan como caracteres)
+  // Arma tandas que entran en una sola entrada del GDS (los separadores también cuentan)
   function tandas(ls) {
     var lim = LIMITE[ST.gds];
     if (!lim) return ls.length ? [ls] : [];
-    var out = [], cur = [], n = 0;
+    var out = [], cur = [], n = 0, sl = lim.sep.length;
     ls.forEach(function (l) {
-      var add = l.t.length + (cur.length ? 1 : 0);
-      if (cur.length && (cur.length + 1 > lim.lineas || n + add > lim.chars)) { out.push(cur); cur = []; n = 0; add = l.t.length; }
+      var add = l.t.length + (cur.length ? sl : 0);
+      if (cur.length && ((lim.lineas && cur.length + 1 > lim.lineas) || n + add > lim.chars)) { out.push(cur); cur = []; n = 0; add = l.t.length; }
       cur.push(l); n += add;
     });
     if (cur.length) out.push(cur);
     return out;
   }
-  function chars(ls) { return ls.map(function (l) { return l.t; }).join('\n').length; }
+  function chars(ls) { var lim = LIMITE[ST.gds] || { sep: '\n' }; return ls.map(function (l) { return l.t; }).join(lim.sep).length; }
   function lineaHtml(l) {
     return '<button type="button" class="ln' + (ST.hechos[l.t] ? ' hecho' : '') + '" data-t="' + esc(l.t) + '"><span>' + esc(l.t) + '</span>' + (l.nota ? '<span class="nota">' + esc(l.nota) + '</span>' : '') + '<span class="cp">' + (ST.hechos[l.t] ? '✓ copiado' : 'copiar') + '</span></button>';
   }
   function faltaHtml(l) { return '<div class="ln falta">Falta ' + esc(l.falta) + (l.id ? ' · ' + esc(nombreDe(l.id)) : '') + '</div>'; }
   var TANDAS = {};
   function bloqueTandas(clave, ls, etiqueta) {
-    var ts = tandas(ls), h = '', lim = LIMITE[ST.gds];
-    if (ts.length > 1) h += '<div class="aviso-tanda">Son ' + ls.length + ' líneas y ' + chars(ls) + ' caracteres. Amadeus admite hasta ' + lim.lineas + ' líneas y ' + lim.chars + ' caracteres por entrada: pegá <b>' + ts.length + ' tandas</b> por separado, en orden.</div>';
+    var ts = tandas(ls), h = '', lim = LIMITE[ST.gds], S = ST.gds === 'S';
+    var unidad = S ? ['comando', 'comandos'] : ['línea', 'líneas'];
+    if (ts.length > 1) h += '<div class="aviso-tanda">Son ' + ls.length + ' ' + unidad[1] + ' y ' + chars(ls) + ' caracteres. ' + lim.gds + ' admite hasta '
+      + (lim.lineas ? lim.lineas + ' líneas y ' : '') + lim.chars + ' caracteres por entrada: pegá <b>' + ts.length + ' tandas</b> por separado, en orden.</div>';
     ts.forEach(function (t, k) {
       var id = clave + k; TANDAS[id] = t.map(function (l) { return l.t; });
-      var hecha = t.every(function (l) { return ST.hechos[l.t]; });
-      h += '<div class="tanda' + (hecha ? ' hecha' : '') + '"><div class="tandah"><span>' + (ts.length > 1 ? '<b>Tanda ' + (k + 1) + ' de ' + ts.length + '</b> · ' : '') + t.length + (t.length === 1 ? ' línea' : ' líneas') + (lim ? ' · ' + chars(t) + ' caracteres' : '') + '</span>'
+      var hecha = t.every(function (l) { return ST.hechos[l.t]; }), c = chars(t);
+      h += '<div class="tanda' + (hecha ? ' hecha' : '') + '"><div class="tandah"><span>' + (ts.length > 1 ? '<b>Tanda ' + (k + 1) + ' de ' + ts.length + '</b> · ' : '')
+        + t.length + ' ' + unidad[t.length === 1 ? 0 : 1] + ' · ' + c + ' caracteres' + (S && t.length > 1 ? ' · encadenados con §' : '')
+        + (c > lim.chars ? ' · <b class="exc">supera el límite de ' + lim.chars + '</b>' : '') + '</span>'
         + '<button type="button" class="' + (hecha ? 's' : 'p') + ' sm" data-tanda="' + id + '">' + (hecha ? '✓ Copiada' : (ts.length > 1 ? 'Copiar tanda ' + (k + 1) : 'Copiar ' + etiqueta)) + '</button></div>';
       var sec = '';
       t.forEach(function (l) { if (l.sec && l.sec !== sec) { sec = l.sec; h += '<div class="seclbl">' + esc(sec) + '</div>'; } h += lineaHtml(l); });
+      if (S && t.length > 1) h += '<div class="entrada" title="Así se copia: una sola entrada">' + esc(t.map(function (l) { return l.t; }).join('§')) + '</div>';
       h += '</div>';
     });
     return h;
@@ -205,7 +214,7 @@
       h += '<div class="paso' + (pend.length ? '' : ' listo') + '"><div class="pasoh"><span class="pn">1</span><b>Cargar los nombres</b>';
       if (!pend.length) h += '<span class="ok">✓ ' + nCarg + (nCarg === 1 ? ' nombre cargado' : ' nombres cargados') + '</span><button type="button" class="lnk" id="nomVolver">volver a mostrarlos</button></div></div>';
       else {
-        h += '</div><p class="hint" style="margin:0 0 8px">' + (A ? 'Primero se crean los pasajeros: sin los nombres en la reserva, Amadeus no acepta los DOCS asociados a cada /P.' : 'Primero se crean los pasajeros: sin los nombres en la reserva, Sabre no acepta los datos asociados a cada pasajero (-1.1, -2.1…).') + '</p>';
+        h += '</div><p class="hint" style="margin:0 0 8px">' + (A ? 'Primero se crean los pasajeros: sin los nombres en la reserva, Amadeus no acepta los DOCS asociados a cada /P. Los nombres nunca se mezclan con otros comandos.' : 'Primero se crean los pasajeros: sin los nombres en la reserva, Sabre no acepta los datos asociados a cada pasajero (-1.1, -2.1…). Los nombres nunca se encadenan con otros comandos.') + '</p>';
         h += bloqueTandas('n', pendOk.map(function (l) { return { t: l.t, nota: l.nota, id: l.id }; }), 'los nombres');
         h += pendFalta.map(faltaHtml).join('');
         if (pendOk.length) h += '<button type="button" class="p listo-btn" id="nomListos">Listo, los nombres ya están en la reserva →</button>';
@@ -364,7 +373,11 @@
   $('out').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
     if (b.hasAttribute('data-t')) { var t = b.getAttribute('data-t'); copiar(t).then(function () { ST.hechos[t] = 1; b.classList.add('hecho'); b.querySelector('.cp').textContent = '✓ copiado'; toast('Copiado: ' + t.slice(0, 40)); }); return; }
-    if (b.hasAttribute('data-tanda')) { var ls = TANDAS[b.getAttribute('data-tanda')] || []; copiar(ls.join('\n')).then(function () { ls.forEach(function (x) { ST.hechos[x] = 1; }); renderOut(); toast(ls.length === 1 ? '1 línea copiada' : ls.length + ' líneas copiadas'); }); return; }
+    if (b.hasAttribute('data-tanda')) {
+      var ls = TANDAS[b.getAttribute('data-tanda')] || [], lim = LIMITE[ST.gds] || { sep: '\n' }, S = ST.gds === 'S';
+      copiar(ls.join(lim.sep)).then(function () { ls.forEach(function (x) { ST.hechos[x] = 1; }); renderOut(); toast(S ? (ls.length === 1 ? '1 comando copiado' : ls.length + ' comandos copiados en una entrada (con §)') : (ls.length === 1 ? '1 línea copiada' : ls.length + ' líneas copiadas')); });
+      return;
+    }
     if (b.hasAttribute('data-r')) { ST.reserva = b.getAttribute('data-r'); renderOut(); return; }
     if (b.id === 'nomListos') {
       ULT.orden.forEach(function (x) { if (x.tipo !== 'INF' || x.adulto) { if (L(x.p.apellidos) && L(x.p.nombres)) ST.cargados[x.p.id] = 1; } });
