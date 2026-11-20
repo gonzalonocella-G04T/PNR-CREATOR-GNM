@@ -322,9 +322,9 @@
     h += '<div class="ph" data-meta></div><ul class="avisos arriba" data-venc></ul>';
     h += '<div class="pgrid">';
     h += '<div class="nomrow"><div><label>Apellidos</label><input class="nm" data-f="apellidos" value="' + esc(p.apellidos) + '" autocomplete="off" spellcheck="false"></div>';
-    h += '<div class="mover"><button type="button" data-mv="an" title="Pasar el primer apellido a nombres">◀</button><button type="button" data-mv="na" title="Pasar el último nombre a apellidos">▶</button></div>';
+    h += '<div class="mover"><button type="button" data-mv="an" tabindex="-1" title="Pasar el primer apellido a nombres">◀</button><button type="button" data-mv="na" tabindex="-1" title="Pasar el último nombre a apellidos">▶</button></div>';
     h += '<div><label>Nombres</label><input class="nm" data-f="nombres" value="' + esc(p.nombres) + '" autocomplete="off" spellcheck="false"></div></div>';
-    h += '<div class="c3"><label>Sexo</label><div class="sx' + (p.sexo ? '' : ' falta') + '"><button type="button" data-sx="M" class="' + (p.sexo === 'M' ? 'on' : '') + '">M</button><button type="button" data-sx="F" class="' + (p.sexo === 'F' ? 'on' : '') + '">F</button></div></div>';
+    h += '<div class="c3"><label>Sexo</label><div class="sx' + (p.sexo ? '' : ' falta') + '"><button type="button" data-sx="M" title="Masculino (tecla M)" tabindex="' + (p.sexo === 'F' ? -1 : 0) + '" class="' + (p.sexo === 'M' ? 'on' : '') + '">M</button><button type="button" data-sx="F" title="Femenino (tecla F)" tabindex="' + (p.sexo === 'F' ? 0 : -1) + '" class="' + (p.sexo === 'F' ? 'on' : '') + '">F</button></div></div>';
     h += '<div class="c4"><label>Nacimiento</label><input data-f="nac" data-fecha="nac" value="' + dmy(p.nac) + '" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" maxlength="11"><div class="small" data-edad></div></div>';
     h += '<div class="c5"><label>Nacionalidad</label><input data-f="nacionalidad" list="paises" value="' + esc(p.nacionalidad) + '" maxlength="3" autocomplete="off"><div class="small">' + esc(paisNom(p.nacionalidad)) + '</div></div>';
     h += '<div class="c3"><label>Documento</label><select data-f="docUsar"><option value="PP"' + (uso === 'PP' ? ' selected' : '') + '>Pasaporte</option><option value="NI"' + (uso === 'NI' ? ' selected' : '') + '>Cédula / DNI</option></select></div>';
@@ -344,7 +344,7 @@
       p.fotos.forEach(function (f, k) {
         if (f.mrz) h += '<img class="mz" src="' + f.mrz + '" alt="Zona leída" data-ver="' + k + '" title="Lo que se leyó (ampliar)">';
         else if (f.foto) h += '<img src="' + f.foto + '" alt="Documento" data-ver="' + k + '" title="Ver el documento">';
-        if (f.lienzo) h += '<button type="button" class="s" data-rel="' + f.lienzo + '">Marcar la zona a mano</button>';
+        if (f.lienzo) h += '<button type="button" class="s" tabindex="-1" data-rel="' + f.lienzo + '">Marcar la zona a mano</button>';
       });
       h += '</div>';
     }
@@ -357,22 +357,22 @@
     var tipoTxt = { ADT: 'Adulto', CHD: 'Niño', INF: 'Infante' }[i.tipo];
     var src = p.fuentes.filter(function (f, k, a) { return a.indexOf(f) === k; }).join(' · ');
     var ver = p.verificado === true ? '<span class="tag ok">✓ Documento leído y verificado</span>' : (p.verificado === false ? '<span class="tag warn">Leído con dudas</span>' : '');
-    art.querySelector('[data-meta]').innerHTML = '<span class="num">' + num + '</span><span class="who">' + esc((L(p.apellidos) || '—') + ' / ' + (L(p.nombres) || '—')) + '</span><span class="tag">' + tipoTxt + (i.tit ? ' · ' + i.tit : '') + '</span>' + etiquetaValidez(p) + ver + (src ? '<span class="tag" title="Origen de los datos">' + esc(src) + '</span>' : '') + '<button type="button" class="s del" data-del="' + p.id + '" title="Quitar pasajero">Quitar</button>';
+    art.querySelector('[data-meta]').innerHTML = '<span class="num">' + num + '</span><span class="who">' + esc((L(p.apellidos) || '—') + ' / ' + (L(p.nombres) || '—')) + '</span><span class="tag">' + tipoTxt + (i.tit ? ' · ' + i.tit : '') + '</span>' + etiquetaValidez(p) + ver + (src ? '<span class="tag" title="Origen de los datos">' + esc(src) + '</span>' : '') + '<button type="button" class="s del" tabindex="-1" data-del="' + p.id + '" title="Quitar pasajero">Quitar</button>';
     var e = art.querySelector('[data-edad]'); if (e) e.textContent = i.edad !== null && i.edad !== undefined ? i.edad + (i.edad === 1 ? ' año' : ' años') + (ST.fviaje ? ' al viajar' : '') : '';
     var sx = art.querySelector('.sx'); if (sx) sx.classList.toggle('falta', !p.sexo);
     var todos = avisos(p, i), arriba = todos.filter(function (a) { return a.k === 'fuerte'; });
     var cv = art.querySelector('[data-venc]'); if (cv) cv.innerHTML = arriba.map(function (a) { return '<li class="fuerte">' + esc(a.t) + '</li>'; }).join('');
-    art.querySelector('[data-av]').innerHTML = todos.filter(function (a) { return a.k !== 'fuerte'; }).map(function (a) { return '<li class="' + ({ err: 'err', ok: 'ok', fuerte: 'fuerte', tenue: 'tenue' }[a.k] || '') + '">' + esc(a.t) + (a.i !== undefined ? ' <button type="button" class="lnk" data-oc="' + a.i + '" title="Ocultar este aviso">ocultar</button>' : '') + '</li>'; }).join('');
+    art.querySelector('[data-av]').innerHTML = todos.filter(function (a) { return a.k !== 'fuerte'; }).map(function (a) { return '<li class="' + ({ err: 'err', ok: 'ok', fuerte: 'fuerte', tenue: 'tenue' }[a.k] || '') + '">' + esc(a.t) + (a.i !== undefined ? ' <button type="button" class="lnk" tabindex="-1" data-oc="' + a.i + '" title="Ocultar este aviso">ocultar</button>' : '') + '</li>'; }).join('');
   }
   function render(todo) {
     var info = calcular();
     if (todo) {
       var c = $('paxs');
-      if (!ST.pax.length) c.innerHTML = '<div class="vacio"><b>Todavía no hay pasajeros.</b><br>Cargá la foto o el PDF del pasaporte, o pegá los datos en texto.</div>';
+      if (!ST.pax.length) c.innerHTML = '<div class="vacio"><b>Todavía no hay pasajeros.</b><br>Cargá la foto o el PDF del pasaporte, o pegá los datos en texto.<br><button type="button" class="s agregar" data-add tabindex="-1">+ Cargar un pasajero a mano</button></div>';
       else {
         var orden = ULT.orden.map(function (x) { return x.p.id; });
         var ps = ST.pax.slice().sort(function (a, b) { return orden.indexOf(a.id) - orden.indexOf(b.id); });
-        c.innerHTML = ps.map(function (p) { return tarjeta(p, info); }).join('') + DOCS_OPC;
+        c.innerHTML = ps.map(function (p) { return tarjeta(p, info); }).join('') + '<button type="button" class="s agregar" data-add tabindex="-1">+ Agregar otro pasajero</button>' + DOCS_OPC;
       }
       firmaCartas = firma();
       $('npax').textContent = ST.pax.length ? '(' + ST.pax.length + ')' : '';
@@ -392,9 +392,11 @@
   // Reconstruye las tarjetas (orden, tipo) conservando el campo donde estaba el cursor
   function rehacer() {
     var a = document.activeElement, art = a && a.closest && a.closest('.pax'), f = a && a.getAttribute && a.getAttribute('data-f');
+    var sxf = a && a.getAttribute && a.getAttribute('data-sx');
     var id = art && art.getAttribute('data-id'), sel = a && typeof a.selectionStart === 'number' ? a.selectionStart : null;
     render(true);
     if (id && f) { var n = document.querySelector('.pax[data-id="' + id + '"] [data-f="' + f + '"]'); if (n) { n.focus(); try { if (sel !== null) n.setSelectionRange(sel, sel); } catch (e) { } } }
+    else if (id && sxf) { var x = document.querySelector('.pax[data-id="' + id + '"] [data-sx="' + sxf + '"]'); if (x) x.focus(); }
   }
   $('paxs').addEventListener('focusout', function () {
     setTimeout(function () { calcular(); if (firma() !== firmaCartas) rehacer(); }, 0);
@@ -432,9 +434,10 @@
   });
   $('paxs').addEventListener('click', function (e) {
     var b = e.target.closest('button,img'); if (!b) return;
+    if (b.hasAttribute('data-add')) { agregarAMano(); return; }
     var art = b.closest('.pax'), p = art && porId(art.getAttribute('data-id'));
     if (b.hasAttribute('data-del')) { ST.pax = ST.pax.filter(function (q) { return q !== p; }); render(true); toast('Pasajero quitado'); return; }
-    if (b.hasAttribute('data-sx')) { p.sexo = b.getAttribute('data-sx'); art.querySelectorAll('[data-sx]').forEach(function (x) { x.classList.toggle('on', x === b); }); cambio(); return; }
+    if (b.hasAttribute('data-sx')) { elegirSexo(art, p, b.getAttribute('data-sx')); return; }
     if (b.hasAttribute('data-mv')) {
       var A = L(p.apellidos).split(' ').filter(Boolean), N = L(p.nombres).split(' ').filter(Boolean);
       if (b.getAttribute('data-mv') === 'an' && A.length > 1) N.push(A.shift());
@@ -478,9 +481,23 @@
   }
   $('leer').addEventListener('click', leerTexto);
   $('txt').addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); leerTexto(); } });
-  $('manual').addEventListener('click', function () {
+  function agregarAMano() {
     var p = nuevo({ fuentes: ['a mano'] }); ST.pax.push(p); ultimo = p.id; render(true);
     var i = document.querySelector('.pax[data-id="' + p.id + '"] [data-f=apellidos]'); if (i) { i.focus(); i.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  }
+  $('manual').addEventListener('click', agregarAMano);
+  function elegirSexo(art, p, sx, foco) {
+    p.sexo = sx;
+    art.querySelectorAll('[data-sx]').forEach(function (x) { var si = x.getAttribute('data-sx') === sx; x.classList.toggle('on', si); x.tabIndex = si ? 0 : -1; if (si && foco) x.focus(); });
+    cambio();
+  }
+  // Sexo con el teclado: M o H = masculino, F = femenino, flechas para alternar (Tab sigue al próximo campo)
+  $('paxs').addEventListener('keydown', function (e) {
+    var b = e.target.closest && e.target.closest('[data-sx]'); if (!b || e.ctrlKey || e.metaKey || e.altKey) return;
+    var art = b.closest('.pax'), p = porId(art.getAttribute('data-id')), k = e.key.toUpperCase(), sx = null;
+    if (k === 'M' || k === 'H') sx = 'M'; else if (k === 'F') sx = 'F';
+    else if (/^ARROW(LEFT|RIGHT|UP|DOWN)$/.test(k)) sx = b.getAttribute('data-sx') === 'M' ? 'F' : 'M';
+    if (sx) { e.preventDefault(); elegirSexo(art, p, sx, true); }
   });
   // Confirmación en la misma página (los cuadros confirm() no funcionan en todos los navegadores embebidos)
   $('limpiar').addEventListener('click', function () {

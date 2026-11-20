@@ -53,5 +53,6 @@ function tipea(txt) { var el = { value: '', selectionStart: 0, setSelectionRange
   return el.value; }
 eq('máscara de fechas', ['05101962', '051062', '5/10/1962', '5-10-62', '05/10/1962', '05<', '0510<', '0510<<', '05101962<<<<', '051019621', '05NOV86', '5.3.1990'].map(tipea),
   ['05/10/1962', '05/10/62', '05/10/1962', '05/10/62', '05/10/1962', '05', '05/10', '05/1', '05/10', '05/10/1962', '05NOV86', '05/03/1990']);
+eq('pasajero sin apellido va al final', CMD.preparar([{ id: 1, apellidos: '', nombres: '' }, { id: 2, apellidos: 'PEREZ', nombres: 'JUAN' }, { id: 3, apellidos: 'ALVAREZ', nombres: 'ANA' }], {}).todos.map(function (x) { return x.p.id + ':' + x.n; }), ['3:1', '2:2', '1:3']);
 console.log(fallas ? '\n' + fallas + ' pruebas fallaron' : '\nTodo bien');
 process.exit(fallas ? 1 : 0);

@@ -162,3 +162,9 @@ label.chk input{margin-top:2px;accent-color:var(--sky)}
 .avisos.arriba{margin:-2px 0 10px}
 .avisos.arriba:empty{display:none}
 .avisos.arriba li{margin-top:0;font-size:13px;padding:8px 11px}
+
+/* Agregar pasajero: debajo de la última tarjeta, bien a la vista */
+button.agregar{display:block;width:100%;margin:2px 0 16px;padding:13px 14px;border:1.5px dashed var(--sky);background:#F4FBF9;font-size:14px;text-align:center}
+button.agregar:hover{background:#E6F5F1}
+.vacio button.agregar{width:auto;margin:14px auto 0;padding:10px 18px}
+.sx button:focus-visible{outline:2px solid var(--sky);outline-offset:-3px}

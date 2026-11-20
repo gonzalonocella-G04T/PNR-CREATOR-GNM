@@ -27,6 +27,7 @@ var CMD = (function () {
   }
   function cmp(a, b) {
     var x = a.apellidos || '', y = b.apellidos || '';
+    if (!x !== !y) return x ? -1 : 1;   // el que todavía no tiene apellido (recién agregado a mano) va al final
     if (x !== y) return x < y ? -1 : 1;
     x = a.nombres || ''; y = b.nombres || '';
     return x < y ? -1 : x > y ? 1 : 0;
