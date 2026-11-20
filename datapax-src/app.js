@@ -1,4 +1,4 @@
-/* ===== Datos del pasajero · interfaz ===== */
+/* ===== DataPax · interfaz ===== */
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var ST = { pax: [], gds: 'A', docsComp: false, titF: 'MRS', fviaje: '', codpais: '598', hechos: {}, reserva: 'nueva', cargados: {} };

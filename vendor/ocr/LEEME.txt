@@ -1,4 +1,4 @@
-Lectura de pasaportes (pasajeros.html), todo se procesa en el navegador:
+Lectura de pasaportes (DataPax, datapax.html), todo se procesa en el navegador:
 - tesseract.min.js / worker.min.js: Tesseract.js 7 (Apache-2.0)
 - tesseract-core-*-lstm.wasm.js: tesseract.js-core 7 (Apache-2.0). El navegador usa una sola variante.
 - lang/mrz-modelo.js: modelo MRZ (gzip + base64, para poder servirlo en cualquier hosting) de DoubangoTelecom/tesseractMRZ, tessdata_fast (BSD-3-Clause)

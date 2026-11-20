@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Datos del pasajero · Hiperviajes</title><link rel="icon" href="pax-fav/favicon.ico?v=1" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="pax-fav/favicon-32.png?v=1"><link rel="icon" type="image/png" sizes="192x192" href="pax-fav/icon-192.png?v=1"><link rel="apple-touch-icon" href="pax-fav/apple-touch-icon.png?v=1"><meta name="theme-color" content="#19C0AA"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600&display=swap"><style>:root{--navy:#174B4F;--sky:#148D7E;--sky2:#19C0AA;--ink:#1A474B;--ink2:#465F5C;--line:#D9EEEC;--line2:#C9ECE8;--bg:#F3FBFA;--amber:#FFF6E0;--amberL:#F0D79A;--amberI:#6B4E00;--red:#FDECEC;--redL:#F2B8B5;--redI:#8C1D18;--ok:#E9F8F4;--okL:#BFE8DF;--okI:#0B6B5C}
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DataPax · Hiperviajes</title><link rel="icon" href="datapax-fav/favicon.ico?v=1" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="datapax-fav/favicon-32.png?v=1"><link rel="icon" type="image/png" sizes="192x192" href="datapax-fav/icon-192.png?v=1"><link rel="apple-touch-icon" href="datapax-fav/apple-touch-icon.png?v=1"><meta name="theme-color" content="#0B6B45"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600&display=swap"><style>:root{--navy:#174B4F;--sky:#148D7E;--sky2:#19C0AA;--ink:#1A474B;--ink2:#465F5C;--line:#D9EEEC;--line2:#C9ECE8;--bg:#F3FBFA;--amber:#FFF6E0;--amberL:#F0D79A;--amberI:#6B4E00;--red:#FDECEC;--redL:#F2B8B5;--redI:#8C1D18;--ok:#E9F8F4;--okL:#BFE8DF;--okI:#0B6B5C}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink);font-size:14px}
@@ -152,10 +152,10 @@ label.chk input{margin-top:2px;accent-color:var(--sky)}
 .tandah button{white-space:nowrap;flex:none}
 .tandah>span{min-width:0}
 </style></head><body><header class="top">
-  <img src="pax-fav/favicon-32.png?v=1" alt="" width="30" height="30" class="logo">
-  <h1>Datos del pasajero</h1>
+  <img src="datapax-fav/favicon-48.png?v=1" alt="" width="34" height="34" class="logo">
+  <h1>DataPax</h1>
   <span class="hint" style="margin:0">Pasaporte, cédula o texto → nombres, DOCS, FOID y contactos para el GDS</span>
-  <span class="hint ver">versión 19/11 23:38</span>
+  <span class="hint ver">versión 20/11 00:06</span>
   <a href="index.html" class="volver">← Volver a Tu Itinerario</a>
 </header>
 <div class="wrap">
@@ -1453,7 +1453,7 @@ var OCR = (function () {
 
   return { motor: motor, cargarImagen: cargarImagen, paginasPDF: paginasPDF, leerCanvas: leerCanvas, leerZona: leerZona };
 })();
-/* ===== Datos del pasajero · interfaz ===== */
+/* ===== DataPax · interfaz ===== */
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var ST = { pax: [], gds: 'A', docsComp: false, titF: 'MRS', fviaje: '', codpais: '598', hechos: {}, reserva: 'nueva', cargados: {} };

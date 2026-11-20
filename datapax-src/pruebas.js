@@ -1,4 +1,4 @@
-// Pruebas rápidas de lectura y comandos:  node pasajeros-src/pruebas.js
+// Pruebas rápidas de lectura y comandos:  node datapax-src/pruebas.js
 var vm = require('vm'), fs = require('fs'), path = require('path'), D = __dirname;
 global.PAISES = JSON.parse(fs.readFileSync(path.join(D, 'paises.json'), 'utf8'));
 ['datos.js', 'mrz.js', 'texto.js', 'cmd.js'].forEach(function (f) { vm.runInThisContext(fs.readFileSync(path.join(D, f), 'utf8'), { filename: f }); });
