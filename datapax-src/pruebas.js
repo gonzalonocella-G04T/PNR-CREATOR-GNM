@@ -54,5 +54,25 @@ function tipea(txt) { var el = { value: '', selectionStart: 0, setSelectionRange
 eq('máscara de fechas', ['05101962', '051062', '5/10/1962', '5-10-62', '05/10/1962', '05<', '0510<', '0510<<', '05101962<<<<', '051019621', '05NOV86', '5.3.1990'].map(tipea),
   ['05/10/1962', '05/10/62', '05/10/1962', '05/10/62', '05/10/1962', '05', '05/10', '05/1', '05/10', '05/10/1962', '05NOV86', '05/03/1990']);
 eq('pasajero sin apellido va al final', CMD.preparar([{ id: 1, apellidos: '', nombres: '' }, { id: 2, apellidos: 'PEREZ', nombres: 'JUAN' }, { id: 3, apellidos: 'ALVAREZ', nombres: 'ANA' }], {}).todos.map(function (x) { return x.p.id + ':' + x.n; }), ['3:1', '2:2', '1:3']);
+// Sexo según el nombre
+eq('sexo por nombre', ['Juan Pedro', 'María José', 'José María', 'Andrea', 'Andrea Sofía', 'Alex Juan', 'María del Carmen', 'Iñaki', 'Conceição', 'Rosario', 'Consuelo', 'Luca', 'Bautista', 'Taiel', 'Xiomara', 'Ariel', 'Noa', 'Kim', 'Simone', 'Trinidad'].map(function (n) { var r = TEXTO.sexoPorNombre(n); return r.sexo || (r.unisex ? 'U' : '-'); }),
+  ['M', 'F', 'M', 'U', 'F', 'M', 'F', 'M', 'F', 'F', 'F', 'M', 'M', '-', 'F', 'M', 'U', 'U', 'U', 'U']);
+// Un solo mail / celular en el texto vale para todos
+var cc = TEXTO.parse('Juan Perez 05/10/1962 pasaporte C123456\nAna Perez 03/04/1965 pasaporte C654321\nLucas Perez 01/02/2001 pasaporte C111222\n\nmail: familia.perez@gmail.com\ncel: 098 584 260');
+eq('un mail y un celular para todos', cc.pasajeros.map(function (p) { return (p.email || '-') + ' ' + (p.telefono || '-'); }), ['familia.perez@gmail.com 59898584260', 'familia.perez@gmail.com 59898584260', 'familia.perez@gmail.com 59898584260']);
+var c2 = TEXTO.parse('Nombre: Juan Perez\nMail: juan@x.com\n\nNombre: Ana Perez\nMail: ana@x.com\n\nNombre: Lucas Perez');
+eq('dos mails distintos: no se reparte', [c2.comun.email, c2.pasajeros[2].email || ''], ['', '']);
+var c3 = TEXTO.parse('mail: grupo@x.com · cel 099123456');
+eq('sólo contacto (para pasajeros ya cargados)', [c3.comun.email, c3.comun.telefono], ['grupo@x.com', '59899123456']);
+// Texto con renglones en blanco en medio (WhatsApp, texto leído de una captura)
+var wa = TEXTO.parse(TEXTO.arreglarOCR('Hola! Te paso los datos para la reserva:\n\nJuan Pablo Rodríguez Silva\n05/03/1980\n\nPasaporte uruguayo C1234567\nvence 12/08/2029\n\nMaría Laura Gómez Pérez\n22/11/1983\n\nPasaporte uruguayo D7654321\nvence 03/02/2027\n\nmail: juanrodriguezegmail.com\ncel: 099 123 456')).pasajeros;
+eq('bloques sin nombre se unen al pasajero anterior', wa.map(function (p) { return [p.apellidos, p.nombres, p.pasaporte, p.vencimiento && p.vencimiento.y, p.email, p.telefono].join('|'); }),
+  ['RODRIGUEZ SILVA|JUAN PABLO|C1234567|2029|juanrodriguez@gmail.com|59899123456', 'GOMEZ PEREZ|MARIA LAURA|D7654321|2027|juanrodriguez@gmail.com|59899123456']);
+eq('@ mal leída en una imagen', ['juanrodriguezegmail.com', 'andrea.nunezGhotmail.com', 'andrea.nunezOhotmail.com', 'gnocellaGhiperviajes.com.uy', 'pp@live.com', 'www.awesome.com', 'olive.com'].map(TEXTO.arreglarOCR),
+  ['juanrodriguez@gmail.com', 'andrea.nunez@hotmail.com', 'andrea.nunez@hotmail.com', 'gnocella@hiperviajes.com.uy', 'pp@live.com', 'www.awesome.com', 'olive.com']);
+var apil = TEXTO.parse('Juan Perez\n05/03/1980\nAna Gomez\n06/04/1985').pasajeros;
+eq('nombre/fecha/nombre/fecha sin renglón en blanco', apil.map(function (p) { return p.nombres + ' ' + p.apellidos + ' ' + p.nacimiento.y; }), ['JUAN PEREZ 1980', 'ANA GOMEZ 1985']);
+var vto = TEXTO.parse('Juan Perez\nPasaporte C1234567\nvence 12/08/2029').pasajeros;
+eq('vencimiento en su propio renglón', [vto.length, vto[0].pasaporte, vto[0].vencimiento && vto[0].vencimiento.y], [1, 'C1234567', 2029]);
 console.log(fallas ? '\n' + fallas + ' pruebas fallaron' : '\nTodo bien');
 process.exit(fallas ? 1 : 0);

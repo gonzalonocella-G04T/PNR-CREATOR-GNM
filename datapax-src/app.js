@@ -55,7 +55,7 @@
 
   // ---------- pasajeros desde cada fuente ----------
   function nuevo(o) {
-    var p = { id: uid++, apellidos: '', nombres: '', sexo: '', nac: null, nacionalidad: '', ppNum: '', ppEmisor: '', ppVenc: null, ciNum: '', ciEmisor: '', ciVenc: null, docUsar: '', email: '', tel: '', tituloManual: '', tipoManual: '', numManual: '', infanteDe: 0, fuentes: [], avisosF: [], ocultos: {}, verificado: null, fotos: [] };
+    var p = { id: uid++, apellidos: '', nombres: '', sexo: '', sexoNombre: '', sexoDuda: '', nac: null, nacionalidad: '', ppNum: '', ppEmisor: '', ppVenc: null, ciNum: '', ciEmisor: '', ciVenc: null, docUsar: '', email: '', tel: '', tituloManual: '', tipoManual: '', numManual: '', infanteDe: 0, fuentes: [], avisosF: [], ocultos: {}, verificado: null, fotos: [] };
     for (var k in o) if (o[k] !== undefined && o[k] !== null && o[k] !== '') p[k] = o[k];
     return p;
   }
@@ -86,6 +86,7 @@
   function desdeTexto(t, fuente) {
     var av = (t.avisos || []).map(function (a) { return { t: a, k: 'warn' }; });
     var o = { apellidos: t.apellidos || '', nombres: t.nombres || '', sexo: t.sexo === 'M' || t.sexo === 'F' ? t.sexo : '', nac: t.nacimiento ? { y: t.nacimiento.y, m: t.nacimiento.m, d: t.nacimiento.d } : null, nacionalidad: t.nacionalidad || '', email: t.email || '', tel: t.telefono || '', fuentes: [fuente], avisosF: av };
+    if (!t.sexo && o.nombres) deducirSexo(o);
     var venc = t.vencimiento ? { y: t.vencimiento.y, m: t.vencimiento.m, d: t.vencimiento.d } : null;
     if (t.pasaporte) {
       o.ppNum = t.pasaporte; o.ppVenc = venc; o.docUsar = 'PP';
@@ -94,6 +95,11 @@
     }
     if (t.ci) { o.ciNum = t.ci; o.ciEmisor = t.nacionalidad || 'URY'; if (!t.pasaporte) { o.docUsar = 'NI'; o.ciVenc = venc; } }
     return nuevo(o);
+  }
+  // Sexo según el nombre de pila (los nombres de ambos sexos quedan sin asignar)
+  function deducirSexo(p) {
+    var r = TEXTO.sexoPorNombre(p.nombres);
+    p.sexo = r.sexo; p.sexoNombre = r.sexo ? r.nombre : ''; p.sexoDuda = r.unisex ? r.nombre : '';
   }
   function mismaPersona(a, b) {
     if (a.ppNum && b.ppNum) return a.ppNum === b.ppNum;
@@ -117,6 +123,9 @@
     var e = ST.pax.filter(function (p) { return mismaPersona(p, n); })[0];
     if (!e) { ST.pax.push(n); ultimo = n.id; return n; }
     var mrz = n.verificado !== null && n.verificado !== undefined;
+    if (n.sexo && !n.sexoNombre && e.sexoNombre) { e.sexo = ''; e.sexoNombre = ''; }
+    if (!e.sexo && n.sexo) { e.sexoNombre = n.sexoNombre; e.sexoDuda = ''; }
+    else if (!e.sexo && !n.sexo && n.sexoDuda) e.sexoDuda = n.sexoDuda;
     ['sexo', 'nac', 'nacionalidad', 'ppNum', 'ppEmisor', 'ppVenc', 'ciNum', 'ciEmisor', 'ciVenc', 'docUsar', 'email', 'tel'].forEach(function (k) {
       if (n[k] && (!e[k] || (mrz && /^(sexo|nac|ppNum|ppEmisor|ppVenc|ciVenc)$/.test(k)))) e[k] = n[k];
     });
@@ -189,7 +198,7 @@
     var av = avisoValidez(p); if (av) a.unshift(av);
     if (!L(p.apellidos)) a.push({ t: 'Falta el apellido.', k: 'err' });
     if (!L(p.nombres)) a.push({ t: 'Falta el nombre.', k: 'err' });
-    if (!p.sexo) a.push({ t: 'Falta el sexo (M/F) para el DOCS.', k: 'err' });
+    if (!p.sexo) a.push({ t: p.sexoDuda ? 'Falta el sexo: ' + p.sexoDuda + ' es nombre de varón y de mujer, elegí M o F.' : 'Falta el sexo (M/F) para el DOCS.', k: 'err' });
     if (!p.nac) a.push({ t: 'Falta la fecha de nacimiento para el DOCS.', k: 'err' });
     if (p.ciNum && (p.ciEmisor || 'URY') === 'URY' && /^\d{7,8}$/.test(p.ciNum) && !TEXTO.ciValida(p.ciNum)) a.push({ t: 'El dígito verificador de la cédula no coincide: revisá el número.', k: 'err' });
     if (!p.ppNum && !p.ciNum) a.push({ t: 'Sin documento: no se arma el FOID.', k: 'warn' });
@@ -324,7 +333,7 @@
     h += '<div class="nomrow"><div><label>Apellidos</label><input class="nm" data-f="apellidos" value="' + esc(p.apellidos) + '" autocomplete="off" spellcheck="false"></div>';
     h += '<div class="mover"><button type="button" data-mv="an" tabindex="-1" title="Pasar el primer apellido a nombres">◀</button><button type="button" data-mv="na" tabindex="-1" title="Pasar el último nombre a apellidos">▶</button></div>';
     h += '<div><label>Nombres</label><input class="nm" data-f="nombres" value="' + esc(p.nombres) + '" autocomplete="off" spellcheck="false"></div></div>';
-    h += '<div class="c3"><label>Sexo</label><div class="sx' + (p.sexo ? '' : ' falta') + '"><button type="button" data-sx="M" title="Masculino (tecla M)" tabindex="' + (p.sexo === 'F' ? -1 : 0) + '" class="' + (p.sexo === 'M' ? 'on' : '') + '">M</button><button type="button" data-sx="F" title="Femenino (tecla F)" tabindex="' + (p.sexo === 'F' ? 0 : -1) + '" class="' + (p.sexo === 'F' ? 'on' : '') + '">F</button></div></div>';
+    h += '<div class="c3"><label>Sexo</label><div class="sx' + (p.sexo ? '' : ' falta') + '"><button type="button" data-sx="M" title="Masculino (tecla M)" tabindex="' + (p.sexo === 'F' ? -1 : 0) + '" class="' + (p.sexo === 'M' ? 'on' : '') + '">M</button><button type="button" data-sx="F" title="Femenino (tecla F)" tabindex="' + (p.sexo === 'F' ? 0 : -1) + '" class="' + (p.sexo === 'F' ? 'on' : '') + '">F</button></div><div class="small" data-sxn></div></div>';
     h += '<div class="c4"><label>Nacimiento</label><input data-f="nac" data-fecha="nac" value="' + dmy(p.nac) + '" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" maxlength="11"><div class="small" data-edad></div></div>';
     h += '<div class="c5"><label>Nacionalidad</label><input data-f="nacionalidad" list="paises" value="' + esc(p.nacionalidad) + '" maxlength="3" autocomplete="off"><div class="small">' + esc(paisNom(p.nacionalidad)) + '</div></div>';
     h += '<div class="c3"><label>Documento</label><select data-f="docUsar"><option value="PP"' + (uso === 'PP' ? ' selected' : '') + '>Pasaporte</option><option value="NI"' + (uso === 'NI' ? ' selected' : '') + '>Cédula / DNI</option></select></div>';
@@ -360,6 +369,7 @@
     art.querySelector('[data-meta]').innerHTML = '<span class="num">' + num + '</span><span class="who">' + esc((L(p.apellidos) || '—') + ' / ' + (L(p.nombres) || '—')) + '</span><span class="tag">' + tipoTxt + (i.tit ? ' · ' + i.tit : '') + '</span>' + etiquetaValidez(p) + ver + (src ? '<span class="tag" title="Origen de los datos">' + esc(src) + '</span>' : '') + '<button type="button" class="s del" tabindex="-1" data-del="' + p.id + '" title="Quitar pasajero">Quitar</button>';
     var e = art.querySelector('[data-edad]'); if (e) e.textContent = i.edad !== null && i.edad !== undefined ? i.edad + (i.edad === 1 ? ' año' : ' años') + (ST.fviaje ? ' al viajar' : '') : '';
     var sx = art.querySelector('.sx'); if (sx) sx.classList.toggle('falta', !p.sexo);
+    var sxn = art.querySelector('[data-sxn]'); if (sxn) { sxn.textContent = p.sexo && p.sexoNombre ? 'Según el nombre' : (!p.sexo && p.sexoDuda ? 'Nombre de ambos sexos' : ''); sxn.title = p.sexoNombre ? 'Deducido de ' + p.sexoNombre + ': si no corresponde, tocá la otra letra' : ''; }
     var todos = avisos(p, i), arriba = todos.filter(function (a) { return a.k === 'fuerte'; });
     var cv = art.querySelector('[data-venc]'); if (cv) cv.innerHTML = arriba.map(function (a) { return '<li class="fuerte">' + esc(a.t) + '</li>'; }).join('');
     art.querySelector('[data-av]').innerHTML = todos.filter(function (a) { return a.k !== 'fuerte'; }).map(function (a) { return '<li class="' + ({ err: 'err', ok: 'ok', fuerte: 'fuerte', tenue: 'tenue' }[a.k] || '') + '">' + esc(a.t) + (a.i !== undefined ? ' <button type="button" class="lnk" tabindex="-1" data-oc="' + a.i + '" title="Ocultar este aviso">ocultar</button>' : '') + '</li>'; }).join('');
@@ -423,6 +433,7 @@
     var f = e.target.getAttribute('data-f'), art = e.target.closest('.pax'); if (!f || !art) return;
     var p = porId(art.getAttribute('data-id'));
     if (f === 'apellidos' || f === 'nombres') { p[f] = L(e.target.value); e.target.value = p[f]; }
+    if (f === 'nombres' && (!p.sexo || p.sexoNombre)) { deducirSexo(p); pintarSexo(art, p); }
     if (/^(nac|ppVenc|ciVenc)$/.test(f)) {
       if (p[f]) { e.target.value = dmy(p[f]); e.target.classList.remove('mal'); }
       else e.target.classList.toggle('mal', !!e.target.value.trim());
@@ -474,10 +485,21 @@
     var t = $('txt').value; if (!t.trim()) { toast('Pegá primero los datos en el recuadro'); return; }
     var r = TEXTO.parse(t, { codPais: ST.codpais }), n = 0, antes = ST.pax.length;
     r.pasajeros.forEach(function (x) { var q = x.mrz ? desdeMRZ(x.mrz, 'MRZ pegada') : desdeTexto(x, 'texto'); if (fusionar(q)) n++; });
-    if (!n) { toast('No encontré datos de pasajeros en el texto'); return; }
+    // un solo mail o celular en el texto: vale para todos los pasajeros (también los cargados antes)
+    var c = r.comun || {}, conMail = 0, conTel = 0;
+    if (ST.pax.length > 1) ST.pax.forEach(function (p) {
+      if (c.email && !p.email) { p.email = c.email; conMail++; }
+      if (c.telefono && !p.tel) { var tt = TEXTO.telefono(c.telefono, ST.codpais); p.tel = tt ? tt.num : c.telefono; conTel++; }
+    });
+    if (!n && !conMail && !conTel) { toast('No encontré datos de pasajeros en el texto'); return; }
     var nuevos = ST.pax.length - antes;
     render(true);
-    toast(nuevos ? (nuevos === 1 ? 'Se agregó 1 pasajero' : 'Se agregaron ' + nuevos + ' pasajeros') : 'Datos sumados al pasajero existente');
+    var msj = nuevos ? (nuevos === 1 ? 'Se agregó 1 pasajero' : 'Se agregaron ' + nuevos + ' pasajeros') : 'Datos sumados al pasajero existente';
+    var dig = function (v) { return String(v || '').replace(/\D/g, ''); };
+    var nM = c.email ? ST.pax.filter(function (p) { return (p.email || '').toLowerCase() === c.email.toLowerCase(); }).length : 0;
+    var nT = c.telefono ? ST.pax.filter(function (p) { return p.tel && (dig(p.tel) === dig(c.telefono) || dig(p.tel).slice(-8) === dig(c.telefono).slice(-8)); }).length : 0;
+    if (nM > 1 || nT > 1) msj += ' · ' + (nM > 1 && nT > 1 ? 'mismo mail y celular' : nM > 1 ? 'mismo mail' : 'mismo celular') + ' para ' + Math.max(nM, nT) + ' pasajeros';
+    toast(msj);
   }
   $('leer').addEventListener('click', leerTexto);
   $('txt').addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); leerTexto(); } });
@@ -486,9 +508,14 @@
     var i = document.querySelector('.pax[data-id="' + p.id + '"] [data-f=apellidos]'); if (i) { i.focus(); i.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
   }
   $('manual').addEventListener('click', agregarAMano);
+  function pintarSexo(art, p, foco) {
+    var hay = art.querySelector('[data-sx="' + (p.sexo || 'M') + '"]');
+    art.querySelectorAll('[data-sx]').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-sx') === p.sexo); x.tabIndex = x === hay ? 0 : -1; });
+    if (foco && hay) hay.focus();
+  }
   function elegirSexo(art, p, sx, foco) {
-    p.sexo = sx;
-    art.querySelectorAll('[data-sx]').forEach(function (x) { var si = x.getAttribute('data-sx') === sx; x.classList.toggle('on', si); x.tabIndex = si ? 0 : -1; if (si && foco) x.focus(); });
+    p.sexo = sx; p.sexoNombre = ''; p.sexoDuda = '';
+    pintarSexo(art, p, foco);
     cambio();
   }
   // Sexo con el teclado: M o H = masculino, F = femenino, flechas para alternar (Tab sigue al próximo campo)
@@ -578,6 +605,71 @@
       });
     });
   }
+  // ---------- campo de texto: también capturas, fotos o PDF con los datos escritos ----------
+  function pareceMRZ(t) { return /<{4,}/.test(t) || /^[A-Z0-9<]{28,}$/m.test(t.replace(/ /g, '')); }
+  function sumarAlCampo(t) {
+    var a = $('txt'); t = t.replace(/\n{3,}/g, '\n\n').trim(); if (!t) return;
+    a.value = a.value.trim() ? a.value.replace(/\s+$/, '') + '\n\n' + t : t;
+  }
+  function procesarDatos(files) {
+    files = Array.prototype.slice.call(files || []).filter(function (f) { return /^image\//.test(f.type) || /pdf$/i.test(f.type) || /\.(pdf|jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(f.name); });
+    if (!files.length) { toast('Elegí una imagen (JPG, PNG) o un PDF'); return; }
+    files.forEach(function (f) {
+      var nombre = f.name && !/^image\.(png|jpe?g)$/i.test(f.name) ? f.name : 'captura';
+      var it = itemCola(nombre);
+      colaTrabajo = colaTrabajo.then(async function () {
+        try {
+          var textos = [], lienzos = [];
+          if (/pdf$/i.test(f.type) || /\.pdf$/i.test(f.name)) {
+            var pags = await OCR.paginasPDF(f, it.estado);
+            for (var k = 0; k < pags.length; k++) {
+              lienzos.push(pags[k].canvas);
+              if (pags[k].texto.replace(/\s/g, '').length > 20) textos.push(pags[k].texto);   // PDF con texto: se usa tal cual
+              else { it.estado('Leyendo página ' + pags[k].pagina + '…'); textos.push(TEXTO.arreglarOCR(await OCR.leerTextoImagen(pags[k].canvas, it.estado))); }
+            }
+          } else {
+            it.estado('Abriendo…');
+            var cv = await OCR.cargarImagen(f); lienzos.push(cv);
+            textos.push(TEXTO.arreglarOCR(await OCR.leerTextoImagen(cv, it.estado)));
+          }
+          var todo = textos.join('\n\n');
+          // ¿Es la foto de un pasaporte o cédula? Entonces se lee la zona MRZ con el lector específico
+          if (pareceMRZ(todo)) {
+            var hubo = false;
+            for (var j = 0; j < lienzos.length; j++) {
+              it.estado('Parece un documento: leyendo la zona MRZ…');
+              var r = await OCR.leerCanvas(lienzos[j], it.estado);
+              if (r.mrz) { agregarLectura(r, lienzos[j], nombre, it); hubo = true; }
+            }
+            if (hubo) return;
+          }
+          if (!todo.replace(/\s/g, '')) { it.fin('warn', 'No encontré texto en el archivo'); return; }
+          var cuantos = TEXTO.parse(todo, { codPais: ST.codpais }).pasajeros.length;
+          sumarAlCampo(todo);
+          if (!cuantos) { it.fin('warn', 'Texto pasado al recuadro: revisalo'); toast('Pasé el texto al recuadro, pero no encontré datos de pasajeros'); return; }
+          it.fin('ok', '✓ Texto leído');
+          leerTexto();
+        } catch (err) {
+          console.error(err);
+          it.fin('err', err && err.message ? err.message : 'No se pudo leer el archivo');
+        }
+      });
+    });
+  }
+  $('txtArch').addEventListener('click', function () { $('fileTxt').click(); });
+  $('fileTxt').addEventListener('change', function () { procesarDatos(this.files); this.value = ''; });
+  $('txt').addEventListener('paste', function (e) {
+    var cd = e.clipboardData; if (!cd) return;
+    if ((cd.getData('text/plain') || '').trim()) return;   // si hay texto (por ej. celdas de Excel), se pega el texto
+    var fs = [];
+    for (var i = 0; cd.items && i < cd.items.length; i++) if (cd.items[i].kind === 'file') { var f = cd.items[i].getAsFile(); if (f) fs.push(f); }
+    if (fs.length) { e.preventDefault(); e.stopPropagation(); procesarDatos(fs); }
+  });
+  ['dragenter', 'dragover'].forEach(function (t) { $('txt').addEventListener(t, function (e) { if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') >= 0) { e.preventDefault(); e.stopPropagation(); $('txt').classList.add('sobre'); } }); });
+  ['dragleave', 'drop'].forEach(function (t) { $('txt').addEventListener(t, function () { $('txt').classList.remove('sobre'); }); });
+  $('txt').addEventListener('drop', function (e) {
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) { e.preventDefault(); e.stopPropagation(); procesarDatos(e.dataTransfer.files); }
+  });
   $('elegir').addEventListener('click', function (e) { e.stopPropagation(); $('file').click(); });
   $('drop').addEventListener('click', function () { $('file').click(); });
   $('drop').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('file').click(); } });
@@ -588,6 +680,9 @@
   window.addEventListener('dragover', function (e) { e.preventDefault(); });
   window.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer && e.dataTransfer.files.length) procesar(e.dataTransfer.files); });
   document.addEventListener('paste', function (e) {
+    // pegando en un campo con texto en el portapapeles (por ej. celdas de Excel, que traen además una imagen): se pega el texto
+    var ed = e.target && e.target.closest && e.target.closest('input,textarea,[contenteditable]');
+    if (ed && e.clipboardData && (e.clipboardData.getData('text/plain') || '').trim()) return;
     var it = e.clipboardData && e.clipboardData.items, fs = [];
     for (var i = 0; it && i < it.length; i++) if (it[i].kind === 'file') { var f = it[i].getAsFile(); if (f) fs.push(f); }
     if (fs.length) { e.preventDefault(); procesar(fs); }

@@ -169,11 +169,27 @@ button.agregar{display:block;width:100%;margin:2px 0 16px;padding:13px 14px;bord
 button.agregar:hover{background:#E6F5F1}
 .vacio button.agregar{width:auto;margin:14px auto 0;padding:10px 18px}
 .sx button:focus-visible{outline:2px solid var(--sky);outline-offset:-3px}
+
+/* Pantallas anchas: cada columna se desplaza por su cuenta (datos a la izquierda, tarjetas al medio, comandos a la derecha) */
+@media(min-width:981px){
+  html,body{height:100%}
+  body{display:flex;flex-direction:column;overflow:hidden}
+  .top{flex:none}
+  .wrap{flex:1 1 auto;min-height:0;width:100%;grid-template-rows:minmax(0,1fr);padding-bottom:0}
+  .wrap>.panel{position:static;align-self:start;max-height:calc(100% - 18px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+  .main{min-height:0;height:100%;overflow-y:auto;overscroll-behavior:contain;padding:0 6px 18px 0;scrollbar-width:thin}
+}
+@media(min-width:1251px){
+  .main{overflow:hidden;padding:0;grid-template-rows:minmax(0,1fr);align-items:stretch}
+  .paxcol,.outcol{position:static;min-height:0;height:100%;overflow-y:auto;overscroll-behavior:contain;padding:0 6px 18px 0;scrollbar-width:thin}
+}
+
+textarea#txt.sobre{border-color:var(--sky);background:#E4F7F3;box-shadow:0 0 0 3px rgba(20,141,126,.18)}
 </style></head><body><header class="top">
   <img src="datapax-fav/favicon-48.png?v=1" alt="" width="34" height="34" class="logo">
   <h1>DataPax</h1>
   <span class="hint" style="margin:0">Pasaporte, cédula o texto → nombres, DOCS, FOID y contactos para el GDS</span>
-  <span class="hint ver">versión 20/11 01:49</span>
+  <span class="hint ver">versión 20/11 15:03</span>
   <a href="index.html" class="volver">← Volver a Tu Itinerario</a>
 </header>
 <div class="wrap">
@@ -192,10 +208,12 @@ button.agregar:hover{background:#E6F5F1}
     <p class="hint">Del pasaporte se lee la franja de abajo con los <code>&lt;&lt;&lt;</code>; de la cédula, el dorso.</p>
     <ul id="cola" class="cola"></ul>
 
-    <label for="txt">…o pegá los datos en texto</label>
-    <textarea id="txt" placeholder="Mail, WhatsApp o planilla de Excel, por ejemplo:&#10;Nombre: Gonzalo Andrés Nocella Massaferro&#10;Fecha de nacimiento: 05/11/1986&#10;Pasaporte: D345678 · Vto.: 12/05/2030&#10;Mail: … · Cel: 098 584 260"></textarea>
+    <label for="txt">…o pegá los datos <i>(texto, captura o PDF)</i></label>
+    <textarea id="txt" placeholder="Mail, WhatsApp o planilla de Excel. También una captura o un PDF con los datos escritos (Ctrl+V o arrastrar). Por ejemplo:&#10;Nombre: Gonzalo Andrés Nocella Massaferro&#10;Fecha de nacimiento: 05/11/1986&#10;Pasaporte: D345678 · Vto.: 12/05/2030&#10;Mail: … · Cel: 098 584 260"></textarea>
     <div class="btns">
       <button type="button" class="p" id="leer">Leer texto</button>
+      <button type="button" class="s" id="txtArch" title="Captura, foto o PDF con los datos escritos">Imagen o PDF</button>
+      <input type="file" id="fileTxt" accept="image/*,.pdf,application/pdf" multiple hidden>
       <button type="button" class="s" id="manual" tabindex="-1">+ Pasajero a mano</button>
       <button type="button" class="s clr" id="limpiar">Limpiar todo</button>
     </div>
@@ -291,6 +309,46 @@ var NOMBRES_PILA = ('AARON ABEL ABIGAIL ABRIL ADA ADELA ADELINA ADOLFO ADRIAN AD
   // portugués / italiano / inglés frecuentes
   'ANTONIO JOAO JOSE PAULO PEDRO LUIZ CARLOS MARCOS RAFAELA THIAGO TIAGO GUILHERME GUSTAVO VINICIUS LEONARDO MATHEUS FELIPE ARTHUR HEITOR DAVI LORENZO BEATRIZ LUIZA GIOVANNA GIULIA ALESSANDRO ALESSANDRA FRANCESCO GIUSEPPE GIOVANNI MARCO LUCA MATTEO STEFANO PAOLO ROBERTA SIMONE CHIARA ' +
   'JOHN JAMES ROBERT MICHAEL WILLIAM DAVID RICHARD JOSEPH THOMAS CHARLES CHRISTOPHER DANIEL MATTHEW ANTHONY MARK STEVEN PAUL ANDREW JOSHUA KEVIN BRIAN GEORGE EDWARD RONALD TIMOTHY JASON JEFFREY RYAN JACOB GARY NICHOLAS ERIC JONATHAN STEPHEN LARRY JUSTIN SCOTT BRANDON BENJAMIN SAMUEL FRANK GREGORY PATRICK PETER HENRY JACK MARY PATRICIA JENNIFER LINDA ELIZABETH BARBARA SUSAN JESSICA SARAH KAREN NANCY LISA BETTY MARGARET SANDRA ASHLEY KIMBERLY EMILY DONNA MICHELLE CAROL AMANDA MELISSA DEBORAH STEPHANIE REBECCA LAURA SHARON CYNTHIA KATHLEEN AMY SHIRLEY ANGELA HELEN ANNA BRENDA EMMA OLIVIA SOPHIA CHARLOTTE GRACE CHLOE LUCY ALICE ANNE KATE').split(' ');
+
+// Sexo según el nombre de pila (para datos en texto sin sexo). U = nombres que pueden ser de varón o de mujer: no se asigna.
+var SEXO_NOMBRES = {
+  M: ('AARON ABEL ABRAHAM ADAN ADOLFO ADRIAN AGUSTIN ALAN ALBERTO ALBINO ALCIDES ALDO ALEJANDRO ALEJO ALESSANDRO ALESSIO ALEXANDER ALEXANDRE ALFONSO ALFREDO ALONSO ALVARO AMADEO AMERICO ' +
+    'AMILCAR ANDRES ANDREW ANGEL ANGELO ANIBAL ANSELMO ANTHONY ANTONIO APARICIO ARIEL ARMANDO ARNALDO ARTHUR ARTURO ATILIO AUGUSTO AURELIO AXEL BALTASAR BARTOLOME BASILIO BAUTISTA BENICIO ' +
+    'BENITO BENJAMIN BERNARDO BLAS BORIS BORJA BRAIAN BRANDON BRAULIO BRIAN BRUNO BRYAN CAIO CALIXTO CAMILO CANDIDO CARLOS CARMELO CASIMIRO CAYETANO CEFERINO CELSO CESAR CHARLES ' +
+    'CHRISTIAN CHRISTOPHER CIRO CLAUDIO CLEMENTE CONRADO CRISTHIAN CRISTIAN CRISTOBAL DALMIRO DAMIAN DANIEL DANILO DANTE DARIO DARWIN DAVI DAVID DAVIDE DEMIAN DENIS DIEGO DIONISIO DOMINGO ' +
+    'DYLAN EDGAR EDGARDO EDISON EDMUNDO EDUARDO EDWARD EDWIN EFRAIN ELADIO ELBIO ELIAS ELIO ELISEO ELVIO EMANUEL EMANUELE EMERSON EMILIANO EMILIO ENRIQUE ENZO ERIC ERNESTO ' +
+    'ESTANISLAO ESTEBAN EUGENIO EUSEBIO EVARISTO EZEQUIEL FABIAN FABIO FABRICIO FACUNDO FAUSTO FEDERICO FELICIANO FELIPE FELIX FERMIN FERNANDO FIDEL FILIBERTO FILIPPO FLAVIO FLORENCIO FRANCESCO FRANCISCO ' +
+    'FRANCO FRANCOIS FRANK FREDDY GABRIEL GAEL GARY GASPAR GASTON GENARO GEORGE GERARDO GERMAN GERONIMO GERVASIO GIACOMO GIANCARLO GIANFRANCO GIANLUCA GILBERTO GINO GIORGIO GIOVANNI GIUSEPPE ' +
+    'GONZALO GREGORIO GREGORY GUIDO GUILHERME GUILLERMO GUSTAVO GUZMAN HANS HAROLD HEBER HECTOR HEITOR HENRIQUE HENRY HERIBERTO HERNAN HERNANDO HILARIO HOMERO HORACIO HUGO HUMBERTO IGNACIO ' +
+    'INAKI ISAAC ISAIAS ISIDORO ISMAEL ISRAEL IVAN JACINTO JACK JACOB JACOBO JAIME JAIR JAMES JASON JAVIER JEFFREY JEREMIAS JERONIMO JESUS JOAO JOAQUIN JOEL JOHN ' +
+    'JONAS JONATAN JONATHAN JORGE JOSE JOSEPH JOSHUA JOSUE JUAN JULIAN JULIO JUSTIN JUSTINO JUSTO KEVIN KLAUS LADISLAO LARRY LAUREANO LAUTARO LEANDRO LEO LEON LEONARDO ' +
+    'LEONEL LIONEL LISANDRO LORENZO LUCA LUCAS LUCIANO LUCIO LUIS LUIZ MAICOL MANUEL MARCELO MARCIAL MARCIO MARCO MARCOS MARIANO MARIO MARK MARTIN MASSIMO MATEO MATHEUS ' +
+    'MATHIAS MATIAS MATTEO MATTHEW MATTIA MAURICIO MAXIMILIANO MAXIMO MICHAEL MIGUEL MILTON MOISES MURILO NAHUEL NAPOLEON NATALIO NAZARENO NELSON NESTOR NICANOR NICHOLAS NICOLA NICOLAS NOEL ' +
+    'NORBERTO OCTAVIO OLIVER OMAR ORESTES ORLANDO OSCAR OSMAR OSVALDO OTAVIO OTTO PABLO PAOLO PASCUAL PATRICIO PATRICK PAUL PAULO PEDRO PETER PIERO PIERRE PIETRO PLACIDO ' +
+    'PRIMO RAFAEL RAIMUNDO RAMIRO RAMON RAUL REINALDO REMIGIO RENATO RENE RICARDO RICCARDO RICHARD ROBERT ROBERTO RODOLFO RODRIGO ROGELIO ROLANDO ROMAN ROMULO RONALD RONALDO ROQUE ' +
+    'RUBEN RYAN SALVADOR SALVATORE SAMUEL SANTIAGO SANTINO SANTOS SAUL SCOTT SEBASTIAN SEGUNDO SERAFIN SERGIO SEVERINO SILVESTRE SILVIO SIMON STEFANO STEPHEN STEVEN TADEO TEODORO THIAGO ' +
+    'THOMAS TIAGO TIMOTEO TIMOTHY TITO TOBIAS TOMAS TOMMASO UBALDO ULISES URIEL VALENTIN VALENTINO VICENTE VICTOR VINCENZO VINICIUS VLADIMIR WAGNER WALTER WASHINGTON WELLINGTON WILLIAM WILSON ' +
+    'XAVIER YAMIL YONATAN ZACARIAS').split(' '),
+  F: ('ABIGAIL ABRIL ADA ADELA ADELINA ADRIANA AGOSTINA AGUSTINA AIDA AILEN AINARA AINHOA AITANA ALBA ALBINA ALEJANDRA ALESSANDRA ALEXANDRA ALEXIA ALFONSINA ALICE ALICIA ALINA ALINE ' +
+    'ALLISON ALMA ALMUDENA AMALIA AMANDA AMBAR AMELIA AMPARO AMY ANA ANABEL ANABELA ANABELLA ANAHI ANALIA ANASTASIA ANDREINA ANDRESA ANGELA ANGELES ANGELICA ANGELINA ANNA ANNE ' +
+    'ANTONELA ANTONELLA ANTONIA ARACELI ARACELY ARIADNA ARIANA ASHLEY ASTRID ASUNCION AURORA AYELEN BARBARA BEATRICE BEATRIZ BELEN BELINDA BERNARDA BERTA BETINA BETTY BIANCA BLANCA BRENDA ' +
+    'BRUNA CAMILA CAMILLE CANDELA CANDELARIA CARINA CARLA CARMELA CARMEN CARMO CAROL CAROLA CAROLINA CASANDRA CATALINA CECILIA CELESTE CELIA CELINA CHARLOTTE CHIARA CHLOE CIELO CINTHIA ' +
+    'CINTIA CLARA CLARISA CLARISSA CLAUDIA CLOTILDE CONCEICAO CONCEPCION CONSTANZA CONSUELO CORAL CORINA CRISTINA CYNTHIA DAIANA DAMARIS DANA DANIELA DAYANA DEBORA DEBORAH DELFINA DELIA DENISE ' +
+    'DIANA DOLORES DONNA DORA DORIS EDITH ELBA ELENA ELIANA ELISA ELISABET ELISABETH ELIZABETH ELOISA ELSA ELVIRA EMILIA EMILY EMMA ERICA ERIKA ESMERALDA ESPERANZA ESTEFANIA ' +
+    'ESTELA ESTHER EUGENIA EVA EVANGELINA FABIANA FATIMA FERNANDA FIORELLA FLAVIA FLOR FLORENCIA FRANCESCA FRANCISCA GABRIELA GENOVEVA GEORGINA GIMENA GINA GIOVANNA GISELA GISELLE GIULIA GLADYS ' +
+    'GLORIA GRACA GRACE GRACIELA GRETA GRISELDA GUADALUPE GUILLERMINA HEBE HELEN HELENA HILDA HORTENSIA IARA INDIRA INES INGRID IRENE IRIS IRMA ISABEL ISABELA ISABELLA ISIDORA ' +
+    'IVANA IVONNE JACQUELINE JANET JAZMIN JENNIFER JESICA JESSICA JIMENA JOANA JOHANA JOHANNA JOSEFA JOSEFINA JUANA JUDITH JULIA JULIANA JULIE JULIETA JUSTINA KAREN KARINA KARLA ' +
+    'KATE KATHERINE KATHLEEN KATIA KIARA KIMBERLY LAILA LARA LARISSA LAURA LEILA LEONELA LEONOR LETICIA LIA LIDIA LILIA LILIANA LINDA LISA LOLA LORENA LOURDES LUANA ' +
+    'LUCIA LUCIANA LUCY LUDMILA LUISA LUISINA LUIZA LUZ MA MABEL MACARENA MAFALDA MAGALI MAGDALENA MAIA MAITE MALENA MANUELA MAR MARA MARCELA MARCIA MARGARET MARGARITA ' +
+    'MARGOT MARIA MARIANA MARIEL MARIELA MARILYN MARINA MARISA MARISOL MARLENE MARTA MARTHA MARTINA MARY MATILDE MAXIMA MAYRA MELANIE MELINA MELISA MELISSA MERCEDES MIA MICAELA ' +
+    'MICHELLE MILAGRO MILAGROS MILENA MIRANDA MIRIAM MIRIAN MIRTA MONICA MORENA NADIA NAIARA NANCY NATALI NATALIA NATIVIDAD NAYARA NEREA NICOLE NIEVES NOELIA NOEMI NORA NORMA ' +
+    'NURIA OFELIA OLGA OLIVIA PALOMA PAMELA PAOLA PATRICIA PAULA PAULINA PAZ PERLA PIA PILAR PRISCILA RAFAELA RAMONA RAQUEL REBECA REBECCA REGINA RENATA RITA ROBERTA ' +
+    'ROCIO ROMINA ROSA ROSALIA ROSANA ROSARIO ROSAURA ROXANA RUTH SABRINA SAMANTA SAMANTHA SANDRA SARA SARAH SELENA SERENA SHARON SHEILA SHIRLEY SILVANA SILVIA SOCORRO SOFIA ' +
+    'SOL SOLANGE SOLEDAD SONIA SOPHIA STEFANIA STELLA STEPHANIE SUSAN SUSANA TAMARA TANIA TATIANA TERESA THAIS URSULA VALENTINA VALERIA VALERIE VANESA VANINA VERA VERONICA VICTORIA ' +
+    'VILMA VIOLETA VIRGINIA VIVIANA WANDA XIMENA YAMILA YANINA YESICA YOLANDA ZOE ZULMA').split(' '),
+  U: ('ALEX ALEXI ALEXIS ANDREA CHARLIE CRUZ DARIEL DOMINIQUE ELIA FRANCIS GABRIELE JEAN JORDAN JULES KIM LUJAN MICHELE MISHA NIKITA NOA REYES ROBIN SAM SASHA ' +
+    'SIMONE TAYLOR TRINIDAD YAEL').split(' ')
+};
 /* ===== Lectura de la zona MRZ (ICAO 9303): pasaportes (TD3), cédulas (TD1) y TD2 =====
    Valida dígitos verificadores y corrige confusiones típicas del OCR (O/0, I/1, S/5…). */
 var MRZ = (function () {
@@ -778,6 +836,9 @@ var TEXTO = (function () {
   var TT = { 'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u', 'à': 'a', 'è': 'e', 'ì': 'i', 'ò': 'o', 'ù': 'u', 'â': 'a', 'ê': 'e', 'î': 'i', 'ô': 'o', 'û': 'u', 'ä': 'a', 'ë': 'e', 'ï': 'i', 'ö': 'o', 'ü': 'u', 'ã': 'a', 'õ': 'o', 'ñ': 'n', 'ç': 'c', 'å': 'a', 'ø': 'o', 'ý': 'y', 'ÿ': 'y', 'ß': 's' };
   var NP = {}, GENT = [];
   (typeof NOMBRES_PILA !== 'undefined' ? NOMBRES_PILA : []).forEach(function (n) { if (n) NP[n] = 1; });
+  // Sexo por nombre de pila: M, F o U (sirve para los dos, no se asigna)
+  var SXN = {}, SX0 = typeof SEXO_NOMBRES !== 'undefined' ? SEXO_NOMBRES : { M: [], F: [], U: [] };
+  ['M', 'F', 'U'].forEach(function (k) { SX0[k].forEach(function (n) { if (n) { SXN[n] = k; if (n.length > 2) NP[n] = 1; } }); });
   var G0 = typeof GENTILICIOS !== 'undefined' ? GENTILICIOS : {};
   Object.keys(G0).forEach(function (k) {
     var t = sinTildes(G0[k]).toUpperCase();
@@ -1128,6 +1189,12 @@ var TEXTO = (function () {
   }
 
   // ---------- separar el texto en pasajeros ----------
+  // Renglón que es sólo un nombre y apellido (2 a 6 palabras, sin números ni palabras de etiqueta, con algún nombre de pila conocido)
+  function lineaNombre(l) {
+    if (!/^\s*[\p{L}'’\-]+(?:\s+[\p{L}'’\-]+){1,5}\s*$/u.test(l)) return false;
+    var ws = N(l).trim().split(/\s+/);
+    return !ws.some(function (w) { return STOP[w] && !/^(DE|DEL|LA|LAS|LOS|Y|E)$/.test(w); }) && ws.some(function (w) { return NP[w]; });
+  }
   function bloques(texto) {
     var ls = texto.replace(/\r/g, '').split('\n'), bs = [], cur = [];
     function cerrar() { if (cur.join('').trim()) bs.push(cur.join('\n')); cur = []; }
@@ -1153,12 +1220,22 @@ var TEXTO = (function () {
       var conDato = lns.filter(function (l) { return fechas(N(l), 'nac').length || /[A-Z]{1,3}\d{6,9}/.test(N(l)) || reCi.test(l); });
       var soloNombres = lns.length >= 2 && lns.every(function (l) { return /^\s*(?:\d{1,2}\s*[).\-–]\s*)?[\p{L}'’\-\/]+(?:\s+[\p{L}'’\-\/]+){1,6}\s*$/u.test(l) && !/^\s*(HOLA|BUEN|SALUDOS|GRACIAS)/i.test(sinTildes(l)); });
       if (!hayEtq && ((lns.length >= 2 && conDato.length >= 2 && conDato.length >= lns.length - 1) || soloNombres)) lns.forEach(function (l) { out.push(l); });
+      else if (!hayEtq && lns.length >= 4) {
+        // nombre / datos / nombre / datos sin renglón en blanco entre pasajeros: se corta antes de cada nombre nuevo
+        var trozo = [], tieneNom = false, tieneDato = false;
+        lns.forEach(function (l) {
+          var esNom = lineaNombre(l), esDato = conDato.indexOf(l) >= 0;
+          if (esNom && tieneNom && tieneDato) { out.push(trozo.join('\n')); trozo = []; tieneNom = tieneDato = false; }
+          trozo.push(l); if (esNom) tieneNom = true; if (esDato) tieneDato = true;
+        });
+        if (trozo.length) out.push(trozo.join('\n'));
+      }
       else out.push(b);
     });
     return out;
   }
 
-  function parse(texto, opc) {
+  function parse0(texto, opc) {
     opc = opc || {};
     var pais0 = opc.codPais || '598';
     texto = String(texto || '');
@@ -1190,7 +1267,21 @@ var TEXTO = (function () {
       if (DESP.test(N(b)) && !p.pasaporte && !p.ci && !p.nacimiento) return;
       if (tieneDatos(p)) res.push(p);
       else if (p.email || p.telefono) sueltos.push(p);
+      else if (p.vencimiento || p.nacionalidad || p.sexo) { p.soloDato = 1; res.push(p); }   // se une al pasajero anterior
     });
+    // Un bloque sin nombre (por ej. el pasaporte en otro renglón separado por una línea en blanco, como pasa
+    // en WhatsApp o en el texto leído de una captura) completa al pasajero anterior si no choca con sus datos.
+    var unidos = [];
+    res.forEach(function (p) {
+      var ant = unidos[unidos.length - 1];
+      var huerfano = !p.apellidos && !p.nombres && ant && (ant.apellidos || ant.nombres);
+      var choca = huerfano && ['nacimiento', 'vencimiento', 'pasaporte', 'ci'].some(function (k) { return p[k] && ant[k]; });
+      if (huerfano && !choca) {
+        Object.keys(p).forEach(function (k) { if (k === 'soloDato') return; if (k === 'avisos') (p.avisos || []).forEach(function (a) { if (ant.avisos.indexOf(a) < 0) ant.avisos.push(a); }); else if (p[k] && !ant[k]) ant[k] = p[k]; });
+      } else unidos.push(p);
+    });
+    res = unidos.filter(function (p) { return !p.soloDato || tieneDatos(p); });
+    res.forEach(function (p) { delete p.soloDato; });
     // contactos sin nombre: al pasajero anterior que no tenga, o al único pasajero.
     // Si el texto no trae pasajeros, se devuelven solos para sumarlos a los que ya están cargados.
     if (!res.length) return { pasajeros: sueltos, avisos: avisos };
@@ -1205,7 +1296,52 @@ var TEXTO = (function () {
     return { pasajeros: res, avisos: avisos };
   }
 
-  return { parse: parse, separar: separar, telefono: telefono, ciValida: ciValida, limpiaNombre: limpiaNombre, fechas: fechas, pais: pais, N: N };
+  // Texto leído de una imagen: la @ de los mails suele salir como e, G, Q, © o desaparecer
+  var TLD_MAIL = '\\.(?:com|net|org|es|uy|ar|br)(?:\\.(?:uy|ar|br|es))?\\b';
+  // dominios inconfundibles: se arreglan aunque la @ haya desaparecido; los demás, sólo si hay un carácter en su lugar
+  var RE_MAIL_OCR1 = new RegExp('([a-z0-9][a-z0-9._%+-]*?)\\s?(?:@|[eGQO©®ª]|\\(a\\))?\\s?((?:gmail|googlemail|hotmail|outlook|yahoo|icloud|protonmail|adinet|hiperviajes|fibertel)' + TLD_MAIL + ')', 'g');
+  var RE_MAIL_OCR2 = new RegExp('([a-z0-9][a-z0-9._%+-]*?)\\s?(?:[eGQO©®ª]|\\(a\\))\\s?((?:live|msn|aol|vera|montevideo|netgate|arnet|speedy)' + TLD_MAIL + ')', 'g');
+  function arreglarOCR(t) {
+    return String(t || '').split('\n').map(function (l) {
+      if (/www\.|https?:/i.test(l)) return l;
+      l = l.replace(RE_MAIL_OCR1, function (m, u, d) { return u + '@' + d; }).replace(RE_MAIL_OCR2, function (m, u, d) { return /@/.test(m) ? m : u + '@' + d; });
+      // dominio propio (empresa): un © ® ª o una G/Q mayúscula en medio de un mail en minúscula
+      return l.replace(/\b([a-z0-9._%+-]{2,})(?:[©®ª]|[GQO](?=[a-z]))([a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,})\b/g, function (m, u, d) { return /@/.test(m) ? m : u + '@' + d; });
+    }).join('\n');
+  }
+
+  // Si en todo el texto hay un solo mail (o un solo celular), vale para todos los pasajeros
+  function parse(texto, o) {
+    var r = parse0(texto, o), ps = r.pasajeros || [];
+    var mails = {}, tels = {};
+    ps.forEach(function (p) { if (p.email) mails[p.email.toLowerCase()] = p.email; if (p.telefono) tels[p.telefono.replace(/\D/g, '')] = p.telefono; });
+    var m = Object.keys(mails), t = Object.keys(tels);
+    r.comun = { email: m.length === 1 ? mails[m[0]] : '', telefono: t.length === 1 ? tels[t[0]] : '' };
+    ps.forEach(function (p) {
+      if (tieneDatos(p)) { if (r.comun.email && !p.email) p.email = r.comun.email; if (r.comun.telefono && !p.telefono) p.telefono = r.comun.telefono; }
+    });
+    return r;
+  }
+
+  // Deduce el sexo del primer nombre: lista de nombres y, si no está, la terminación (‑A mujer, ‑O varón).
+  // Devuelve { sexo: 'M'|'F'|'', nombre, unisex, regla }.
+  var PARTIC = { DE: 1, DEL: 1, LA: 1, LAS: 1, LOS: 1, DO: 1, DA: 1, DOS: 1, DAS: 1, Y: 1, E: 1 };
+  function sexoPorNombre(nombres) {
+    var t = limpiaNombre(nombres).split(' ').filter(function (w) { return w && !PARTIC[w]; });
+    if (!t.length) return { sexo: '', nombre: '', unisex: false, regla: '' };
+    var a = SXN[t[0]], b = t[1] ? SXN[t[1]] : null;
+    if (a === 'M' || a === 'F') return { sexo: a, nombre: t[0], unisex: false, regla: 'lista' };
+    if (a === 'U') {
+      if (b === 'M' || b === 'F') return { sexo: b, nombre: t[0] + ' ' + t[1], unisex: false, regla: 'lista' };
+      return { sexo: '', nombre: t[0], unisex: true, regla: 'lista' };
+    }
+    if (b === 'M' || b === 'F') return { sexo: b, nombre: t[1], unisex: false, regla: 'lista' };
+    if (t[0].length >= 3 && /A$/.test(t[0])) return { sexo: 'F', nombre: t[0], unisex: false, regla: 'terminacion' };
+    if (t[0].length >= 3 && /O$/.test(t[0])) return { sexo: 'M', nombre: t[0], unisex: false, regla: 'terminacion' };
+    return { sexo: '', nombre: t[0], unisex: false, regla: '' };
+  }
+
+  return { arreglarOCR: arreglarOCR, sexoPorNombre: sexoPorNombre, parse: parse, separar: separar, telefono: telefono, ciValida: ciValida, limpiaNombre: limpiaNombre, fechas: fechas, pais: pais, N: N };
 })();
 if (typeof module !== 'undefined') module.exports = TEXTO;
 /* ===== Armado de comandos para Amadeus y Sabre =====
@@ -1378,6 +1514,37 @@ var OCR = (function () {
     })().catch(function (e) { cargando = null; throw e; });
     return cargando;
   }
+  // ---- texto común (capturas de WhatsApp, mails, PDF escaneados): modelo de español ----
+  var wTexto = null, cargandoT = null, progresoT = null;
+  function motorTexto(aviso) {
+    if (wTexto) return Promise.resolve(wTexto);
+    if (!cargandoT) cargandoT = (async function () {
+      aviso && aviso('Preparando el lector de texto (sólo la primera vez)…');
+      if (typeof Tesseract === 'undefined') await script(url('vendor/ocr/tesseract.min.js'));
+      if (typeof SPA_MODELO === 'undefined') await script(url('vendor/ocr/lang/spa-modelo.js'));
+      var b = atob(SPA_MODELO), datos = new Uint8Array(b.length);
+      for (var i = 0; i < b.length; i++) datos[i] = b.charCodeAt(i);
+      var w = await Tesseract.createWorker([{ code: 'spa', data: datos }], 1, {
+        workerPath: url('vendor/ocr/worker.min.js'),
+        corePath: url('vendor/ocr').replace(/\/$/, ''),
+        cacheMethod: 'none',
+        workerBlobURL: false,
+        logger: function (m) { if (progresoT && m && m.status === 'recognizing text') progresoT(m.progress); }
+      });
+      await w.setParameters({ tessedit_pageseg_mode: '3', preserve_interword_spaces: '1', user_defined_dpi: '300' });
+      wTexto = w; return w;
+    })().catch(function (e) { cargandoT = null; throw e; });
+    return cargandoT;
+  }
+  async function leerTextoImagen(canvas, aviso, escMax) {
+    var w = await motorTexto(aviso), lado = Math.max(canvas.width, canvas.height), c = canvas;
+    // las capturas de pantalla tienen letra chica: se agrandan para leer mejor
+    var esc = Math.max(1, Math.min(escMax || 2.5, 2200 / lado));
+    if (esc > 1.05) { c = document.createElement('canvas'); c.width = Math.round(canvas.width * esc); c.height = Math.round(canvas.height * esc); var g = c.getContext('2d'); g.imageSmoothingQuality = 'high'; g.drawImage(canvas, 0, 0, c.width, c.height); }
+    progresoT = function (v) { aviso && aviso('Leyendo el texto… ' + Math.round(v * 100) + ' %'); };
+    try { var r = await w.recognize(c); return (r.data.text || '').replace(/[ \t]+\n/g, '\n'); }
+    finally { progresoT = null; }
+  }
   async function psm(w, m) { if (psmActual !== m) { await w.setParameters({ tessedit_pageseg_mode: m }); psmActual = m; } }
   function aCanvas(pix) {
     var c = document.createElement('canvas'); c.width = pix.width; c.height = pix.height;
@@ -1487,7 +1654,7 @@ var OCR = (function () {
     return { mrz: best, recorte: recorte };
   }
 
-  return { motor: motor, cargarImagen: cargarImagen, paginasPDF: paginasPDF, leerCanvas: leerCanvas, leerZona: leerZona };
+  return { motorTexto: motorTexto, leerTextoImagen: leerTextoImagen, motor: motor, cargarImagen: cargarImagen, paginasPDF: paginasPDF, leerCanvas: leerCanvas, leerZona: leerZona };
 })();
 /* ===== DataPax · interfaz ===== */
 (function () {
@@ -1546,7 +1713,7 @@ var OCR = (function () {
 
   // ---------- pasajeros desde cada fuente ----------
   function nuevo(o) {
-    var p = { id: uid++, apellidos: '', nombres: '', sexo: '', nac: null, nacionalidad: '', ppNum: '', ppEmisor: '', ppVenc: null, ciNum: '', ciEmisor: '', ciVenc: null, docUsar: '', email: '', tel: '', tituloManual: '', tipoManual: '', numManual: '', infanteDe: 0, fuentes: [], avisosF: [], ocultos: {}, verificado: null, fotos: [] };
+    var p = { id: uid++, apellidos: '', nombres: '', sexo: '', sexoNombre: '', sexoDuda: '', nac: null, nacionalidad: '', ppNum: '', ppEmisor: '', ppVenc: null, ciNum: '', ciEmisor: '', ciVenc: null, docUsar: '', email: '', tel: '', tituloManual: '', tipoManual: '', numManual: '', infanteDe: 0, fuentes: [], avisosF: [], ocultos: {}, verificado: null, fotos: [] };
     for (var k in o) if (o[k] !== undefined && o[k] !== null && o[k] !== '') p[k] = o[k];
     return p;
   }
@@ -1577,6 +1744,7 @@ var OCR = (function () {
   function desdeTexto(t, fuente) {
     var av = (t.avisos || []).map(function (a) { return { t: a, k: 'warn' }; });
     var o = { apellidos: t.apellidos || '', nombres: t.nombres || '', sexo: t.sexo === 'M' || t.sexo === 'F' ? t.sexo : '', nac: t.nacimiento ? { y: t.nacimiento.y, m: t.nacimiento.m, d: t.nacimiento.d } : null, nacionalidad: t.nacionalidad || '', email: t.email || '', tel: t.telefono || '', fuentes: [fuente], avisosF: av };
+    if (!t.sexo && o.nombres) deducirSexo(o);
     var venc = t.vencimiento ? { y: t.vencimiento.y, m: t.vencimiento.m, d: t.vencimiento.d } : null;
     if (t.pasaporte) {
       o.ppNum = t.pasaporte; o.ppVenc = venc; o.docUsar = 'PP';
@@ -1585,6 +1753,11 @@ var OCR = (function () {
     }
     if (t.ci) { o.ciNum = t.ci; o.ciEmisor = t.nacionalidad || 'URY'; if (!t.pasaporte) { o.docUsar = 'NI'; o.ciVenc = venc; } }
     return nuevo(o);
+  }
+  // Sexo según el nombre de pila (los nombres de ambos sexos quedan sin asignar)
+  function deducirSexo(p) {
+    var r = TEXTO.sexoPorNombre(p.nombres);
+    p.sexo = r.sexo; p.sexoNombre = r.sexo ? r.nombre : ''; p.sexoDuda = r.unisex ? r.nombre : '';
   }
   function mismaPersona(a, b) {
     if (a.ppNum && b.ppNum) return a.ppNum === b.ppNum;
@@ -1608,6 +1781,9 @@ var OCR = (function () {
     var e = ST.pax.filter(function (p) { return mismaPersona(p, n); })[0];
     if (!e) { ST.pax.push(n); ultimo = n.id; return n; }
     var mrz = n.verificado !== null && n.verificado !== undefined;
+    if (n.sexo && !n.sexoNombre && e.sexoNombre) { e.sexo = ''; e.sexoNombre = ''; }
+    if (!e.sexo && n.sexo) { e.sexoNombre = n.sexoNombre; e.sexoDuda = ''; }
+    else if (!e.sexo && !n.sexo && n.sexoDuda) e.sexoDuda = n.sexoDuda;
     ['sexo', 'nac', 'nacionalidad', 'ppNum', 'ppEmisor', 'ppVenc', 'ciNum', 'ciEmisor', 'ciVenc', 'docUsar', 'email', 'tel'].forEach(function (k) {
       if (n[k] && (!e[k] || (mrz && /^(sexo|nac|ppNum|ppEmisor|ppVenc|ciVenc)$/.test(k)))) e[k] = n[k];
     });
@@ -1680,7 +1856,7 @@ var OCR = (function () {
     var av = avisoValidez(p); if (av) a.unshift(av);
     if (!L(p.apellidos)) a.push({ t: 'Falta el apellido.', k: 'err' });
     if (!L(p.nombres)) a.push({ t: 'Falta el nombre.', k: 'err' });
-    if (!p.sexo) a.push({ t: 'Falta el sexo (M/F) para el DOCS.', k: 'err' });
+    if (!p.sexo) a.push({ t: p.sexoDuda ? 'Falta el sexo: ' + p.sexoDuda + ' es nombre de varón y de mujer, elegí M o F.' : 'Falta el sexo (M/F) para el DOCS.', k: 'err' });
     if (!p.nac) a.push({ t: 'Falta la fecha de nacimiento para el DOCS.', k: 'err' });
     if (p.ciNum && (p.ciEmisor || 'URY') === 'URY' && /^\d{7,8}$/.test(p.ciNum) && !TEXTO.ciValida(p.ciNum)) a.push({ t: 'El dígito verificador de la cédula no coincide: revisá el número.', k: 'err' });
     if (!p.ppNum && !p.ciNum) a.push({ t: 'Sin documento: no se arma el FOID.', k: 'warn' });
@@ -1815,7 +1991,7 @@ var OCR = (function () {
     h += '<div class="nomrow"><div><label>Apellidos</label><input class="nm" data-f="apellidos" value="' + esc(p.apellidos) + '" autocomplete="off" spellcheck="false"></div>';
     h += '<div class="mover"><button type="button" data-mv="an" tabindex="-1" title="Pasar el primer apellido a nombres">◀</button><button type="button" data-mv="na" tabindex="-1" title="Pasar el último nombre a apellidos">▶</button></div>';
     h += '<div><label>Nombres</label><input class="nm" data-f="nombres" value="' + esc(p.nombres) + '" autocomplete="off" spellcheck="false"></div></div>';
-    h += '<div class="c3"><label>Sexo</label><div class="sx' + (p.sexo ? '' : ' falta') + '"><button type="button" data-sx="M" title="Masculino (tecla M)" tabindex="' + (p.sexo === 'F' ? -1 : 0) + '" class="' + (p.sexo === 'M' ? 'on' : '') + '">M</button><button type="button" data-sx="F" title="Femenino (tecla F)" tabindex="' + (p.sexo === 'F' ? 0 : -1) + '" class="' + (p.sexo === 'F' ? 'on' : '') + '">F</button></div></div>';
+    h += '<div class="c3"><label>Sexo</label><div class="sx' + (p.sexo ? '' : ' falta') + '"><button type="button" data-sx="M" title="Masculino (tecla M)" tabindex="' + (p.sexo === 'F' ? -1 : 0) + '" class="' + (p.sexo === 'M' ? 'on' : '') + '">M</button><button type="button" data-sx="F" title="Femenino (tecla F)" tabindex="' + (p.sexo === 'F' ? 0 : -1) + '" class="' + (p.sexo === 'F' ? 'on' : '') + '">F</button></div><div class="small" data-sxn></div></div>';
     h += '<div class="c4"><label>Nacimiento</label><input data-f="nac" data-fecha="nac" value="' + dmy(p.nac) + '" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" maxlength="11"><div class="small" data-edad></div></div>';
     h += '<div class="c5"><label>Nacionalidad</label><input data-f="nacionalidad" list="paises" value="' + esc(p.nacionalidad) + '" maxlength="3" autocomplete="off"><div class="small">' + esc(paisNom(p.nacionalidad)) + '</div></div>';
     h += '<div class="c3"><label>Documento</label><select data-f="docUsar"><option value="PP"' + (uso === 'PP' ? ' selected' : '') + '>Pasaporte</option><option value="NI"' + (uso === 'NI' ? ' selected' : '') + '>Cédula / DNI</option></select></div>';
@@ -1851,6 +2027,7 @@ var OCR = (function () {
     art.querySelector('[data-meta]').innerHTML = '<span class="num">' + num + '</span><span class="who">' + esc((L(p.apellidos) || '—') + ' / ' + (L(p.nombres) || '—')) + '</span><span class="tag">' + tipoTxt + (i.tit ? ' · ' + i.tit : '') + '</span>' + etiquetaValidez(p) + ver + (src ? '<span class="tag" title="Origen de los datos">' + esc(src) + '</span>' : '') + '<button type="button" class="s del" tabindex="-1" data-del="' + p.id + '" title="Quitar pasajero">Quitar</button>';
     var e = art.querySelector('[data-edad]'); if (e) e.textContent = i.edad !== null && i.edad !== undefined ? i.edad + (i.edad === 1 ? ' año' : ' años') + (ST.fviaje ? ' al viajar' : '') : '';
     var sx = art.querySelector('.sx'); if (sx) sx.classList.toggle('falta', !p.sexo);
+    var sxn = art.querySelector('[data-sxn]'); if (sxn) { sxn.textContent = p.sexo && p.sexoNombre ? 'Según el nombre' : (!p.sexo && p.sexoDuda ? 'Nombre de ambos sexos' : ''); sxn.title = p.sexoNombre ? 'Deducido de ' + p.sexoNombre + ': si no corresponde, tocá la otra letra' : ''; }
     var todos = avisos(p, i), arriba = todos.filter(function (a) { return a.k === 'fuerte'; });
     var cv = art.querySelector('[data-venc]'); if (cv) cv.innerHTML = arriba.map(function (a) { return '<li class="fuerte">' + esc(a.t) + '</li>'; }).join('');
     art.querySelector('[data-av]').innerHTML = todos.filter(function (a) { return a.k !== 'fuerte'; }).map(function (a) { return '<li class="' + ({ err: 'err', ok: 'ok', fuerte: 'fuerte', tenue: 'tenue' }[a.k] || '') + '">' + esc(a.t) + (a.i !== undefined ? ' <button type="button" class="lnk" tabindex="-1" data-oc="' + a.i + '" title="Ocultar este aviso">ocultar</button>' : '') + '</li>'; }).join('');
@@ -1914,6 +2091,7 @@ var OCR = (function () {
     var f = e.target.getAttribute('data-f'), art = e.target.closest('.pax'); if (!f || !art) return;
     var p = porId(art.getAttribute('data-id'));
     if (f === 'apellidos' || f === 'nombres') { p[f] = L(e.target.value); e.target.value = p[f]; }
+    if (f === 'nombres' && (!p.sexo || p.sexoNombre)) { deducirSexo(p); pintarSexo(art, p); }
     if (/^(nac|ppVenc|ciVenc)$/.test(f)) {
       if (p[f]) { e.target.value = dmy(p[f]); e.target.classList.remove('mal'); }
       else e.target.classList.toggle('mal', !!e.target.value.trim());
@@ -1965,10 +2143,21 @@ var OCR = (function () {
     var t = $('txt').value; if (!t.trim()) { toast('Pegá primero los datos en el recuadro'); return; }
     var r = TEXTO.parse(t, { codPais: ST.codpais }), n = 0, antes = ST.pax.length;
     r.pasajeros.forEach(function (x) { var q = x.mrz ? desdeMRZ(x.mrz, 'MRZ pegada') : desdeTexto(x, 'texto'); if (fusionar(q)) n++; });
-    if (!n) { toast('No encontré datos de pasajeros en el texto'); return; }
+    // un solo mail o celular en el texto: vale para todos los pasajeros (también los cargados antes)
+    var c = r.comun || {}, conMail = 0, conTel = 0;
+    if (ST.pax.length > 1) ST.pax.forEach(function (p) {
+      if (c.email && !p.email) { p.email = c.email; conMail++; }
+      if (c.telefono && !p.tel) { var tt = TEXTO.telefono(c.telefono, ST.codpais); p.tel = tt ? tt.num : c.telefono; conTel++; }
+    });
+    if (!n && !conMail && !conTel) { toast('No encontré datos de pasajeros en el texto'); return; }
     var nuevos = ST.pax.length - antes;
     render(true);
-    toast(nuevos ? (nuevos === 1 ? 'Se agregó 1 pasajero' : 'Se agregaron ' + nuevos + ' pasajeros') : 'Datos sumados al pasajero existente');
+    var msj = nuevos ? (nuevos === 1 ? 'Se agregó 1 pasajero' : 'Se agregaron ' + nuevos + ' pasajeros') : 'Datos sumados al pasajero existente';
+    var dig = function (v) { return String(v || '').replace(/\D/g, ''); };
+    var nM = c.email ? ST.pax.filter(function (p) { return (p.email || '').toLowerCase() === c.email.toLowerCase(); }).length : 0;
+    var nT = c.telefono ? ST.pax.filter(function (p) { return p.tel && (dig(p.tel) === dig(c.telefono) || dig(p.tel).slice(-8) === dig(c.telefono).slice(-8)); }).length : 0;
+    if (nM > 1 || nT > 1) msj += ' · ' + (nM > 1 && nT > 1 ? 'mismo mail y celular' : nM > 1 ? 'mismo mail' : 'mismo celular') + ' para ' + Math.max(nM, nT) + ' pasajeros';
+    toast(msj);
   }
   $('leer').addEventListener('click', leerTexto);
   $('txt').addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); leerTexto(); } });
@@ -1977,9 +2166,14 @@ var OCR = (function () {
     var i = document.querySelector('.pax[data-id="' + p.id + '"] [data-f=apellidos]'); if (i) { i.focus(); i.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
   }
   $('manual').addEventListener('click', agregarAMano);
+  function pintarSexo(art, p, foco) {
+    var hay = art.querySelector('[data-sx="' + (p.sexo || 'M') + '"]');
+    art.querySelectorAll('[data-sx]').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-sx') === p.sexo); x.tabIndex = x === hay ? 0 : -1; });
+    if (foco && hay) hay.focus();
+  }
   function elegirSexo(art, p, sx, foco) {
-    p.sexo = sx;
-    art.querySelectorAll('[data-sx]').forEach(function (x) { var si = x.getAttribute('data-sx') === sx; x.classList.toggle('on', si); x.tabIndex = si ? 0 : -1; if (si && foco) x.focus(); });
+    p.sexo = sx; p.sexoNombre = ''; p.sexoDuda = '';
+    pintarSexo(art, p, foco);
     cambio();
   }
   // Sexo con el teclado: M o H = masculino, F = femenino, flechas para alternar (Tab sigue al próximo campo)
@@ -2069,6 +2263,71 @@ var OCR = (function () {
       });
     });
   }
+  // ---------- campo de texto: también capturas, fotos o PDF con los datos escritos ----------
+  function pareceMRZ(t) { return /<{4,}/.test(t) || /^[A-Z0-9<]{28,}$/m.test(t.replace(/ /g, '')); }
+  function sumarAlCampo(t) {
+    var a = $('txt'); t = t.replace(/\n{3,}/g, '\n\n').trim(); if (!t) return;
+    a.value = a.value.trim() ? a.value.replace(/\s+$/, '') + '\n\n' + t : t;
+  }
+  function procesarDatos(files) {
+    files = Array.prototype.slice.call(files || []).filter(function (f) { return /^image\//.test(f.type) || /pdf$/i.test(f.type) || /\.(pdf|jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(f.name); });
+    if (!files.length) { toast('Elegí una imagen (JPG, PNG) o un PDF'); return; }
+    files.forEach(function (f) {
+      var nombre = f.name && !/^image\.(png|jpe?g)$/i.test(f.name) ? f.name : 'captura';
+      var it = itemCola(nombre);
+      colaTrabajo = colaTrabajo.then(async function () {
+        try {
+          var textos = [], lienzos = [];
+          if (/pdf$/i.test(f.type) || /\.pdf$/i.test(f.name)) {
+            var pags = await OCR.paginasPDF(f, it.estado);
+            for (var k = 0; k < pags.length; k++) {
+              lienzos.push(pags[k].canvas);
+              if (pags[k].texto.replace(/\s/g, '').length > 20) textos.push(pags[k].texto);   // PDF con texto: se usa tal cual
+              else { it.estado('Leyendo página ' + pags[k].pagina + '…'); textos.push(TEXTO.arreglarOCR(await OCR.leerTextoImagen(pags[k].canvas, it.estado))); }
+            }
+          } else {
+            it.estado('Abriendo…');
+            var cv = await OCR.cargarImagen(f); lienzos.push(cv);
+            textos.push(TEXTO.arreglarOCR(await OCR.leerTextoImagen(cv, it.estado)));
+          }
+          var todo = textos.join('\n\n');
+          // ¿Es la foto de un pasaporte o cédula? Entonces se lee la zona MRZ con el lector específico
+          if (pareceMRZ(todo)) {
+            var hubo = false;
+            for (var j = 0; j < lienzos.length; j++) {
+              it.estado('Parece un documento: leyendo la zona MRZ…');
+              var r = await OCR.leerCanvas(lienzos[j], it.estado);
+              if (r.mrz) { agregarLectura(r, lienzos[j], nombre, it); hubo = true; }
+            }
+            if (hubo) return;
+          }
+          if (!todo.replace(/\s/g, '')) { it.fin('warn', 'No encontré texto en el archivo'); return; }
+          var cuantos = TEXTO.parse(todo, { codPais: ST.codpais }).pasajeros.length;
+          sumarAlCampo(todo);
+          if (!cuantos) { it.fin('warn', 'Texto pasado al recuadro: revisalo'); toast('Pasé el texto al recuadro, pero no encontré datos de pasajeros'); return; }
+          it.fin('ok', '✓ Texto leído');
+          leerTexto();
+        } catch (err) {
+          console.error(err);
+          it.fin('err', err && err.message ? err.message : 'No se pudo leer el archivo');
+        }
+      });
+    });
+  }
+  $('txtArch').addEventListener('click', function () { $('fileTxt').click(); });
+  $('fileTxt').addEventListener('change', function () { procesarDatos(this.files); this.value = ''; });
+  $('txt').addEventListener('paste', function (e) {
+    var cd = e.clipboardData; if (!cd) return;
+    if ((cd.getData('text/plain') || '').trim()) return;   // si hay texto (por ej. celdas de Excel), se pega el texto
+    var fs = [];
+    for (var i = 0; cd.items && i < cd.items.length; i++) if (cd.items[i].kind === 'file') { var f = cd.items[i].getAsFile(); if (f) fs.push(f); }
+    if (fs.length) { e.preventDefault(); e.stopPropagation(); procesarDatos(fs); }
+  });
+  ['dragenter', 'dragover'].forEach(function (t) { $('txt').addEventListener(t, function (e) { if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') >= 0) { e.preventDefault(); e.stopPropagation(); $('txt').classList.add('sobre'); } }); });
+  ['dragleave', 'drop'].forEach(function (t) { $('txt').addEventListener(t, function () { $('txt').classList.remove('sobre'); }); });
+  $('txt').addEventListener('drop', function (e) {
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) { e.preventDefault(); e.stopPropagation(); procesarDatos(e.dataTransfer.files); }
+  });
   $('elegir').addEventListener('click', function (e) { e.stopPropagation(); $('file').click(); });
   $('drop').addEventListener('click', function () { $('file').click(); });
   $('drop').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('file').click(); } });
@@ -2079,6 +2338,9 @@ var OCR = (function () {
   window.addEventListener('dragover', function (e) { e.preventDefault(); });
   window.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer && e.dataTransfer.files.length) procesar(e.dataTransfer.files); });
   document.addEventListener('paste', function (e) {
+    // pegando en un campo con texto en el portapapeles (por ej. celdas de Excel, que traen además una imagen): se pega el texto
+    var ed = e.target && e.target.closest && e.target.closest('input,textarea,[contenteditable]');
+    if (ed && e.clipboardData && (e.clipboardData.getData('text/plain') || '').trim()) return;
     var it = e.clipboardData && e.clipboardData.items, fs = [];
     for (var i = 0; it && i < it.length; i++) if (it[i].kind === 'file') { var f = it[i].getAsFile(); if (f) fs.push(f); }
     if (fs.length) { e.preventDefault(); procesar(fs); }

@@ -6,6 +6,9 @@ var TEXTO = (function () {
   var TT = { 'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u', 'à': 'a', 'è': 'e', 'ì': 'i', 'ò': 'o', 'ù': 'u', 'â': 'a', 'ê': 'e', 'î': 'i', 'ô': 'o', 'û': 'u', 'ä': 'a', 'ë': 'e', 'ï': 'i', 'ö': 'o', 'ü': 'u', 'ã': 'a', 'õ': 'o', 'ñ': 'n', 'ç': 'c', 'å': 'a', 'ø': 'o', 'ý': 'y', 'ÿ': 'y', 'ß': 's' };
   var NP = {}, GENT = [];
   (typeof NOMBRES_PILA !== 'undefined' ? NOMBRES_PILA : []).forEach(function (n) { if (n) NP[n] = 1; });
+  // Sexo por nombre de pila: M, F o U (sirve para los dos, no se asigna)
+  var SXN = {}, SX0 = typeof SEXO_NOMBRES !== 'undefined' ? SEXO_NOMBRES : { M: [], F: [], U: [] };
+  ['M', 'F', 'U'].forEach(function (k) { SX0[k].forEach(function (n) { if (n) { SXN[n] = k; if (n.length > 2) NP[n] = 1; } }); });
   var G0 = typeof GENTILICIOS !== 'undefined' ? GENTILICIOS : {};
   Object.keys(G0).forEach(function (k) {
     var t = sinTildes(G0[k]).toUpperCase();
@@ -356,6 +359,12 @@ var TEXTO = (function () {
   }
 
   // ---------- separar el texto en pasajeros ----------
+  // Renglón que es sólo un nombre y apellido (2 a 6 palabras, sin números ni palabras de etiqueta, con algún nombre de pila conocido)
+  function lineaNombre(l) {
+    if (!/^\s*[\p{L}'’\-]+(?:\s+[\p{L}'’\-]+){1,5}\s*$/u.test(l)) return false;
+    var ws = N(l).trim().split(/\s+/);
+    return !ws.some(function (w) { return STOP[w] && !/^(DE|DEL|LA|LAS|LOS|Y|E)$/.test(w); }) && ws.some(function (w) { return NP[w]; });
+  }
   function bloques(texto) {
     var ls = texto.replace(/\r/g, '').split('\n'), bs = [], cur = [];
     function cerrar() { if (cur.join('').trim()) bs.push(cur.join('\n')); cur = []; }
@@ -381,12 +390,22 @@ var TEXTO = (function () {
       var conDato = lns.filter(function (l) { return fechas(N(l), 'nac').length || /[A-Z]{1,3}\d{6,9}/.test(N(l)) || reCi.test(l); });
       var soloNombres = lns.length >= 2 && lns.every(function (l) { return /^\s*(?:\d{1,2}\s*[).\-–]\s*)?[\p{L}'’\-\/]+(?:\s+[\p{L}'’\-\/]+){1,6}\s*$/u.test(l) && !/^\s*(HOLA|BUEN|SALUDOS|GRACIAS)/i.test(sinTildes(l)); });
       if (!hayEtq && ((lns.length >= 2 && conDato.length >= 2 && conDato.length >= lns.length - 1) || soloNombres)) lns.forEach(function (l) { out.push(l); });
+      else if (!hayEtq && lns.length >= 4) {
+        // nombre / datos / nombre / datos sin renglón en blanco entre pasajeros: se corta antes de cada nombre nuevo
+        var trozo = [], tieneNom = false, tieneDato = false;
+        lns.forEach(function (l) {
+          var esNom = lineaNombre(l), esDato = conDato.indexOf(l) >= 0;
+          if (esNom && tieneNom && tieneDato) { out.push(trozo.join('\n')); trozo = []; tieneNom = tieneDato = false; }
+          trozo.push(l); if (esNom) tieneNom = true; if (esDato) tieneDato = true;
+        });
+        if (trozo.length) out.push(trozo.join('\n'));
+      }
       else out.push(b);
     });
     return out;
   }
 
-  function parse(texto, opc) {
+  function parse0(texto, opc) {
     opc = opc || {};
     var pais0 = opc.codPais || '598';
     texto = String(texto || '');
@@ -418,7 +437,21 @@ var TEXTO = (function () {
       if (DESP.test(N(b)) && !p.pasaporte && !p.ci && !p.nacimiento) return;
       if (tieneDatos(p)) res.push(p);
       else if (p.email || p.telefono) sueltos.push(p);
+      else if (p.vencimiento || p.nacionalidad || p.sexo) { p.soloDato = 1; res.push(p); }   // se une al pasajero anterior
     });
+    // Un bloque sin nombre (por ej. el pasaporte en otro renglón separado por una línea en blanco, como pasa
+    // en WhatsApp o en el texto leído de una captura) completa al pasajero anterior si no choca con sus datos.
+    var unidos = [];
+    res.forEach(function (p) {
+      var ant = unidos[unidos.length - 1];
+      var huerfano = !p.apellidos && !p.nombres && ant && (ant.apellidos || ant.nombres);
+      var choca = huerfano && ['nacimiento', 'vencimiento', 'pasaporte', 'ci'].some(function (k) { return p[k] && ant[k]; });
+      if (huerfano && !choca) {
+        Object.keys(p).forEach(function (k) { if (k === 'soloDato') return; if (k === 'avisos') (p.avisos || []).forEach(function (a) { if (ant.avisos.indexOf(a) < 0) ant.avisos.push(a); }); else if (p[k] && !ant[k]) ant[k] = p[k]; });
+      } else unidos.push(p);
+    });
+    res = unidos.filter(function (p) { return !p.soloDato || tieneDatos(p); });
+    res.forEach(function (p) { delete p.soloDato; });
     // contactos sin nombre: al pasajero anterior que no tenga, o al único pasajero.
     // Si el texto no trae pasajeros, se devuelven solos para sumarlos a los que ya están cargados.
     if (!res.length) return { pasajeros: sueltos, avisos: avisos };
@@ -433,6 +466,51 @@ var TEXTO = (function () {
     return { pasajeros: res, avisos: avisos };
   }
 
-  return { parse: parse, separar: separar, telefono: telefono, ciValida: ciValida, limpiaNombre: limpiaNombre, fechas: fechas, pais: pais, N: N };
+  // Texto leído de una imagen: la @ de los mails suele salir como e, G, Q, © o desaparecer
+  var TLD_MAIL = '\\.(?:com|net|org|es|uy|ar|br)(?:\\.(?:uy|ar|br|es))?\\b';
+  // dominios inconfundibles: se arreglan aunque la @ haya desaparecido; los demás, sólo si hay un carácter en su lugar
+  var RE_MAIL_OCR1 = new RegExp('([a-z0-9][a-z0-9._%+-]*?)\\s?(?:@|[eGQO©®ª]|\\(a\\))?\\s?((?:gmail|googlemail|hotmail|outlook|yahoo|icloud|protonmail|adinet|hiperviajes|fibertel)' + TLD_MAIL + ')', 'g');
+  var RE_MAIL_OCR2 = new RegExp('([a-z0-9][a-z0-9._%+-]*?)\\s?(?:[eGQO©®ª]|\\(a\\))\\s?((?:live|msn|aol|vera|montevideo|netgate|arnet|speedy)' + TLD_MAIL + ')', 'g');
+  function arreglarOCR(t) {
+    return String(t || '').split('\n').map(function (l) {
+      if (/www\.|https?:/i.test(l)) return l;
+      l = l.replace(RE_MAIL_OCR1, function (m, u, d) { return u + '@' + d; }).replace(RE_MAIL_OCR2, function (m, u, d) { return /@/.test(m) ? m : u + '@' + d; });
+      // dominio propio (empresa): un © ® ª o una G/Q mayúscula en medio de un mail en minúscula
+      return l.replace(/\b([a-z0-9._%+-]{2,})(?:[©®ª]|[GQO](?=[a-z]))([a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,})\b/g, function (m, u, d) { return /@/.test(m) ? m : u + '@' + d; });
+    }).join('\n');
+  }
+
+  // Si en todo el texto hay un solo mail (o un solo celular), vale para todos los pasajeros
+  function parse(texto, o) {
+    var r = parse0(texto, o), ps = r.pasajeros || [];
+    var mails = {}, tels = {};
+    ps.forEach(function (p) { if (p.email) mails[p.email.toLowerCase()] = p.email; if (p.telefono) tels[p.telefono.replace(/\D/g, '')] = p.telefono; });
+    var m = Object.keys(mails), t = Object.keys(tels);
+    r.comun = { email: m.length === 1 ? mails[m[0]] : '', telefono: t.length === 1 ? tels[t[0]] : '' };
+    ps.forEach(function (p) {
+      if (tieneDatos(p)) { if (r.comun.email && !p.email) p.email = r.comun.email; if (r.comun.telefono && !p.telefono) p.telefono = r.comun.telefono; }
+    });
+    return r;
+  }
+
+  // Deduce el sexo del primer nombre: lista de nombres y, si no está, la terminación (‑A mujer, ‑O varón).
+  // Devuelve { sexo: 'M'|'F'|'', nombre, unisex, regla }.
+  var PARTIC = { DE: 1, DEL: 1, LA: 1, LAS: 1, LOS: 1, DO: 1, DA: 1, DOS: 1, DAS: 1, Y: 1, E: 1 };
+  function sexoPorNombre(nombres) {
+    var t = limpiaNombre(nombres).split(' ').filter(function (w) { return w && !PARTIC[w]; });
+    if (!t.length) return { sexo: '', nombre: '', unisex: false, regla: '' };
+    var a = SXN[t[0]], b = t[1] ? SXN[t[1]] : null;
+    if (a === 'M' || a === 'F') return { sexo: a, nombre: t[0], unisex: false, regla: 'lista' };
+    if (a === 'U') {
+      if (b === 'M' || b === 'F') return { sexo: b, nombre: t[0] + ' ' + t[1], unisex: false, regla: 'lista' };
+      return { sexo: '', nombre: t[0], unisex: true, regla: 'lista' };
+    }
+    if (b === 'M' || b === 'F') return { sexo: b, nombre: t[1], unisex: false, regla: 'lista' };
+    if (t[0].length >= 3 && /A$/.test(t[0])) return { sexo: 'F', nombre: t[0], unisex: false, regla: 'terminacion' };
+    if (t[0].length >= 3 && /O$/.test(t[0])) return { sexo: 'M', nombre: t[0], unisex: false, regla: 'terminacion' };
+    return { sexo: '', nombre: t[0], unisex: false, regla: '' };
+  }
+
+  return { arreglarOCR: arreglarOCR, sexoPorNombre: sexoPorNombre, parse: parse, separar: separar, telefono: telefono, ciValida: ciValida, limpiaNombre: limpiaNombre, fechas: fechas, pais: pais, N: N };
 })();
 if (typeof module !== 'undefined') module.exports = TEXTO;

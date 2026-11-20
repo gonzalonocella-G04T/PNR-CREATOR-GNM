@@ -21,10 +21,12 @@
     <p class="hint">Del pasaporte se lee la franja de abajo con los <code>&lt;&lt;&lt;</code>; de la cédula, el dorso.</p>
     <ul id="cola" class="cola"></ul>
 
-    <label for="txt">…o pegá los datos en texto</label>
-    <textarea id="txt" placeholder="Mail, WhatsApp o planilla de Excel, por ejemplo:&#10;Nombre: Gonzalo Andrés Nocella Massaferro&#10;Fecha de nacimiento: 05/11/1986&#10;Pasaporte: D345678 · Vto.: 12/05/2030&#10;Mail: … · Cel: 098 584 260"></textarea>
+    <label for="txt">…o pegá los datos <i>(texto, captura o PDF)</i></label>
+    <textarea id="txt" placeholder="Mail, WhatsApp o planilla de Excel. También una captura o un PDF con los datos escritos (Ctrl+V o arrastrar). Por ejemplo:&#10;Nombre: Gonzalo Andrés Nocella Massaferro&#10;Fecha de nacimiento: 05/11/1986&#10;Pasaporte: D345678 · Vto.: 12/05/2030&#10;Mail: … · Cel: 098 584 260"></textarea>
     <div class="btns">
       <button type="button" class="p" id="leer">Leer texto</button>
+      <button type="button" class="s" id="txtArch" title="Captura, foto o PDF con los datos escritos">Imagen o PDF</button>
+      <input type="file" id="fileTxt" accept="image/*,.pdf,application/pdf" multiple hidden>
       <button type="button" class="s" id="manual" tabindex="-1">+ Pasajero a mano</button>
       <button type="button" class="s clr" id="limpiar">Limpiar todo</button>
     </div>
