@@ -27,5 +27,32 @@ var soloCtc = TEXTO.parse('Mail: gnocella@hiperviajes.com.uy\nCel: 098 584 260')
 eq('sólo contactos', [soloCtc.length, soloCtc[0] && soloCtc[0].email, soloCtc[0] && soloCtc[0].telefono], [1, 'gnocella@hiperviajes.com.uy', '59898584260']);
 var grupo = 'Apellido\tNombre\tFecha nac.\tPasaporte\nCABRERA\tNICOLAS\t13/02/1980\tC1234570\nPEREIRA\tVALENTINA\t12/01/1979\tC1234569\nSILVA\tANA\t01/01/1990\tC1234500';
 eq('planilla sin falsas MRZ', TEXTO.parse(grupo).pasajeros.map(function (p) { return p.apellidos; }), ['CABRERA', 'PEREIRA', 'SILVA']);
+// Validez del documento: suma de meses y plazos (funciones de app.js)
+var appSrc = fs.readFileSync(path.join(D, 'app.js'), 'utf8');
+function fn(n) { var i = appSrc.indexOf('function ' + n + '('), d = 0, j = appSrc.indexOf('{', i); for (var k = j; k < appSrc.length; k++) { if (appSrc[k] === '{') d++; if (appSrc[k] === '}') { d--; if (!d) return appSrc.slice(i, k + 1); } } }
+vm.runInThisContext(fn('sumarMeses') + ';' + fn('mesesEntre') + ';' + fn('plazo'));
+function F(y, m, d) { return new Date(y, m - 1, d); }
+eq('31/08 + 6 meses = 28/02', sumarMeses(F(2026, 8, 31), 6).getTime(), F(2027, 2, 28).getTime());
+eq('plazos', [plazo(F(2026, 11, 20), F(2027, 5, 19)), plazo(F(2026, 11, 20), F(2027, 5, 20)), plazo(F(2026, 11, 20), F(2026, 12, 5)), plazo(F(2026, 11, 20), F(2028, 1, 15))], ['5 meses', '6 meses', '15 días', '1 año y 1 mes']);
+eq('umbral 6 meses', [F(2027, 5, 19) < sumarMeses(F(2026, 11, 20), 6), F(2027, 5, 20) < sumarMeses(F(2026, 11, 20), 6)], [true, false]);
+// Nombres para GDS: Ñ → N, Ç → C, sin tildes, apóstrofos ni signos
+eq('limpieza de nombres', ['Muñoz Ñandú', 'Gonçalves Conceição', "D'Alessandro", 'O’Brien', 'Pérez-Gómez', 'Müller', 'Straße', 'Łukasz', 'Dvořák', 'Ærø', 'St. John'].map(TEXTO.limpiaNombre),
+  ['MUNOZ NANDU', 'GONCALVES CONCEICAO', 'DALESSANDRO', 'OBRIEN', 'PEREZ GOMEZ', 'MULLER', 'STRASSE', 'LUKASZ', 'DVORAK', 'AERO', 'ST JOHN']);
+var tn = TEXTO.parse('Nombre: Iñaki Peña Gonçalves\nFecha de nacimiento: 01/02/1990').pasajeros[0];
+eq('nombre con Ñ y Ç desde texto', [tn.apellidos, tn.nombres], ['PENA GONCALVES', 'INAKI']);
+// Texto en minúscula, una cosa por línea (ejemplo de Gonzalo)
+var pe = TEXTO.parse('pedro porro lopez\n05-10-1962\npasaporte uruguayo d345678\n pplopez@gmail.com\n 59898653333').pasajeros;
+eq('una cosa por línea, en minúscula', pe.length === 1 && [pe[0].apellidos, pe[0].nombres, pe[0].nacimiento.d + '/' + pe[0].nacimiento.m + '/' + pe[0].nacimiento.y, pe[0].pasaporte, pe[0].nacionalidad, pe[0].email, pe[0].telefono], ['PORRO LOPEZ', 'PEDRO', '5/10/1962', 'D345678', 'URY', 'pplopez@gmail.com', '59898653333']);
+eq('celular con 598 y una cifra de menos', TEXTO.telefono('5989865333').num, '5989865333');
+eq('saludo no es nombre', TEXTO.parse('hola te paso los datos\njuan perez\n12/04/1978').pasajeros.map(function (p) { return p.apellidos + '/' + p.nombres; }), ['PEREZ/JUAN']);
+// Máscara de fechas: las barras se ponen solas al tipear
+vm.runInThisContext(fn('mascaraFecha'));
+function tipea(txt) { var el = { value: '', selectionStart: 0, setSelectionRange: function (a) { this.selectionStart = a; } };
+  txt.split('').forEach(function (c) { if (c === '<') { el.value = el.value.slice(0, -1); el.selectionStart = el.value.length; mascaraFecha(el, { inputType: 'deleteContentBackward' }); }
+    else { el.value += c; el.selectionStart = el.value.length; mascaraFecha(el, { inputType: 'insertText' }); } });
+  return el.value; }
+eq('máscara de fechas', ['05101962', '051062', '5/10/1962', '5-10-62', '05/10/1962', '05<', '0510<', '0510<<', '05101962<<<<', '051019621', '05NOV86', '5.3.1990'].map(tipea),
+  ['05/10/1962', '05/10/62', '05/10/1962', '05/10/62', '05/10/1962', '05', '05/10', '05/1', '05/10', '05/10/1962', '05NOV86', '05/03/1990']);
+eq('pasajero sin apellido va al final', CMD.preparar([{ id: 1, apellidos: '', nombres: '' }, { id: 2, apellidos: 'PEREZ', nombres: 'JUAN' }, { id: 3, apellidos: 'ALVAREZ', nombres: 'ANA' }], {}).todos.map(function (x) { return x.p.id + ':' + x.n; }), ['3:1', '2:2', '1:3']);
 console.log(fallas ? '\n' + fallas + ' pruebas fallaron' : '\nTodo bien');
 process.exit(fallas ? 1 : 0);

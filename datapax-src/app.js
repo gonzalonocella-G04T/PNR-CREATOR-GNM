@@ -19,6 +19,27 @@
     var t = new Date(f.y, f.m - 1, f.d);
     return t.getFullYear() === f.y && t.getMonth() === f.m - 1 && t.getDate() === f.d ? f : null;
   }
+  // Máscara de fecha: pone las barras solas mientras se escribe (05101962 → 05/10/1962).
+  // Acepta separadores escritos a mano (5/10/62, 5-10-1962) y no actúa con texto (05NOV86) ni al borrar.
+  function mascaraFecha(el, ev) {
+    var v = el.value, alFinal = el.selectionStart === v.length;
+    if (!alFinal) return;
+    if (/[^\d\/\-. ]/.test(v)) {   // con letras (05NOV86) no se enmascara; se saca la barra que se puso sola
+      var sl = v.replace(/^(\d{1,2})\/(?=[A-Za-z])/, '$1');
+      if (sl !== v) { el.value = sl; try { el.setSelectionRange(sl.length, sl.length); } catch (e) { } }
+      return;
+    }
+    var borrando = ev && /^delete/.test(ev.inputType || '');
+    var segs = v.replace(/[\-. ]/g, '/').split('/'), dig = '';
+    segs.forEach(function (sg, k) { if (k < segs.length - 1 && k < 2 && sg.length === 1) sg = '0' + sg; dig += sg; });
+    dig = dig.replace(/\D/g, '').slice(0, 8);
+    var out = dig.slice(0, 2);
+    if (dig.length > 2) out += '/' + dig.slice(2, 4);
+    if (dig.length > 4) out += '/' + dig.slice(4, 8);
+    if (!borrando && (dig.length === 2 || dig.length === 4)) out += '/';
+    if (out !== v) { el.value = out; try { el.setSelectionRange(out.length, out.length); } catch (e) { } }
+  }
+  function cifras(v) { return String(v || '').replace(/\D/g, '').length; }
   function deIso(s) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? { y: +m[1], m: +m[2], d: +m[3] } : null; }
   function dmy(d) { return d ? (d.d < 10 ? '0' : '') + d.d + '/' + (d.m < 10 ? '0' : '') + d.m + '/' + d.y : ''; }
   function fecha(d) { return d ? new Date(d.y, d.m - 1, d.d) : null; }
@@ -111,21 +132,65 @@
   }
 
   // ---------- avisos dinámicos ----------
+  // ---------- validez del documento ----------
+  function hoy0() { var d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function sumarMeses(d, n) { // suma meses sin desbordar (31/08 + 6 meses = 28/02 o 29/02)
+    var r = new Date(d.getFullYear(), d.getMonth() + n, 1), ult = new Date(r.getFullYear(), r.getMonth() + 1, 0).getDate();
+    r.setDate(Math.min(d.getDate(), ult)); return r;
+  }
+  function mesesEntre(a, b) { var m = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()); if (b.getDate() < a.getDate()) m--; return m; }
+  function plazo(a, b) {
+    var m = mesesEntre(a, b);
+    if (m < 1) { var d = Math.round((b - a) / 864e5); return d === 1 ? '1 día' : d + ' días'; }
+    if (m < 12) return m === 1 ? '1 mes' : m + ' meses';
+    var y = Math.floor(m / 12), r = m % 12;
+    return (y === 1 ? '1 año' : y + ' años') + (r ? ' y ' + (r === 1 ? '1 mes' : r + ' meses') : '');
+  }
+  // nivel: vencido · antesViaje · menos6 (alerta fuerte) · menos18 (aviso tenue) · ok · sin (no hay fecha)
+  function validez(p) {
+    var uso = p.docUsar === 'NI' || (!p.ppNum && p.ciNum) ? 'NI' : 'PP';
+    var v = uso === 'NI' ? p.ciVenc : p.ppVenc, doc = uso === 'NI' ? 'la cédula' : 'el pasaporte';
+    var hayDoc = uso === 'NI' ? !!p.ciNum : !!p.ppNum;
+    if (!v) return { nivel: hayDoc ? 'sin' : '', doc: doc };
+    var viaje = deDmy(ST.fviaje), h = hoy0(), ref = viaje ? fecha(viaje) : h, fv = fecha(v);
+    if (ref < h) ref = h;
+    var r = { v: v, fv: fv, ref: ref, viaje: !!viaje, doc: doc };
+    if (fv < h) r.nivel = 'vencido';
+    else if (fv < ref) r.nivel = 'antesViaje';
+    else if (fv < sumarMeses(ref, 6)) r.nivel = 'menos6';
+    else if (fv < sumarMeses(ref, 18)) r.nivel = 'menos18';
+    else r.nivel = 'ok';
+    r.plazo = fv >= ref ? plazo(ref, fv) : '';
+    return r;
+  }
+  function avisoValidez(p) {
+    var r = validez(p), d = r.v ? dmy(r.v) : '', Doc = r.doc.charAt(0).toUpperCase() + r.doc.slice(1);
+    switch (r.nivel) {
+      case 'vencido': return { t: '⚠ DOCUMENTO VENCIDO: ' + r.doc + ' venció el ' + d + '. No sirve para viajar.', k: 'fuerte' };
+      case 'antesViaje': return { t: '⚠ VENCE ANTES DEL VIAJE: ' + r.doc + ' vence el ' + d + '.', k: 'fuerte' };
+      case 'menos6': return { t: '⚠ VENCE EN MENOS DE 6 MESES: ' + r.doc + ' vence el ' + d + ' (' + (r.viaje ? 'a ' + r.plazo + ' de la fecha del viaje' : 'en ' + r.plazo) + '). Muchos destinos y aerolíneas exigen 6 meses de validez al ingresar.', k: 'fuerte' };
+      case 'menos18': return { t: Doc + ' vence el ' + d + ' (' + (r.viaje ? 'le quedan ' + r.plazo + ' al viajar' : 'en ' + r.plazo) + '). ' + (r.viaje ? 'Verificá que a la fecha de regreso le sigan quedando 6 meses.' : 'Si el viaje es dentro de varios meses, verificá que a esa fecha le sigan quedando 6 meses de validez.'), k: 'tenue' };
+      case 'sin': return { t: 'Sin fecha de vencimiento del documento: no se puede controlar la validez.', k: 'tenue' };
+    }
+    return null;
+  }
+  function etiquetaValidez(p) {
+    var r = validez(p);
+    if (r.nivel === 'vencido') return '<span class="tag venc">⚠ Documento vencido</span>';
+    if (r.nivel === 'antesViaje') return '<span class="tag venc">⚠ Vence antes del viaje</span>';
+    if (r.nivel === 'menos6') return '<span class="tag venc">⚠ ' + (r.viaje ? 'Al viajar le quedan ' + r.plazo : 'Vence en ' + r.plazo) + '</span>';
+    if (r.nivel === 'menos18') return '<span class="tag tenue">' + (r.viaje ? 'Al viajar le quedan ' + r.plazo : 'Vence en ' + r.plazo) + '</span>';
+    return '';
+  }
+
   function avisos(p, info) {
     var a = p.avisosF.filter(function (x, i) { return !p.ocultos[i]; }).map(function (x) { return { t: x.t, k: x.k, i: p.avisosF.indexOf(x) }; });
-    var ref = refViaje(), seis = new Date(ref); seis.setMonth(seis.getMonth() + 6);
     var tipo = info ? info.tipo : 'ADT';
+    var av = avisoValidez(p); if (av) a.unshift(av);
     if (!L(p.apellidos)) a.push({ t: 'Falta el apellido.', k: 'err' });
     if (!L(p.nombres)) a.push({ t: 'Falta el nombre.', k: 'err' });
     if (!p.sexo) a.push({ t: 'Falta el sexo (M/F) para el DOCS.', k: 'err' });
     if (!p.nac) a.push({ t: 'Falta la fecha de nacimiento para el DOCS.', k: 'err' });
-    var uso = p.docUsar === 'NI' || (!p.ppNum && p.ciNum) ? 'NI' : 'PP';
-    var v = uso === 'NI' ? p.ciVenc : p.ppVenc;
-    if (v) {
-      var fv = fecha(v);
-      if (fv < ref) a.push({ t: (uso === 'NI' ? 'La cédula' : 'El pasaporte') + ' está VENCIDO (' + dmy(v) + ')' + (ST.fviaje ? ' para la fecha del viaje' : '') + '.', k: 'err' });
-      else if (fv < seis) a.push({ t: 'Vence el ' + dmy(v) + ': menos de 6 meses ' + (ST.fviaje ? 'después del viaje' : 'desde hoy') + '. Varios destinos lo exigen.', k: 'warn' });
-    }
     if (p.ciNum && (p.ciEmisor || 'URY') === 'URY' && /^\d{7,8}$/.test(p.ciNum) && !TEXTO.ciValida(p.ciNum)) a.push({ t: 'El dígito verificador de la cédula no coincide: revisá el número.', k: 'err' });
     if (!p.ppNum && !p.ciNum) a.push({ t: 'Sin documento: no se arma el FOID.', k: 'warn' });
     if (tipo === 'INF' && info && !info.adulto) a.push({ t: 'El infante necesita un adulto con quien viajar.', k: 'err' });
@@ -204,7 +269,16 @@
     var o = $('out'), A = ST.gds !== 'S';
     if (!ST.pax.length) { o.innerHTML = '<p class="hint">Los comandos aparecen acá a medida que cargás pasajeros.</p>'; return; }
     TANDAS = {};
-    var h = '<div class="preg"><span>¿La reserva ya tiene los nombres cargados?</span><div class="seg seg-sm" id="reserva"><button type="button" data-r="nueva" class="' + (ST.reserva === 'nueva' ? 'on' : '') + '">No, es nueva</button><button type="button" data-r="existe" class="' + (ST.reserva === 'existe' ? 'on' : '') + '">Sí, ya están</button></div></div>';
+    var fuertes = [], tenues = [];
+    ST.pax.forEach(function (p) {
+      var r = validez(p), nom = (L(p.apellidos) || '—') + ' / ' + (L(p.nombres).split(' ')[0] || '');
+      if (/vencido|antesViaje|menos6/.test(r.nivel)) fuertes.push(esc(nom) + ' — ' + (r.nivel === 'vencido' ? 'VENCIDO desde el ' + dmy(r.v) : (r.nivel === 'antesViaje' ? 'vence antes del viaje (' + dmy(r.v) + ')' : 'vence el ' + dmy(r.v) + ', ' + (r.viaje ? 'a ' + r.plazo + ' del viaje' : 'en ' + r.plazo))));
+      else if (r.nivel === 'menos18') tenues.push(nom);
+    });
+    var h = '';
+    if (fuertes.length) h += '<div class="alerta-venc"><b>⚠ ' + (fuertes.length === 1 ? 'Documento vencido o con menos de 6 meses de validez' : fuertes.length + ' documentos vencidos o con menos de 6 meses de validez') + '</b><ul>' + fuertes.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div>';
+    if (tenues.length) h += '<p class="aviso-tenue">' + (tenues.length === 1 ? '1 documento vence' : tenues.length + ' documentos vencen') + (deDmy(ST.fviaje) ? ' dentro de los 18 meses posteriores al viaje: verificá que a la fecha de regreso le sigan quedando 6 meses.' : ' dentro de los próximos 18 meses: si el viaje es más adelante, verificá la validez a esa fecha.') + '</p>';
+    h += '<div class="preg"><span>¿La reserva ya tiene los nombres cargados?</span><div class="seg seg-sm" id="reserva"><button type="button" data-r="nueva" class="' + (ST.reserva === 'nueva' ? 'on' : '') + '">No, es nueva</button><button type="button" data-r="existe" class="' + (ST.reserva === 'existe' ? 'on' : '') + '">Sí, ya están</button></div></div>';
     // ---- paso 1: nombres ----
     var nom = ULT.secciones.nombres;
     var pend = ST.reserva === 'existe' ? [] : nom.filter(function (l) { return !l.id || !ST.cargados[l.id]; });
@@ -245,12 +319,12 @@
     var uso = p.docUsar === 'NI' || (!p.ppNum && p.ciNum) ? 'NI' : 'PP';
     var adultos = ST.pax.filter(function (q) { return q.id !== p.id && info[q.id] && info[q.id].tipo === 'ADT'; });
     var h = '<article class="pax" data-id="' + p.id + '">';
-    h += '<div class="ph" data-meta></div>';
+    h += '<div class="ph" data-meta></div><ul class="avisos arriba" data-venc></ul>';
     h += '<div class="pgrid">';
     h += '<div class="nomrow"><div><label>Apellidos</label><input class="nm" data-f="apellidos" value="' + esc(p.apellidos) + '" autocomplete="off" spellcheck="false"></div>';
-    h += '<div class="mover"><button type="button" data-mv="an" title="Pasar el primer apellido a nombres">◀</button><button type="button" data-mv="na" title="Pasar el último nombre a apellidos">▶</button></div>';
+    h += '<div class="mover"><button type="button" data-mv="an" tabindex="-1" title="Pasar el primer apellido a nombres">◀</button><button type="button" data-mv="na" tabindex="-1" title="Pasar el último nombre a apellidos">▶</button></div>';
     h += '<div><label>Nombres</label><input class="nm" data-f="nombres" value="' + esc(p.nombres) + '" autocomplete="off" spellcheck="false"></div></div>';
-    h += '<div class="c3"><label>Sexo</label><div class="sx' + (p.sexo ? '' : ' falta') + '"><button type="button" data-sx="M" class="' + (p.sexo === 'M' ? 'on' : '') + '">M</button><button type="button" data-sx="F" class="' + (p.sexo === 'F' ? 'on' : '') + '">F</button></div></div>';
+    h += '<div class="c3"><label>Sexo</label><div class="sx' + (p.sexo ? '' : ' falta') + '"><button type="button" data-sx="M" title="Masculino (tecla M)" tabindex="' + (p.sexo === 'F' ? -1 : 0) + '" class="' + (p.sexo === 'M' ? 'on' : '') + '">M</button><button type="button" data-sx="F" title="Femenino (tecla F)" tabindex="' + (p.sexo === 'F' ? 0 : -1) + '" class="' + (p.sexo === 'F' ? 'on' : '') + '">F</button></div></div>';
     h += '<div class="c4"><label>Nacimiento</label><input data-f="nac" data-fecha="nac" value="' + dmy(p.nac) + '" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" maxlength="11"><div class="small" data-edad></div></div>';
     h += '<div class="c5"><label>Nacionalidad</label><input data-f="nacionalidad" list="paises" value="' + esc(p.nacionalidad) + '" maxlength="3" autocomplete="off"><div class="small">' + esc(paisNom(p.nacionalidad)) + '</div></div>';
     h += '<div class="c3"><label>Documento</label><select data-f="docUsar"><option value="PP"' + (uso === 'PP' ? ' selected' : '') + '>Pasaporte</option><option value="NI"' + (uso === 'NI' ? ' selected' : '') + '>Cédula / DNI</option></select></div>';
@@ -270,7 +344,7 @@
       p.fotos.forEach(function (f, k) {
         if (f.mrz) h += '<img class="mz" src="' + f.mrz + '" alt="Zona leída" data-ver="' + k + '" title="Lo que se leyó (ampliar)">';
         else if (f.foto) h += '<img src="' + f.foto + '" alt="Documento" data-ver="' + k + '" title="Ver el documento">';
-        if (f.lienzo) h += '<button type="button" class="s" data-rel="' + f.lienzo + '">Marcar la zona a mano</button>';
+        if (f.lienzo) h += '<button type="button" class="s" tabindex="-1" data-rel="' + f.lienzo + '">Marcar la zona a mano</button>';
       });
       h += '</div>';
     }
@@ -283,20 +357,22 @@
     var tipoTxt = { ADT: 'Adulto', CHD: 'Niño', INF: 'Infante' }[i.tipo];
     var src = p.fuentes.filter(function (f, k, a) { return a.indexOf(f) === k; }).join(' · ');
     var ver = p.verificado === true ? '<span class="tag ok">✓ Documento leído y verificado</span>' : (p.verificado === false ? '<span class="tag warn">Leído con dudas</span>' : '');
-    art.querySelector('[data-meta]').innerHTML = '<span class="num">' + num + '</span><span class="who">' + esc((L(p.apellidos) || '—') + ' / ' + (L(p.nombres) || '—')) + '</span><span class="tag">' + tipoTxt + (i.tit ? ' · ' + i.tit : '') + '</span>' + ver + (src ? '<span class="tag" title="Origen de los datos">' + esc(src) + '</span>' : '') + '<button type="button" class="s del" data-del="' + p.id + '" title="Quitar pasajero">Quitar</button>';
+    art.querySelector('[data-meta]').innerHTML = '<span class="num">' + num + '</span><span class="who">' + esc((L(p.apellidos) || '—') + ' / ' + (L(p.nombres) || '—')) + '</span><span class="tag">' + tipoTxt + (i.tit ? ' · ' + i.tit : '') + '</span>' + etiquetaValidez(p) + ver + (src ? '<span class="tag" title="Origen de los datos">' + esc(src) + '</span>' : '') + '<button type="button" class="s del" tabindex="-1" data-del="' + p.id + '" title="Quitar pasajero">Quitar</button>';
     var e = art.querySelector('[data-edad]'); if (e) e.textContent = i.edad !== null && i.edad !== undefined ? i.edad + (i.edad === 1 ? ' año' : ' años') + (ST.fviaje ? ' al viajar' : '') : '';
     var sx = art.querySelector('.sx'); if (sx) sx.classList.toggle('falta', !p.sexo);
-    art.querySelector('[data-av]').innerHTML = avisos(p, i).map(function (a) { return '<li class="' + (a.k === 'err' ? 'err' : (a.k === 'ok' ? 'ok' : '')) + '">' + esc(a.t) + (a.i !== undefined ? ' <button type="button" class="lnk" data-oc="' + a.i + '" title="Ocultar este aviso">ocultar</button>' : '') + '</li>'; }).join('');
+    var todos = avisos(p, i), arriba = todos.filter(function (a) { return a.k === 'fuerte'; });
+    var cv = art.querySelector('[data-venc]'); if (cv) cv.innerHTML = arriba.map(function (a) { return '<li class="fuerte">' + esc(a.t) + '</li>'; }).join('');
+    art.querySelector('[data-av]').innerHTML = todos.filter(function (a) { return a.k !== 'fuerte'; }).map(function (a) { return '<li class="' + ({ err: 'err', ok: 'ok', fuerte: 'fuerte', tenue: 'tenue' }[a.k] || '') + '">' + esc(a.t) + (a.i !== undefined ? ' <button type="button" class="lnk" tabindex="-1" data-oc="' + a.i + '" title="Ocultar este aviso">ocultar</button>' : '') + '</li>'; }).join('');
   }
   function render(todo) {
     var info = calcular();
     if (todo) {
       var c = $('paxs');
-      if (!ST.pax.length) c.innerHTML = '<div class="vacio"><b>Todavía no hay pasajeros.</b><br>Cargá la foto o el PDF del pasaporte, o pegá los datos en texto.</div>';
+      if (!ST.pax.length) c.innerHTML = '<div class="vacio"><b>Todavía no hay pasajeros.</b><br>Cargá la foto o el PDF del pasaporte, o pegá los datos en texto.<br><button type="button" class="s agregar" data-add tabindex="-1">+ Cargar un pasajero a mano</button></div>';
       else {
         var orden = ULT.orden.map(function (x) { return x.p.id; });
         var ps = ST.pax.slice().sort(function (a, b) { return orden.indexOf(a.id) - orden.indexOf(b.id); });
-        c.innerHTML = ps.map(function (p) { return tarjeta(p, info); }).join('') + DOCS_OPC;
+        c.innerHTML = ps.map(function (p) { return tarjeta(p, info); }).join('') + '<button type="button" class="s agregar" data-add tabindex="-1">+ Agregar otro pasajero</button>' + DOCS_OPC;
       }
       firmaCartas = firma();
       $('npax').textContent = ST.pax.length ? '(' + ST.pax.length + ')' : '';
@@ -316,9 +392,11 @@
   // Reconstruye las tarjetas (orden, tipo) conservando el campo donde estaba el cursor
   function rehacer() {
     var a = document.activeElement, art = a && a.closest && a.closest('.pax'), f = a && a.getAttribute && a.getAttribute('data-f');
+    var sxf = a && a.getAttribute && a.getAttribute('data-sx');
     var id = art && art.getAttribute('data-id'), sel = a && typeof a.selectionStart === 'number' ? a.selectionStart : null;
     render(true);
     if (id && f) { var n = document.querySelector('.pax[data-id="' + id + '"] [data-f="' + f + '"]'); if (n) { n.focus(); try { if (sel !== null) n.setSelectionRange(sel, sel); } catch (e) { } } }
+    else if (id && sxf) { var x = document.querySelector('.pax[data-id="' + id + '"] [data-sx="' + sxf + '"]'); if (x) x.focus(); }
   }
   $('paxs').addEventListener('focusout', function () {
     setTimeout(function () { calcular(); if (firma() !== firmaCartas) rehacer(); }, 0);
@@ -330,10 +408,11 @@
     var f = e.target.getAttribute('data-f'), art = e.target.closest('.pax'); if (!f || !art) return;
     var p = porId(art.getAttribute('data-id')), v = e.target.value;
     if (/^(nac|ppVenc|ciVenc)$/.test(f)) {
+      mascaraFecha(e.target, e); v = e.target.value;
       var fd = deDmy(v);
       // año de 2 cifras en nacimiento: siglo pasado si quedaría en el futuro
       if (fd && f === 'nac' && /\d{2}$/.test(v.trim()) && !/\d{4}$/.test(v.trim()) && new Date(fd.y, fd.m - 1, fd.d) > new Date()) fd.y -= 100;
-      p[f] = fd; e.target.classList.toggle('mal', !!v.trim() && !fd);
+      p[f] = fd; e.target.classList.toggle('mal', !fd && (cifras(v) >= 8 || /[A-Za-z]{3}\d{2,4}$/.test(v)));
     }
     else if (/^(nacionalidad|ppEmisor|ciEmisor)$/.test(f)) p[f] = v.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
     else if (f === 'infanteDe') p[f] = +v || 0;
@@ -344,7 +423,10 @@
     var f = e.target.getAttribute('data-f'), art = e.target.closest('.pax'); if (!f || !art) return;
     var p = porId(art.getAttribute('data-id'));
     if (f === 'apellidos' || f === 'nombres') { p[f] = L(e.target.value); e.target.value = p[f]; }
-    if (/^(nac|ppVenc|ciVenc)$/.test(f) && p[f]) { e.target.value = dmy(p[f]); e.target.classList.remove('mal'); }
+    if (/^(nac|ppVenc|ciVenc)$/.test(f)) {
+      if (p[f]) { e.target.value = dmy(p[f]); e.target.classList.remove('mal'); }
+      else e.target.classList.toggle('mal', !!e.target.value.trim());
+    }
     if (f === 'tel' && p.tel) { var t = TEXTO.telefono(p.tel, ST.codpais); if (t) { p.tel = t.num; e.target.value = t.num; if (t.aviso) toast(t.aviso); } }
     if (/^(nacionalidad|ppEmisor|ciEmisor)$/.test(f)) { e.target.value = p[f]; if (p[f] && !PAISES[p[f]]) toast('Código de país desconocido: usá el de 3 letras (URY, ARG, BRA…)'); }
     if (f === 'docUsar' || f === 'tipoManual' || f === 'infanteDe') { rehacer(); return; }
@@ -352,9 +434,10 @@
   });
   $('paxs').addEventListener('click', function (e) {
     var b = e.target.closest('button,img'); if (!b) return;
+    if (b.hasAttribute('data-add')) { agregarAMano(); return; }
     var art = b.closest('.pax'), p = art && porId(art.getAttribute('data-id'));
     if (b.hasAttribute('data-del')) { ST.pax = ST.pax.filter(function (q) { return q !== p; }); render(true); toast('Pasajero quitado'); return; }
-    if (b.hasAttribute('data-sx')) { p.sexo = b.getAttribute('data-sx'); art.querySelectorAll('[data-sx]').forEach(function (x) { x.classList.toggle('on', x === b); }); cambio(); return; }
+    if (b.hasAttribute('data-sx')) { elegirSexo(art, p, b.getAttribute('data-sx')); return; }
     if (b.hasAttribute('data-mv')) {
       var A = L(p.apellidos).split(' ').filter(Boolean), N = L(p.nombres).split(' ').filter(Boolean);
       if (b.getAttribute('data-mv') === 'an' && A.length > 1) N.push(A.shift());
@@ -398,9 +481,23 @@
   }
   $('leer').addEventListener('click', leerTexto);
   $('txt').addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); leerTexto(); } });
-  $('manual').addEventListener('click', function () {
+  function agregarAMano() {
     var p = nuevo({ fuentes: ['a mano'] }); ST.pax.push(p); ultimo = p.id; render(true);
     var i = document.querySelector('.pax[data-id="' + p.id + '"] [data-f=apellidos]'); if (i) { i.focus(); i.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  }
+  $('manual').addEventListener('click', agregarAMano);
+  function elegirSexo(art, p, sx, foco) {
+    p.sexo = sx;
+    art.querySelectorAll('[data-sx]').forEach(function (x) { var si = x.getAttribute('data-sx') === sx; x.classList.toggle('on', si); x.tabIndex = si ? 0 : -1; if (si && foco) x.focus(); });
+    cambio();
+  }
+  // Sexo con el teclado: M o H = masculino, F = femenino, flechas para alternar (Tab sigue al próximo campo)
+  $('paxs').addEventListener('keydown', function (e) {
+    var b = e.target.closest && e.target.closest('[data-sx]'); if (!b || e.ctrlKey || e.metaKey || e.altKey) return;
+    var art = b.closest('.pax'), p = porId(art.getAttribute('data-id')), k = e.key.toUpperCase(), sx = null;
+    if (k === 'M' || k === 'H') sx = 'M'; else if (k === 'F') sx = 'F';
+    else if (/^ARROW(LEFT|RIGHT|UP|DOWN)$/.test(k)) sx = b.getAttribute('data-sx') === 'M' ? 'F' : 'M';
+    if (sx) { e.preventDefault(); elegirSexo(art, p, sx, true); }
   });
   // Confirmación en la misma página (los cuadros confirm() no funcionan en todos los navegadores embebidos)
   $('limpiar').addEventListener('click', function () {
@@ -562,6 +659,7 @@
   $('docsComp').addEventListener('change', function () { ST.docsComp = this.checked; guardarConf(); render(false); });
   $('titF').addEventListener('change', function () { ST.titF = this.value; guardarConf(); render(false); });
   $('codpais').addEventListener('change', function () { ST.codpais = this.value.replace(/\D/g, '') || '598'; this.value = ST.codpais; guardarConf(); });
+  $('fviaje').addEventListener('input', function (e) { mascaraFecha(this, e); this.classList.remove('mal'); });
   $('fviaje').addEventListener('change', function () {
     var f = deDmy(this.value); this.classList.toggle('mal', !!this.value.trim() && !f);
     if (f || !this.value.trim()) { ST.fviaje = f ? dmy(f) : ''; this.value = ST.fviaje; render(true); }

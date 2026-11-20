@@ -151,11 +151,29 @@ label.chk input{margin-top:2px;accent-color:var(--sky)}
 .entrada{margin-top:6px;font:500 11.5px/1.4 ui-monospace,Menlo,Consolas,monospace;color:var(--ink2);background:#F1F6F5;border-radius:7px;padding:6px 8px;overflow-wrap:anywhere}
 .tandah button{white-space:nowrap;flex:none}
 .tandah>span{min-width:0}
+/* validez del documento */
+.avisos li.fuerte{background:#FDECEC;border:1px solid #E0827C;border-left:5px solid #C62828;color:#8C1D18;font-weight:700;font-size:12.5px}
+.avisos li.tenue{background:#F4F7F8;border:1px solid #E1E8EA;color:#5F7072;font-size:11.5px}
+.ph .tag.venc{background:#C62828;color:#fff;font-weight:700}
+.ph .tag.tenue{background:#EEF2F3;color:#5F7072}
+.alerta-venc{background:#FDECEC;border:1px solid #E0827C;border-left:6px solid #C62828;border-radius:10px;padding:9px 12px;margin-bottom:12px;color:#8C1D18;font-size:12.5px}
+.alerta-venc b{display:block;font-size:13px;margin-bottom:3px}
+.alerta-venc ul{margin:0;padding-left:18px}
+.aviso-tenue{font-size:11.5px;color:#5F7072;background:#F4F7F8;border-radius:8px;padding:6px 9px;margin:0 0 12px}
+.avisos.arriba{margin:-2px 0 10px}
+.avisos.arriba:empty{display:none}
+.avisos.arriba li{margin-top:0;font-size:13px;padding:8px 11px}
+
+/* Agregar pasajero: debajo de la última tarjeta, bien a la vista */
+button.agregar{display:block;width:100%;margin:2px 0 16px;padding:13px 14px;border:1.5px dashed var(--sky);background:#F4FBF9;font-size:14px;text-align:center}
+button.agregar:hover{background:#E6F5F1}
+.vacio button.agregar{width:auto;margin:14px auto 0;padding:10px 18px}
+.sx button:focus-visible{outline:2px solid var(--sky);outline-offset:-3px}
 </style></head><body><header class="top">
   <img src="datapax-fav/favicon-48.png?v=1" alt="" width="34" height="34" class="logo">
   <h1>DataPax</h1>
   <span class="hint" style="margin:0">Pasaporte, cédula o texto → nombres, DOCS, FOID y contactos para el GDS</span>
-  <span class="hint ver">versión 20/11 00:06</span>
+  <span class="hint ver">versión 20/11 01:49</span>
   <a href="index.html" class="volver">← Volver a Tu Itinerario</a>
 </header>
 <div class="wrap">
@@ -178,7 +196,7 @@ label.chk input{margin-top:2px;accent-color:var(--sky)}
     <textarea id="txt" placeholder="Mail, WhatsApp o planilla de Excel, por ejemplo:&#10;Nombre: Gonzalo Andrés Nocella Massaferro&#10;Fecha de nacimiento: 05/11/1986&#10;Pasaporte: D345678 · Vto.: 12/05/2030&#10;Mail: … · Cel: 098 584 260"></textarea>
     <div class="btns">
       <button type="button" class="p" id="leer">Leer texto</button>
-      <button type="button" class="s" id="manual">+ Pasajero a mano</button>
+      <button type="button" class="s" id="manual" tabindex="-1">+ Pasajero a mano</button>
       <button type="button" class="s clr" id="limpiar">Limpiar todo</button>
     </div>
 
@@ -776,9 +794,14 @@ var TEXTO = (function () {
     });
   }
   function N(s) { return sinTildes(s).toUpperCase(); }
-  // Nombre apto para GDS: sin tildes, guiones → espacio, sin apóstrofos ni signos
+  // Nombre apto para GDS: Ñ → N, Ç → C, sin tildes ni diéresis, sin apóstrofos ni signos (guiones → espacio).
+  // Las letras especiales se transliteran como en la MRZ del pasaporte (ß → SS, Æ → AE, Ł → L…).
+  var LIG = { 'Æ': 'AE', 'æ': 'AE', 'Œ': 'OE', 'œ': 'OE', 'ß': 'SS', 'ẞ': 'SS', 'Ø': 'O', 'ø': 'O', 'Ł': 'L', 'ł': 'L', 'Đ': 'D', 'đ': 'D', 'Ð': 'D', 'ð': 'D', 'Þ': 'TH', 'þ': 'TH', 'ı': 'I', 'Ħ': 'H', 'ħ': 'H' };
   function limpiaNombre(s) {
-    return N(s).replace(/['’`´]/g, '').replace(/[-‐–_.]/g, ' ').replace(/[^A-Z ]/g, ' ').replace(/\s+/g, ' ').trim();
+    s = String(s || '').replace(/[ÆæŒœßẞØøŁłĐđÐðÞþıĦħ]/g, function (c) { return LIG[c]; });
+    if (s.normalize) s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    else s = sinTildes(s);
+    return s.toUpperCase().replace(/['’‘`´ʼ]/g, '').replace(/[-‐‑–—_.]/g, ' ').replace(/[^A-Z ]/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
   // ---------- fechas ----------
@@ -833,16 +856,19 @@ var TEXTO = (function () {
     if (!d) return null;
     if (plus) return { num: d, aviso: '' };
     if (pais === '598') {
-      if (/^598\d{8}$/.test(d)) return { num: d, aviso: '' };
+      if (/^5989\d{7}$/.test(d)) return { num: d, aviso: '' };
+      if (/^598[24]\d{7}$/.test(d)) return { num: d, aviso: 'Parece un teléfono fijo; el CTCM es para celular' };
+      if (/^598/.test(d) && d.length !== 11) return { num: d, aviso: 'El celular tiene ' + (d.length - 3) + ' cifras después del 598 y un celular uruguayo lleva 8 (598 9X XXX XXX): falta o sobra un número' };
       if (/^09\d{7}$/.test(d)) return { num: '598' + d.slice(1), aviso: '' };
       if (/^9\d{7}$/.test(d)) return { num: '598' + d, aviso: '' };
       if (/^[24]\d{7}$/.test(d)) return { num: '598' + d, aviso: 'Parece un teléfono fijo; el CTCM es para celular' };
     }
+    if (d.indexOf(pais) === 0 && d.length >= pais.length + 7) return { num: d, aviso: 'Verificá el teléfono: ya parece incluir el código ' + pais };
     if (d.length >= 11) return { num: d, aviso: 'Verificá el código de país del teléfono' };
     return { num: pais + d.replace(/^0/, ''), aviso: 'Verificá el teléfono: se agregó el código ' + pais };
   }
   var RE_MAIL = /[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/gi;
-  var RE_TEL = /(?:\+|00)?\d[\d\s().\-]{6,}\d/g;
+  var RE_TEL = /(?:\+|00)?\d[\d \t().\-]{6,}\d/g; // nunca cruza un salto de línea
   var RE_CI = /(^|[^\d.])(\d{1}\.?\d{3}\.?\d{3}\s?[-‐–]\s?\d|\d\.\d{3}\.\d{3}\d)(?![\d])/g;
   function ciValida(num) {
     var d = String(num).replace(/\D/g, '');
@@ -877,7 +903,7 @@ var TEXTO = (function () {
     ['mail', /\b(?:E-?MAIL|MAIL|CORREO(?:\s+ELECTRONICO)?)\b/],
     ['tel', /\b(?:CELULAR|CEL|MOVIL|MOBILE|TEL(?:EFONO|EFONE|F)?|PHONE|WHATSAPP|WSP|WPP|WA|CONTACTO)\b\.?/]
   ];
-  var STOP = { HOLA: 1, BUENAS: 1, BUENOS: 1, BUEN: 1, DIA: 1, DIAS: 1, TARDES: 1, NOCHES: 1, DATOS: 1, DATO: 1, SALUDOS: 1, GRACIAS: 1, SR: 1, SRA: 1, SRTA: 1, MR: 1, MRS: 1, MS: 1, MISS: 1, MSTR: 1, ADULTO: 1, MENOR: 1, NINO: 1, NINA: 1, INFANTE: 1, BEBE: 1, VIAJA: 1, VIAJAN: 1, VUELO: 1, VUELOS: 1, RESERVA: 1, PASAJEROS: 1, ADJUNTO: 1, ENVIO: 1, ABRAZO: 1, ATTE: 1, ATENTAMENTE: 1, CORDIALES: 1, URUGUAY: 1, ARGENTINA: 1, MONTEVIDEO: 1, ESPOSA: 1, ESPOSO: 1, HIJO: 1, HIJA: 1, HIJOS: 1, MAMA: 1, PAPA: 1, Y: 1, E: 1, CON: 1, PARA: 1, POR: 1, EL: 1, LA: 1, LOS: 1, LAS: 1, DE: 1, DEL: 1, MI: 1, SU: 1, TE: 1, LE: 1, PASO: 1, SON: 1, ES: 1 };
+  var STOP = { CLIENTE: 1, CLIENTA: 1, PASAJERA: 1, SENOR: 1, SENORA: 1, FAMILIA: 1, VIAJE: 1, VIAJERO: 1, VIAJEROS: 1, QUE: 1, COMO: 1, ESTE: 1, ESTA: 1, ESTOS: 1, ESTAS: 1, UN: 1, UNA: 1, AL: 1, LO: 1, ME: 1, NOS: 1, SE: 1, SI: 1, NO: 1, YA: 1, AHI: 1, ACA: 1, AQUI: 1, NECESITO: 1, NECESITA: 1, FAVOR: 1, EMITIR: 1, COTIZAR: 1, ENVIAR: 1, MANDO: 1, ENVIO: 1, PASAJE: 1, PASAJES: 1, BOLETO: 1, BOLETOS: 1, NOMBRE: 1, NOMBRES: 1, APELLIDO: 1, APELLIDOS: 1, PASAPORTE: 1, CEDULA: 1, DOCUMENTO: 1, CORREO: 1, MAIL: 1, TELEFONO: 1, CELULAR: 1, ABAJO: 1, SIGUIENTE: 1, SIGUIENTES: 1, HOLA: 1, BUENAS: 1, BUENOS: 1, BUEN: 1, DIA: 1, DIAS: 1, TARDES: 1, NOCHES: 1, DATOS: 1, DATO: 1, SALUDOS: 1, GRACIAS: 1, SR: 1, SRA: 1, SRTA: 1, MR: 1, MRS: 1, MS: 1, MISS: 1, MSTR: 1, ADULTO: 1, MENOR: 1, NINO: 1, NINA: 1, INFANTE: 1, BEBE: 1, VIAJA: 1, VIAJAN: 1, VUELO: 1, VUELOS: 1, RESERVA: 1, PASAJEROS: 1, ADJUNTO: 1, ENVIO: 1, ABRAZO: 1, ATTE: 1, ATENTAMENTE: 1, CORDIALES: 1, URUGUAY: 1, ARGENTINA: 1, MONTEVIDEO: 1, ESPOSA: 1, ESPOSO: 1, HIJO: 1, HIJA: 1, HIJOS: 1, MAMA: 1, PAPA: 1, Y: 1, E: 1, CON: 1, PARA: 1, POR: 1, EL: 1, LA: 1, LOS: 1, LAS: 1, DE: 1, DEL: 1, MI: 1, SU: 1, TE: 1, LE: 1, PASO: 1, SON: 1, ES: 1 };
   var PART = { DE: 1, DEL: 1, LA: 1, LAS: 1, LOS: 1, DA: 1, DAS: 1, DO: 1, DOS: 1, DI: 1, VAN: 1, VON: 1, DER: 1, DEN: 1, MC: 1, MAC: 1, SAN: 1, SANTA: 1 };
 
   // Separa "nombres apellidos" escritos de corrido. orden: 'NA' (nombre primero) o 'AN' (apellido primero)
@@ -953,7 +979,7 @@ var TEXTO = (function () {
       else if (h.t === 'nombres') { p.nombres = ((p.nombres ? p.nombres + ' ' : '') + limpiaNombre(v.split(/\s{2,}|\t|[|;]/)[0])).trim(); marcar(h.vi, h.vf); }
       else if (h.t === 'completo' || h.t === 'completoAN') {
         var val = v.split(/\s{2,}|\t|[|;]| - /)[0].replace(/\b(?:sr|sra|srta|mr|mrs|ms)\b\.?/ig, '').replace(/^\s*\d+\s*/, '');
-        var m = val.match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñÇçÃãÕõÂâÊêÔô'’\-\/, ]+/);
+        var m = val.match(/[\p{L}'’\-\/, ]+/u);
         if (m && m[0].trim().split(/\s+/).length >= 1) { p.completo = m[0].trim(); orden = h.t === 'completoAN' ? 'AN' : 'NA'; marcar(h.vi, h.vi + val.length); }
       }
       else if (h.t === 'nac' || h.t === 'venc' || h.t === 'emi') {
@@ -974,7 +1000,7 @@ var TEXTO = (function () {
         if (sx) { var c = sx[1][0]; p.sexo = c === 'F' || sx[1] === 'MUJER' ? 'F' : (c === 'M' || c === 'H' || c === 'V' ? 'M' : 'X'); marcar(h.vi, h.vi + sx[0].length); }
       }
       else if (h.t === 'mail') { var me = v.match(RE_MAIL); if (me) { p.email = me[0]; marcar(h.vi, h.vi + v.indexOf(me[0]) + me[0].length); } }
-      else if (h.t === 'tel') { var mt = v.match(/(?:\+|00)?\d[\d\s().\-]{6,}\d/); if (mt) { p.telRaw = mt[0]; marcar(h.vi, h.vi + v.indexOf(mt[0]) + mt[0].length); } }
+      else if (h.t === 'tel') { var mt = v.match(/(?:\+|00)?\d[\d \t().\-]{6,}\d/); if (mt) { p.telRaw = mt[0]; marcar(h.vi, h.vi + v.indexOf(mt[0]) + mt[0].length); } }
     });
     // ---- datos sin etiqueta ----
     if (!p.sexo) {
@@ -1006,9 +1032,9 @@ var TEXTO = (function () {
       else return;
       marcar(f.i, f.i + f.l);
     });
-    libre(/(?:^|[^A-Z0-9])([A-Z]{1,3}\d{6,9})(?![A-Z0-9])/g, function (m, i, f) {
+    libre(/(?:^|[^A-Z0-9])([A-Z]{1,3}\d{6,9})(?![A-Z0-9])/gi, function (m, i, f) {
       if (p.pasaporte) return false;
-      p.pasaporte = m[1]; p.ppSuelto = 1;
+      p.pasaporte = m[1].toUpperCase(); p.ppSuelto = 1;
       for (var k = i; k < f; k++) usado[k] = 1; return false;
     });
     libre(new RegExp(RE_TEL.source, 'g'), function (m) {
@@ -1027,13 +1053,22 @@ var TEXTO = (function () {
       var libreTxt = '';
       for (var k = 0; k < txt.length; k++) libreTxt += usado[k] ? '|' : txt[k];
       var lineas = libreTxt.split(/\n|[,;|•·]| - | – /);
+      // Primero: una línea entera hecha sólo de palabras (2 a 6), aunque esté toda en minúscula
+      for (var lq = 0; lq < lineas.length && !p.completo; lq++) {
+        var lt = lineas[lq].replace(/^\s*\d{1,2}\s*[).\-–]\s*/, '').trim();
+        if (!/^[\p{L}'’\-]+(?:\s+[\p{L}'’\-]+){1,5}$/u.test(lt)) continue;
+        var pw = lt.split(/\s+/).map(limpiaNombre);
+        var comunes = pw.filter(function (w, k) { return (STOP[w] && !(PART[w] && k > 0 && k < pw.length - 1)) || MES[w] || ETQ.some(function (e) { return e[1].test(w); }); });
+        if (comunes.length || pais(lt) && pw.length <= 2) continue;
+        p.completo = lt;
+      }
       for (var li = 0; li < lineas.length && !p.completo; li++) {
         var ws = lineas[li].replace(/^\s*\d+\s*[).\-–]?\s*/, '').split(/\s+/).filter(Boolean), run = [];
         for (var wi = 0; wi <= ws.length; wi++) {
           var x = ws[wi] ? ws[wi].replace(/[.,:;!?)]+$/, '').replace(/^[(¿¡"']+/, '') : '', X = x ? limpiaNombre(x) : '';
           var corta = ws[wi] && /[.,:;!?]$/.test(ws[wi]);
-          var esPal = x && /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñÇçÃãÕõÂâÊêÔôß'’\-]+$/.test(x);
-          var mayus = x && (/^[A-ZÁÉÍÓÚÜÑÇÃÕÂÊÔ]/.test(x) || (PART[X] && run.length));
+          var esPal = x && /^[\p{L}'’\-]+$/u.test(x);
+          var mayus = x && (/^\p{Lu}/u.test(x) || (PART[X] && run.length));
           if (esPal && mayus && X && (!STOP[X] || (PART[X] && run.length)) && !MES[X]) { run.push(x); if (!corta) continue; }
           while (run.length && PART[limpiaNombre(run[run.length - 1])]) run.pop();
           if (run.length >= 2) { p.completo = run.join(' '); break; }
@@ -1100,7 +1135,7 @@ var TEXTO = (function () {
     ls.forEach(function (l) {
       var L = N(l);
       if (!l.trim()) { cerrar(); vistos = {}; return; }
-      var nuevo = /^\s*(?:\d{1,2}\s*[).\-–]|(?:PAX|PASAJER[OA])\s*\d+|[-•*]\s)/.test(L);
+      var nuevo = /^\s*(?:\d{1,2}\s*[).\-–](?!\s*\d)|(?:PAX|PASAJER[OA])\s*\d+|[-•*]\s)/.test(L);
       // una etiqueta de nombre que se repite indica otro pasajero
       var etq = /^\s*(APELLIDOS?|NOMBRES?\s+Y\s+APELLIDOS?|NOMBRE\s+COMPLETO|PASAJER[OA]|NOMBRES?)\b/.exec(L);
       if (etq) { var k = etq[1].replace(/S$/, ''); if (vistos[k]) nuevo = true; }
@@ -1116,7 +1151,7 @@ var TEXTO = (function () {
       var hayEtq = ETQ.slice(0, 4).some(function (e) { return e[1].test(N(b)); });
       var reCi = new RegExp(RE_CI.source);
       var conDato = lns.filter(function (l) { return fechas(N(l), 'nac').length || /[A-Z]{1,3}\d{6,9}/.test(N(l)) || reCi.test(l); });
-      var soloNombres = lns.length >= 2 && lns.every(function (l) { return /^\s*(?:\d{1,2}\s*[).\-–]\s*)?[A-Za-zÁÉÍÓÚÜÑáéíóúüñÇçÃãÕõÂâÊêÔô'’\-\/]+(?:\s+[A-Za-zÁÉÍÓÚÜÑáéíóúüñÇçÃãÕõÂâÊêÔô'’\-\/]+){1,6}\s*$/.test(l) && !/^\s*(HOLA|BUEN|SALUDOS|GRACIAS)/i.test(sinTildes(l)); });
+      var soloNombres = lns.length >= 2 && lns.every(function (l) { return /^\s*(?:\d{1,2}\s*[).\-–]\s*)?[\p{L}'’\-\/]+(?:\s+[\p{L}'’\-\/]+){1,6}\s*$/u.test(l) && !/^\s*(HOLA|BUEN|SALUDOS|GRACIAS)/i.test(sinTildes(l)); });
       if (!hayEtq && ((lns.length >= 2 && conDato.length >= 2 && conDato.length >= lns.length - 1) || soloNombres)) lns.forEach(function (l) { out.push(l); });
       else out.push(b);
     });
@@ -1202,6 +1237,7 @@ var CMD = (function () {
   }
   function cmp(a, b) {
     var x = a.apellidos || '', y = b.apellidos || '';
+    if (!x !== !y) return x ? -1 : 1;   // el que todavía no tiene apellido (recién agregado a mano) va al final
     if (x !== y) return x < y ? -1 : 1;
     x = a.nombres || ''; y = b.nombres || '';
     return x < y ? -1 : x > y ? 1 : 0;
@@ -1474,6 +1510,27 @@ var OCR = (function () {
     var t = new Date(f.y, f.m - 1, f.d);
     return t.getFullYear() === f.y && t.getMonth() === f.m - 1 && t.getDate() === f.d ? f : null;
   }
+  // Máscara de fecha: pone las barras solas mientras se escribe (05101962 → 05/10/1962).
+  // Acepta separadores escritos a mano (5/10/62, 5-10-1962) y no actúa con texto (05NOV86) ni al borrar.
+  function mascaraFecha(el, ev) {
+    var v = el.value, alFinal = el.selectionStart === v.length;
+    if (!alFinal) return;
+    if (/[^\d\/\-. ]/.test(v)) {   // con letras (05NOV86) no se enmascara; se saca la barra que se puso sola
+      var sl = v.replace(/^(\d{1,2})\/(?=[A-Za-z])/, '$1');
+      if (sl !== v) { el.value = sl; try { el.setSelectionRange(sl.length, sl.length); } catch (e) { } }
+      return;
+    }
+    var borrando = ev && /^delete/.test(ev.inputType || '');
+    var segs = v.replace(/[\-. ]/g, '/').split('/'), dig = '';
+    segs.forEach(function (sg, k) { if (k < segs.length - 1 && k < 2 && sg.length === 1) sg = '0' + sg; dig += sg; });
+    dig = dig.replace(/\D/g, '').slice(0, 8);
+    var out = dig.slice(0, 2);
+    if (dig.length > 2) out += '/' + dig.slice(2, 4);
+    if (dig.length > 4) out += '/' + dig.slice(4, 8);
+    if (!borrando && (dig.length === 2 || dig.length === 4)) out += '/';
+    if (out !== v) { el.value = out; try { el.setSelectionRange(out.length, out.length); } catch (e) { } }
+  }
+  function cifras(v) { return String(v || '').replace(/\D/g, '').length; }
   function deIso(s) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? { y: +m[1], m: +m[2], d: +m[3] } : null; }
   function dmy(d) { return d ? (d.d < 10 ? '0' : '') + d.d + '/' + (d.m < 10 ? '0' : '') + d.m + '/' + d.y : ''; }
   function fecha(d) { return d ? new Date(d.y, d.m - 1, d.d) : null; }
@@ -1566,21 +1623,65 @@ var OCR = (function () {
   }
 
   // ---------- avisos dinámicos ----------
+  // ---------- validez del documento ----------
+  function hoy0() { var d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function sumarMeses(d, n) { // suma meses sin desbordar (31/08 + 6 meses = 28/02 o 29/02)
+    var r = new Date(d.getFullYear(), d.getMonth() + n, 1), ult = new Date(r.getFullYear(), r.getMonth() + 1, 0).getDate();
+    r.setDate(Math.min(d.getDate(), ult)); return r;
+  }
+  function mesesEntre(a, b) { var m = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()); if (b.getDate() < a.getDate()) m--; return m; }
+  function plazo(a, b) {
+    var m = mesesEntre(a, b);
+    if (m < 1) { var d = Math.round((b - a) / 864e5); return d === 1 ? '1 día' : d + ' días'; }
+    if (m < 12) return m === 1 ? '1 mes' : m + ' meses';
+    var y = Math.floor(m / 12), r = m % 12;
+    return (y === 1 ? '1 año' : y + ' años') + (r ? ' y ' + (r === 1 ? '1 mes' : r + ' meses') : '');
+  }
+  // nivel: vencido · antesViaje · menos6 (alerta fuerte) · menos18 (aviso tenue) · ok · sin (no hay fecha)
+  function validez(p) {
+    var uso = p.docUsar === 'NI' || (!p.ppNum && p.ciNum) ? 'NI' : 'PP';
+    var v = uso === 'NI' ? p.ciVenc : p.ppVenc, doc = uso === 'NI' ? 'la cédula' : 'el pasaporte';
+    var hayDoc = uso === 'NI' ? !!p.ciNum : !!p.ppNum;
+    if (!v) return { nivel: hayDoc ? 'sin' : '', doc: doc };
+    var viaje = deDmy(ST.fviaje), h = hoy0(), ref = viaje ? fecha(viaje) : h, fv = fecha(v);
+    if (ref < h) ref = h;
+    var r = { v: v, fv: fv, ref: ref, viaje: !!viaje, doc: doc };
+    if (fv < h) r.nivel = 'vencido';
+    else if (fv < ref) r.nivel = 'antesViaje';
+    else if (fv < sumarMeses(ref, 6)) r.nivel = 'menos6';
+    else if (fv < sumarMeses(ref, 18)) r.nivel = 'menos18';
+    else r.nivel = 'ok';
+    r.plazo = fv >= ref ? plazo(ref, fv) : '';
+    return r;
+  }
+  function avisoValidez(p) {
+    var r = validez(p), d = r.v ? dmy(r.v) : '', Doc = r.doc.charAt(0).toUpperCase() + r.doc.slice(1);
+    switch (r.nivel) {
+      case 'vencido': return { t: '⚠ DOCUMENTO VENCIDO: ' + r.doc + ' venció el ' + d + '. No sirve para viajar.', k: 'fuerte' };
+      case 'antesViaje': return { t: '⚠ VENCE ANTES DEL VIAJE: ' + r.doc + ' vence el ' + d + '.', k: 'fuerte' };
+      case 'menos6': return { t: '⚠ VENCE EN MENOS DE 6 MESES: ' + r.doc + ' vence el ' + d + ' (' + (r.viaje ? 'a ' + r.plazo + ' de la fecha del viaje' : 'en ' + r.plazo) + '). Muchos destinos y aerolíneas exigen 6 meses de validez al ingresar.', k: 'fuerte' };
+      case 'menos18': return { t: Doc + ' vence el ' + d + ' (' + (r.viaje ? 'le quedan ' + r.plazo + ' al viajar' : 'en ' + r.plazo) + '). ' + (r.viaje ? 'Verificá que a la fecha de regreso le sigan quedando 6 meses.' : 'Si el viaje es dentro de varios meses, verificá que a esa fecha le sigan quedando 6 meses de validez.'), k: 'tenue' };
+      case 'sin': return { t: 'Sin fecha de vencimiento del documento: no se puede controlar la validez.', k: 'tenue' };
+    }
+    return null;
+  }
+  function etiquetaValidez(p) {
+    var r = validez(p);
+    if (r.nivel === 'vencido') return '<span class="tag venc">⚠ Documento vencido</span>';
+    if (r.nivel === 'antesViaje') return '<span class="tag venc">⚠ Vence antes del viaje</span>';
+    if (r.nivel === 'menos6') return '<span class="tag venc">⚠ ' + (r.viaje ? 'Al viajar le quedan ' + r.plazo : 'Vence en ' + r.plazo) + '</span>';
+    if (r.nivel === 'menos18') return '<span class="tag tenue">' + (r.viaje ? 'Al viajar le quedan ' + r.plazo : 'Vence en ' + r.plazo) + '</span>';
+    return '';
+  }
+
   function avisos(p, info) {
     var a = p.avisosF.filter(function (x, i) { return !p.ocultos[i]; }).map(function (x) { return { t: x.t, k: x.k, i: p.avisosF.indexOf(x) }; });
-    var ref = refViaje(), seis = new Date(ref); seis.setMonth(seis.getMonth() + 6);
     var tipo = info ? info.tipo : 'ADT';
+    var av = avisoValidez(p); if (av) a.unshift(av);
     if (!L(p.apellidos)) a.push({ t: 'Falta el apellido.', k: 'err' });
     if (!L(p.nombres)) a.push({ t: 'Falta el nombre.', k: 'err' });
     if (!p.sexo) a.push({ t: 'Falta el sexo (M/F) para el DOCS.', k: 'err' });
     if (!p.nac) a.push({ t: 'Falta la fecha de nacimiento para el DOCS.', k: 'err' });
-    var uso = p.docUsar === 'NI' || (!p.ppNum && p.ciNum) ? 'NI' : 'PP';
-    var v = uso === 'NI' ? p.ciVenc : p.ppVenc;
-    if (v) {
-      var fv = fecha(v);
-      if (fv < ref) a.push({ t: (uso === 'NI' ? 'La cédula' : 'El pasaporte') + ' está VENCIDO (' + dmy(v) + ')' + (ST.fviaje ? ' para la fecha del viaje' : '') + '.', k: 'err' });
-      else if (fv < seis) a.push({ t: 'Vence el ' + dmy(v) + ': menos de 6 meses ' + (ST.fviaje ? 'después del viaje' : 'desde hoy') + '. Varios destinos lo exigen.', k: 'warn' });
-    }
     if (p.ciNum && (p.ciEmisor || 'URY') === 'URY' && /^\d{7,8}$/.test(p.ciNum) && !TEXTO.ciValida(p.ciNum)) a.push({ t: 'El dígito verificador de la cédula no coincide: revisá el número.', k: 'err' });
     if (!p.ppNum && !p.ciNum) a.push({ t: 'Sin documento: no se arma el FOID.', k: 'warn' });
     if (tipo === 'INF' && info && !info.adulto) a.push({ t: 'El infante necesita un adulto con quien viajar.', k: 'err' });
@@ -1659,7 +1760,16 @@ var OCR = (function () {
     var o = $('out'), A = ST.gds !== 'S';
     if (!ST.pax.length) { o.innerHTML = '<p class="hint">Los comandos aparecen acá a medida que cargás pasajeros.</p>'; return; }
     TANDAS = {};
-    var h = '<div class="preg"><span>¿La reserva ya tiene los nombres cargados?</span><div class="seg seg-sm" id="reserva"><button type="button" data-r="nueva" class="' + (ST.reserva === 'nueva' ? 'on' : '') + '">No, es nueva</button><button type="button" data-r="existe" class="' + (ST.reserva === 'existe' ? 'on' : '') + '">Sí, ya están</button></div></div>';
+    var fuertes = [], tenues = [];
+    ST.pax.forEach(function (p) {
+      var r = validez(p), nom = (L(p.apellidos) || '—') + ' / ' + (L(p.nombres).split(' ')[0] || '');
+      if (/vencido|antesViaje|menos6/.test(r.nivel)) fuertes.push(esc(nom) + ' — ' + (r.nivel === 'vencido' ? 'VENCIDO desde el ' + dmy(r.v) : (r.nivel === 'antesViaje' ? 'vence antes del viaje (' + dmy(r.v) + ')' : 'vence el ' + dmy(r.v) + ', ' + (r.viaje ? 'a ' + r.plazo + ' del viaje' : 'en ' + r.plazo))));
+      else if (r.nivel === 'menos18') tenues.push(nom);
+    });
+    var h = '';
+    if (fuertes.length) h += '<div class="alerta-venc"><b>⚠ ' + (fuertes.length === 1 ? 'Documento vencido o con menos de 6 meses de validez' : fuertes.length + ' documentos vencidos o con menos de 6 meses de validez') + '</b><ul>' + fuertes.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div>';
+    if (tenues.length) h += '<p class="aviso-tenue">' + (tenues.length === 1 ? '1 documento vence' : tenues.length + ' documentos vencen') + (deDmy(ST.fviaje) ? ' dentro de los 18 meses posteriores al viaje: verificá que a la fecha de regreso le sigan quedando 6 meses.' : ' dentro de los próximos 18 meses: si el viaje es más adelante, verificá la validez a esa fecha.') + '</p>';
+    h += '<div class="preg"><span>¿La reserva ya tiene los nombres cargados?</span><div class="seg seg-sm" id="reserva"><button type="button" data-r="nueva" class="' + (ST.reserva === 'nueva' ? 'on' : '') + '">No, es nueva</button><button type="button" data-r="existe" class="' + (ST.reserva === 'existe' ? 'on' : '') + '">Sí, ya están</button></div></div>';
     // ---- paso 1: nombres ----
     var nom = ULT.secciones.nombres;
     var pend = ST.reserva === 'existe' ? [] : nom.filter(function (l) { return !l.id || !ST.cargados[l.id]; });
@@ -1700,12 +1810,12 @@ var OCR = (function () {
     var uso = p.docUsar === 'NI' || (!p.ppNum && p.ciNum) ? 'NI' : 'PP';
     var adultos = ST.pax.filter(function (q) { return q.id !== p.id && info[q.id] && info[q.id].tipo === 'ADT'; });
     var h = '<article class="pax" data-id="' + p.id + '">';
-    h += '<div class="ph" data-meta></div>';
+    h += '<div class="ph" data-meta></div><ul class="avisos arriba" data-venc></ul>';
     h += '<div class="pgrid">';
     h += '<div class="nomrow"><div><label>Apellidos</label><input class="nm" data-f="apellidos" value="' + esc(p.apellidos) + '" autocomplete="off" spellcheck="false"></div>';
-    h += '<div class="mover"><button type="button" data-mv="an" title="Pasar el primer apellido a nombres">◀</button><button type="button" data-mv="na" title="Pasar el último nombre a apellidos">▶</button></div>';
+    h += '<div class="mover"><button type="button" data-mv="an" tabindex="-1" title="Pasar el primer apellido a nombres">◀</button><button type="button" data-mv="na" tabindex="-1" title="Pasar el último nombre a apellidos">▶</button></div>';
     h += '<div><label>Nombres</label><input class="nm" data-f="nombres" value="' + esc(p.nombres) + '" autocomplete="off" spellcheck="false"></div></div>';
-    h += '<div class="c3"><label>Sexo</label><div class="sx' + (p.sexo ? '' : ' falta') + '"><button type="button" data-sx="M" class="' + (p.sexo === 'M' ? 'on' : '') + '">M</button><button type="button" data-sx="F" class="' + (p.sexo === 'F' ? 'on' : '') + '">F</button></div></div>';
+    h += '<div class="c3"><label>Sexo</label><div class="sx' + (p.sexo ? '' : ' falta') + '"><button type="button" data-sx="M" title="Masculino (tecla M)" tabindex="' + (p.sexo === 'F' ? -1 : 0) + '" class="' + (p.sexo === 'M' ? 'on' : '') + '">M</button><button type="button" data-sx="F" title="Femenino (tecla F)" tabindex="' + (p.sexo === 'F' ? 0 : -1) + '" class="' + (p.sexo === 'F' ? 'on' : '') + '">F</button></div></div>';
     h += '<div class="c4"><label>Nacimiento</label><input data-f="nac" data-fecha="nac" value="' + dmy(p.nac) + '" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" maxlength="11"><div class="small" data-edad></div></div>';
     h += '<div class="c5"><label>Nacionalidad</label><input data-f="nacionalidad" list="paises" value="' + esc(p.nacionalidad) + '" maxlength="3" autocomplete="off"><div class="small">' + esc(paisNom(p.nacionalidad)) + '</div></div>';
     h += '<div class="c3"><label>Documento</label><select data-f="docUsar"><option value="PP"' + (uso === 'PP' ? ' selected' : '') + '>Pasaporte</option><option value="NI"' + (uso === 'NI' ? ' selected' : '') + '>Cédula / DNI</option></select></div>';
@@ -1725,7 +1835,7 @@ var OCR = (function () {
       p.fotos.forEach(function (f, k) {
         if (f.mrz) h += '<img class="mz" src="' + f.mrz + '" alt="Zona leída" data-ver="' + k + '" title="Lo que se leyó (ampliar)">';
         else if (f.foto) h += '<img src="' + f.foto + '" alt="Documento" data-ver="' + k + '" title="Ver el documento">';
-        if (f.lienzo) h += '<button type="button" class="s" data-rel="' + f.lienzo + '">Marcar la zona a mano</button>';
+        if (f.lienzo) h += '<button type="button" class="s" tabindex="-1" data-rel="' + f.lienzo + '">Marcar la zona a mano</button>';
       });
       h += '</div>';
     }
@@ -1738,20 +1848,22 @@ var OCR = (function () {
     var tipoTxt = { ADT: 'Adulto', CHD: 'Niño', INF: 'Infante' }[i.tipo];
     var src = p.fuentes.filter(function (f, k, a) { return a.indexOf(f) === k; }).join(' · ');
     var ver = p.verificado === true ? '<span class="tag ok">✓ Documento leído y verificado</span>' : (p.verificado === false ? '<span class="tag warn">Leído con dudas</span>' : '');
-    art.querySelector('[data-meta]').innerHTML = '<span class="num">' + num + '</span><span class="who">' + esc((L(p.apellidos) || '—') + ' / ' + (L(p.nombres) || '—')) + '</span><span class="tag">' + tipoTxt + (i.tit ? ' · ' + i.tit : '') + '</span>' + ver + (src ? '<span class="tag" title="Origen de los datos">' + esc(src) + '</span>' : '') + '<button type="button" class="s del" data-del="' + p.id + '" title="Quitar pasajero">Quitar</button>';
+    art.querySelector('[data-meta]').innerHTML = '<span class="num">' + num + '</span><span class="who">' + esc((L(p.apellidos) || '—') + ' / ' + (L(p.nombres) || '—')) + '</span><span class="tag">' + tipoTxt + (i.tit ? ' · ' + i.tit : '') + '</span>' + etiquetaValidez(p) + ver + (src ? '<span class="tag" title="Origen de los datos">' + esc(src) + '</span>' : '') + '<button type="button" class="s del" tabindex="-1" data-del="' + p.id + '" title="Quitar pasajero">Quitar</button>';
     var e = art.querySelector('[data-edad]'); if (e) e.textContent = i.edad !== null && i.edad !== undefined ? i.edad + (i.edad === 1 ? ' año' : ' años') + (ST.fviaje ? ' al viajar' : '') : '';
     var sx = art.querySelector('.sx'); if (sx) sx.classList.toggle('falta', !p.sexo);
-    art.querySelector('[data-av]').innerHTML = avisos(p, i).map(function (a) { return '<li class="' + (a.k === 'err' ? 'err' : (a.k === 'ok' ? 'ok' : '')) + '">' + esc(a.t) + (a.i !== undefined ? ' <button type="button" class="lnk" data-oc="' + a.i + '" title="Ocultar este aviso">ocultar</button>' : '') + '</li>'; }).join('');
+    var todos = avisos(p, i), arriba = todos.filter(function (a) { return a.k === 'fuerte'; });
+    var cv = art.querySelector('[data-venc]'); if (cv) cv.innerHTML = arriba.map(function (a) { return '<li class="fuerte">' + esc(a.t) + '</li>'; }).join('');
+    art.querySelector('[data-av]').innerHTML = todos.filter(function (a) { return a.k !== 'fuerte'; }).map(function (a) { return '<li class="' + ({ err: 'err', ok: 'ok', fuerte: 'fuerte', tenue: 'tenue' }[a.k] || '') + '">' + esc(a.t) + (a.i !== undefined ? ' <button type="button" class="lnk" tabindex="-1" data-oc="' + a.i + '" title="Ocultar este aviso">ocultar</button>' : '') + '</li>'; }).join('');
   }
   function render(todo) {
     var info = calcular();
     if (todo) {
       var c = $('paxs');
-      if (!ST.pax.length) c.innerHTML = '<div class="vacio"><b>Todavía no hay pasajeros.</b><br>Cargá la foto o el PDF del pasaporte, o pegá los datos en texto.</div>';
+      if (!ST.pax.length) c.innerHTML = '<div class="vacio"><b>Todavía no hay pasajeros.</b><br>Cargá la foto o el PDF del pasaporte, o pegá los datos en texto.<br><button type="button" class="s agregar" data-add tabindex="-1">+ Cargar un pasajero a mano</button></div>';
       else {
         var orden = ULT.orden.map(function (x) { return x.p.id; });
         var ps = ST.pax.slice().sort(function (a, b) { return orden.indexOf(a.id) - orden.indexOf(b.id); });
-        c.innerHTML = ps.map(function (p) { return tarjeta(p, info); }).join('') + DOCS_OPC;
+        c.innerHTML = ps.map(function (p) { return tarjeta(p, info); }).join('') + '<button type="button" class="s agregar" data-add tabindex="-1">+ Agregar otro pasajero</button>' + DOCS_OPC;
       }
       firmaCartas = firma();
       $('npax').textContent = ST.pax.length ? '(' + ST.pax.length + ')' : '';
@@ -1771,9 +1883,11 @@ var OCR = (function () {
   // Reconstruye las tarjetas (orden, tipo) conservando el campo donde estaba el cursor
   function rehacer() {
     var a = document.activeElement, art = a && a.closest && a.closest('.pax'), f = a && a.getAttribute && a.getAttribute('data-f');
+    var sxf = a && a.getAttribute && a.getAttribute('data-sx');
     var id = art && art.getAttribute('data-id'), sel = a && typeof a.selectionStart === 'number' ? a.selectionStart : null;
     render(true);
     if (id && f) { var n = document.querySelector('.pax[data-id="' + id + '"] [data-f="' + f + '"]'); if (n) { n.focus(); try { if (sel !== null) n.setSelectionRange(sel, sel); } catch (e) { } } }
+    else if (id && sxf) { var x = document.querySelector('.pax[data-id="' + id + '"] [data-sx="' + sxf + '"]'); if (x) x.focus(); }
   }
   $('paxs').addEventListener('focusout', function () {
     setTimeout(function () { calcular(); if (firma() !== firmaCartas) rehacer(); }, 0);
@@ -1785,10 +1899,11 @@ var OCR = (function () {
     var f = e.target.getAttribute('data-f'), art = e.target.closest('.pax'); if (!f || !art) return;
     var p = porId(art.getAttribute('data-id')), v = e.target.value;
     if (/^(nac|ppVenc|ciVenc)$/.test(f)) {
+      mascaraFecha(e.target, e); v = e.target.value;
       var fd = deDmy(v);
       // año de 2 cifras en nacimiento: siglo pasado si quedaría en el futuro
       if (fd && f === 'nac' && /\d{2}$/.test(v.trim()) && !/\d{4}$/.test(v.trim()) && new Date(fd.y, fd.m - 1, fd.d) > new Date()) fd.y -= 100;
-      p[f] = fd; e.target.classList.toggle('mal', !!v.trim() && !fd);
+      p[f] = fd; e.target.classList.toggle('mal', !fd && (cifras(v) >= 8 || /[A-Za-z]{3}\d{2,4}$/.test(v)));
     }
     else if (/^(nacionalidad|ppEmisor|ciEmisor)$/.test(f)) p[f] = v.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
     else if (f === 'infanteDe') p[f] = +v || 0;
@@ -1799,7 +1914,10 @@ var OCR = (function () {
     var f = e.target.getAttribute('data-f'), art = e.target.closest('.pax'); if (!f || !art) return;
     var p = porId(art.getAttribute('data-id'));
     if (f === 'apellidos' || f === 'nombres') { p[f] = L(e.target.value); e.target.value = p[f]; }
-    if (/^(nac|ppVenc|ciVenc)$/.test(f) && p[f]) { e.target.value = dmy(p[f]); e.target.classList.remove('mal'); }
+    if (/^(nac|ppVenc|ciVenc)$/.test(f)) {
+      if (p[f]) { e.target.value = dmy(p[f]); e.target.classList.remove('mal'); }
+      else e.target.classList.toggle('mal', !!e.target.value.trim());
+    }
     if (f === 'tel' && p.tel) { var t = TEXTO.telefono(p.tel, ST.codpais); if (t) { p.tel = t.num; e.target.value = t.num; if (t.aviso) toast(t.aviso); } }
     if (/^(nacionalidad|ppEmisor|ciEmisor)$/.test(f)) { e.target.value = p[f]; if (p[f] && !PAISES[p[f]]) toast('Código de país desconocido: usá el de 3 letras (URY, ARG, BRA…)'); }
     if (f === 'docUsar' || f === 'tipoManual' || f === 'infanteDe') { rehacer(); return; }
@@ -1807,9 +1925,10 @@ var OCR = (function () {
   });
   $('paxs').addEventListener('click', function (e) {
     var b = e.target.closest('button,img'); if (!b) return;
+    if (b.hasAttribute('data-add')) { agregarAMano(); return; }
     var art = b.closest('.pax'), p = art && porId(art.getAttribute('data-id'));
     if (b.hasAttribute('data-del')) { ST.pax = ST.pax.filter(function (q) { return q !== p; }); render(true); toast('Pasajero quitado'); return; }
-    if (b.hasAttribute('data-sx')) { p.sexo = b.getAttribute('data-sx'); art.querySelectorAll('[data-sx]').forEach(function (x) { x.classList.toggle('on', x === b); }); cambio(); return; }
+    if (b.hasAttribute('data-sx')) { elegirSexo(art, p, b.getAttribute('data-sx')); return; }
     if (b.hasAttribute('data-mv')) {
       var A = L(p.apellidos).split(' ').filter(Boolean), N = L(p.nombres).split(' ').filter(Boolean);
       if (b.getAttribute('data-mv') === 'an' && A.length > 1) N.push(A.shift());
@@ -1853,9 +1972,23 @@ var OCR = (function () {
   }
   $('leer').addEventListener('click', leerTexto);
   $('txt').addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); leerTexto(); } });
-  $('manual').addEventListener('click', function () {
+  function agregarAMano() {
     var p = nuevo({ fuentes: ['a mano'] }); ST.pax.push(p); ultimo = p.id; render(true);
     var i = document.querySelector('.pax[data-id="' + p.id + '"] [data-f=apellidos]'); if (i) { i.focus(); i.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  }
+  $('manual').addEventListener('click', agregarAMano);
+  function elegirSexo(art, p, sx, foco) {
+    p.sexo = sx;
+    art.querySelectorAll('[data-sx]').forEach(function (x) { var si = x.getAttribute('data-sx') === sx; x.classList.toggle('on', si); x.tabIndex = si ? 0 : -1; if (si && foco) x.focus(); });
+    cambio();
+  }
+  // Sexo con el teclado: M o H = masculino, F = femenino, flechas para alternar (Tab sigue al próximo campo)
+  $('paxs').addEventListener('keydown', function (e) {
+    var b = e.target.closest && e.target.closest('[data-sx]'); if (!b || e.ctrlKey || e.metaKey || e.altKey) return;
+    var art = b.closest('.pax'), p = porId(art.getAttribute('data-id')), k = e.key.toUpperCase(), sx = null;
+    if (k === 'M' || k === 'H') sx = 'M'; else if (k === 'F') sx = 'F';
+    else if (/^ARROW(LEFT|RIGHT|UP|DOWN)$/.test(k)) sx = b.getAttribute('data-sx') === 'M' ? 'F' : 'M';
+    if (sx) { e.preventDefault(); elegirSexo(art, p, sx, true); }
   });
   // Confirmación en la misma página (los cuadros confirm() no funcionan en todos los navegadores embebidos)
   $('limpiar').addEventListener('click', function () {
@@ -2017,6 +2150,7 @@ var OCR = (function () {
   $('docsComp').addEventListener('change', function () { ST.docsComp = this.checked; guardarConf(); render(false); });
   $('titF').addEventListener('change', function () { ST.titF = this.value; guardarConf(); render(false); });
   $('codpais').addEventListener('change', function () { ST.codpais = this.value.replace(/\D/g, '') || '598'; this.value = ST.codpais; guardarConf(); });
+  $('fviaje').addEventListener('input', function (e) { mascaraFecha(this, e); this.classList.remove('mal'); });
   $('fviaje').addEventListener('change', function () {
     var f = deDmy(this.value); this.classList.toggle('mal', !!this.value.trim() && !f);
     if (f || !this.value.trim()) { ST.fviaje = f ? dmy(f) : ''; this.value = ST.fviaje; render(true); }
