@@ -97,6 +97,8 @@ textarea:focus, input:focus { border-color: var(--blue); outline: none; box-shad
 .cap .tv { overflow: visible; box-shadow: none; border: 0; border-radius: 0; padding: 0; }
 .btn-wa2 { background: #E3F6EA; color: #136C36; border-color: #A9DDBC; }
 .btn-wa2:hover { background: #D2F0DD; }
+.btn-wa3 { background: transparent; color: #136C36; border-color: #CFE8D8; font-weight: 600; }
+.btn-wa3:hover { background: #F0FAF3; border-color: #A9DDBC; }
 .ov { position: fixed; inset: 0; background: rgba(10,25,45,.55); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 60; }
 .ovc { background: #FFFFFF; border-radius: 14px; max-width: min(1100px, 100%); max-height: 100%; overflow: auto; padding: 14px; box-shadow: 0 20px 50px rgba(0,0,0,.3); }
 .ovh { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-bottom: 10px; }
@@ -1679,7 +1681,7 @@ function view() {
     '<p class="opt" style="margin:6px 0 0">Precio de venta por pasajero, impuestos incluidos. Dejá vacío lo que no corresponda. Se muestra solo en el formato Completa.</p>' +
     '<label for="pxTxt" style="margin-top:8px">Aclaraciones <span class="opt">equipaje, condiciones…</span></label><textarea id="pxTxt" rows="2" placeholder="Ej.: Incluye equipaje de mano de 10 kg y valija de 23 kg."></textarea></details>' +
     '</div>' +
-    '</aside><main class="stage"><div class="fmtbar"><span class="cgl">Formato</span><div class="seg" role="group" aria-label="Formato del itinerario"><button type="button" data-fmt="full">Completa</button><button type="button" data-fmt="simple">Simple</button><button type="button" data-fmt="pass">Boarding pass verde</button><button type="button" data-fmt="passhv">Boarding pass celeste</button></div></div><div class="copybar"><div class="cg"><span class="cgl">Para cotización o mail</span><button type="button" class="btn btn-primary" id="cprich">Copiar tabla</button></div><div class="cg"><span class="cgl">Para WhatsApp</span><button type="button" class="btn btn-wa" id="cpwa">Copiar texto WhatsApp</button><button type="button" class="btn btn-wa2" id="cpimg">Copiar imagen</button><button type="button" class="btn btn-ghost dl" id="dlpng">Descargar imagen</button><button type="button" class="btn btn-ghost dl" id="dlpdf">Descargar PDF</button></div></div><div id="preview"></div></main></div></div>';
+    '</aside><main class="stage"><div class="fmtbar"><span class="cgl">Formato</span><div class="seg" role="group" aria-label="Formato del itinerario"><button type="button" data-fmt="full">Completa</button><button type="button" data-fmt="simple">Simple</button><button type="button" data-fmt="pass">Boarding pass verde</button><button type="button" data-fmt="passhv">Boarding pass celeste</button></div></div><div class="copybar"><div class="cg"><span class="cgl">Para cotización o mail</span><button type="button" class="btn btn-primary" id="cprich">Copiar tabla</button></div><div class="cg"><span class="cgl">Para WhatsApp</span><button type="button" class="btn btn-wa" id="cpimg">Copiar imagen WhatsApp</button><button type="button" class="btn btn-ghost dl" id="dlpng">Descargar imagen</button><button type="button" class="btn btn-ghost dl" id="dlpdf">Descargar PDF</button><button type="button" class="btn btn-wa3 sm" id="cpwa">Copiar texto WhatsApp</button></div></div><div id="preview"></div></main></div></div>';
   $('pnr').value = dr.pnr || '';
   $('pax').value = dr.pax || '';
   $('adv').value = dr.adv ? dr.adv : (lsGet('hv2_advisor') || '');
