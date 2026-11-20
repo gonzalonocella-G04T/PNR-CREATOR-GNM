@@ -27,5 +27,13 @@ var soloCtc = TEXTO.parse('Mail: gnocella@hiperviajes.com.uy\nCel: 098 584 260')
 eq('sólo contactos', [soloCtc.length, soloCtc[0] && soloCtc[0].email, soloCtc[0] && soloCtc[0].telefono], [1, 'gnocella@hiperviajes.com.uy', '59898584260']);
 var grupo = 'Apellido\tNombre\tFecha nac.\tPasaporte\nCABRERA\tNICOLAS\t13/02/1980\tC1234570\nPEREIRA\tVALENTINA\t12/01/1979\tC1234569\nSILVA\tANA\t01/01/1990\tC1234500';
 eq('planilla sin falsas MRZ', TEXTO.parse(grupo).pasajeros.map(function (p) { return p.apellidos; }), ['CABRERA', 'PEREIRA', 'SILVA']);
+// Validez del documento: suma de meses y plazos (funciones de app.js)
+var appSrc = fs.readFileSync(path.join(D, 'app.js'), 'utf8');
+function fn(n) { var i = appSrc.indexOf('function ' + n + '('), d = 0, j = appSrc.indexOf('{', i); for (var k = j; k < appSrc.length; k++) { if (appSrc[k] === '{') d++; if (appSrc[k] === '}') { d--; if (!d) return appSrc.slice(i, k + 1); } } }
+vm.runInThisContext(fn('sumarMeses') + ';' + fn('mesesEntre') + ';' + fn('plazo'));
+function F(y, m, d) { return new Date(y, m - 1, d); }
+eq('31/08 + 6 meses = 28/02', sumarMeses(F(2026, 8, 31), 6).getTime(), F(2027, 2, 28).getTime());
+eq('plazos', [plazo(F(2026, 11, 20), F(2027, 5, 19)), plazo(F(2026, 11, 20), F(2027, 5, 20)), plazo(F(2026, 11, 20), F(2026, 12, 5)), plazo(F(2026, 11, 20), F(2028, 1, 15))], ['5 meses', '6 meses', '15 días', '1 año y 1 mes']);
+eq('umbral 6 meses', [F(2027, 5, 19) < sumarMeses(F(2026, 11, 20), 6), F(2027, 5, 20) < sumarMeses(F(2026, 11, 20), 6)], [true, false]);
 console.log(fallas ? '\n' + fallas + ' pruebas fallaron' : '\nTodo bien');
 process.exit(fallas ? 1 : 0);

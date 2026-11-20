@@ -111,21 +111,65 @@
   }
 
   // ---------- avisos dinámicos ----------
+  // ---------- validez del documento ----------
+  function hoy0() { var d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function sumarMeses(d, n) { // suma meses sin desbordar (31/08 + 6 meses = 28/02 o 29/02)
+    var r = new Date(d.getFullYear(), d.getMonth() + n, 1), ult = new Date(r.getFullYear(), r.getMonth() + 1, 0).getDate();
+    r.setDate(Math.min(d.getDate(), ult)); return r;
+  }
+  function mesesEntre(a, b) { var m = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()); if (b.getDate() < a.getDate()) m--; return m; }
+  function plazo(a, b) {
+    var m = mesesEntre(a, b);
+    if (m < 1) { var d = Math.round((b - a) / 864e5); return d === 1 ? '1 día' : d + ' días'; }
+    if (m < 12) return m === 1 ? '1 mes' : m + ' meses';
+    var y = Math.floor(m / 12), r = m % 12;
+    return (y === 1 ? '1 año' : y + ' años') + (r ? ' y ' + (r === 1 ? '1 mes' : r + ' meses') : '');
+  }
+  // nivel: vencido · antesViaje · menos6 (alerta fuerte) · menos18 (aviso tenue) · ok · sin (no hay fecha)
+  function validez(p) {
+    var uso = p.docUsar === 'NI' || (!p.ppNum && p.ciNum) ? 'NI' : 'PP';
+    var v = uso === 'NI' ? p.ciVenc : p.ppVenc, doc = uso === 'NI' ? 'la cédula' : 'el pasaporte';
+    var hayDoc = uso === 'NI' ? !!p.ciNum : !!p.ppNum;
+    if (!v) return { nivel: hayDoc ? 'sin' : '', doc: doc };
+    var viaje = deDmy(ST.fviaje), h = hoy0(), ref = viaje ? fecha(viaje) : h, fv = fecha(v);
+    if (ref < h) ref = h;
+    var r = { v: v, fv: fv, ref: ref, viaje: !!viaje, doc: doc };
+    if (fv < h) r.nivel = 'vencido';
+    else if (fv < ref) r.nivel = 'antesViaje';
+    else if (fv < sumarMeses(ref, 6)) r.nivel = 'menos6';
+    else if (fv < sumarMeses(ref, 18)) r.nivel = 'menos18';
+    else r.nivel = 'ok';
+    r.plazo = fv >= ref ? plazo(ref, fv) : '';
+    return r;
+  }
+  function avisoValidez(p) {
+    var r = validez(p), d = r.v ? dmy(r.v) : '', Doc = r.doc.charAt(0).toUpperCase() + r.doc.slice(1);
+    switch (r.nivel) {
+      case 'vencido': return { t: '⚠ DOCUMENTO VENCIDO: ' + r.doc + ' venció el ' + d + '. No sirve para viajar.', k: 'fuerte' };
+      case 'antesViaje': return { t: '⚠ VENCE ANTES DEL VIAJE: ' + r.doc + ' vence el ' + d + '.', k: 'fuerte' };
+      case 'menos6': return { t: '⚠ VENCE EN MENOS DE 6 MESES: ' + r.doc + ' vence el ' + d + ' (' + (r.viaje ? 'a ' + r.plazo + ' de la fecha del viaje' : 'en ' + r.plazo) + '). Muchos destinos y aerolíneas exigen 6 meses de validez al ingresar.', k: 'fuerte' };
+      case 'menos18': return { t: Doc + ' vence el ' + d + ' (' + (r.viaje ? 'le quedan ' + r.plazo + ' al viajar' : 'en ' + r.plazo) + '). ' + (r.viaje ? 'Verificá que a la fecha de regreso le sigan quedando 6 meses.' : 'Si el viaje es dentro de varios meses, verificá que a esa fecha le sigan quedando 6 meses de validez.'), k: 'tenue' };
+      case 'sin': return { t: 'Sin fecha de vencimiento del documento: no se puede controlar la validez.', k: 'tenue' };
+    }
+    return null;
+  }
+  function etiquetaValidez(p) {
+    var r = validez(p);
+    if (r.nivel === 'vencido') return '<span class="tag venc">⚠ Documento vencido</span>';
+    if (r.nivel === 'antesViaje') return '<span class="tag venc">⚠ Vence antes del viaje</span>';
+    if (r.nivel === 'menos6') return '<span class="tag venc">⚠ ' + (r.viaje ? 'Al viajar le quedan ' + r.plazo : 'Vence en ' + r.plazo) + '</span>';
+    if (r.nivel === 'menos18') return '<span class="tag tenue">' + (r.viaje ? 'Al viajar le quedan ' + r.plazo : 'Vence en ' + r.plazo) + '</span>';
+    return '';
+  }
+
   function avisos(p, info) {
     var a = p.avisosF.filter(function (x, i) { return !p.ocultos[i]; }).map(function (x) { return { t: x.t, k: x.k, i: p.avisosF.indexOf(x) }; });
-    var ref = refViaje(), seis = new Date(ref); seis.setMonth(seis.getMonth() + 6);
     var tipo = info ? info.tipo : 'ADT';
+    var av = avisoValidez(p); if (av) a.unshift(av);
     if (!L(p.apellidos)) a.push({ t: 'Falta el apellido.', k: 'err' });
     if (!L(p.nombres)) a.push({ t: 'Falta el nombre.', k: 'err' });
     if (!p.sexo) a.push({ t: 'Falta el sexo (M/F) para el DOCS.', k: 'err' });
     if (!p.nac) a.push({ t: 'Falta la fecha de nacimiento para el DOCS.', k: 'err' });
-    var uso = p.docUsar === 'NI' || (!p.ppNum && p.ciNum) ? 'NI' : 'PP';
-    var v = uso === 'NI' ? p.ciVenc : p.ppVenc;
-    if (v) {
-      var fv = fecha(v);
-      if (fv < ref) a.push({ t: (uso === 'NI' ? 'La cédula' : 'El pasaporte') + ' está VENCIDO (' + dmy(v) + ')' + (ST.fviaje ? ' para la fecha del viaje' : '') + '.', k: 'err' });
-      else if (fv < seis) a.push({ t: 'Vence el ' + dmy(v) + ': menos de 6 meses ' + (ST.fviaje ? 'después del viaje' : 'desde hoy') + '. Varios destinos lo exigen.', k: 'warn' });
-    }
     if (p.ciNum && (p.ciEmisor || 'URY') === 'URY' && /^\d{7,8}$/.test(p.ciNum) && !TEXTO.ciValida(p.ciNum)) a.push({ t: 'El dígito verificador de la cédula no coincide: revisá el número.', k: 'err' });
     if (!p.ppNum && !p.ciNum) a.push({ t: 'Sin documento: no se arma el FOID.', k: 'warn' });
     if (tipo === 'INF' && info && !info.adulto) a.push({ t: 'El infante necesita un adulto con quien viajar.', k: 'err' });
@@ -204,7 +248,16 @@
     var o = $('out'), A = ST.gds !== 'S';
     if (!ST.pax.length) { o.innerHTML = '<p class="hint">Los comandos aparecen acá a medida que cargás pasajeros.</p>'; return; }
     TANDAS = {};
-    var h = '<div class="preg"><span>¿La reserva ya tiene los nombres cargados?</span><div class="seg seg-sm" id="reserva"><button type="button" data-r="nueva" class="' + (ST.reserva === 'nueva' ? 'on' : '') + '">No, es nueva</button><button type="button" data-r="existe" class="' + (ST.reserva === 'existe' ? 'on' : '') + '">Sí, ya están</button></div></div>';
+    var fuertes = [], tenues = [];
+    ST.pax.forEach(function (p) {
+      var r = validez(p), nom = (L(p.apellidos) || '—') + ' / ' + (L(p.nombres).split(' ')[0] || '');
+      if (/vencido|antesViaje|menos6/.test(r.nivel)) fuertes.push(esc(nom) + ' — ' + (r.nivel === 'vencido' ? 'VENCIDO desde el ' + dmy(r.v) : (r.nivel === 'antesViaje' ? 'vence antes del viaje (' + dmy(r.v) + ')' : 'vence el ' + dmy(r.v) + ', ' + (r.viaje ? 'a ' + r.plazo + ' del viaje' : 'en ' + r.plazo))));
+      else if (r.nivel === 'menos18') tenues.push(nom);
+    });
+    var h = '';
+    if (fuertes.length) h += '<div class="alerta-venc"><b>⚠ ' + (fuertes.length === 1 ? 'Documento vencido o con menos de 6 meses de validez' : fuertes.length + ' documentos vencidos o con menos de 6 meses de validez') + '</b><ul>' + fuertes.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div>';
+    if (tenues.length) h += '<p class="aviso-tenue">' + (tenues.length === 1 ? '1 documento vence' : tenues.length + ' documentos vencen') + (deDmy(ST.fviaje) ? ' dentro de los 18 meses posteriores al viaje: verificá que a la fecha de regreso le sigan quedando 6 meses.' : ' dentro de los próximos 18 meses: si el viaje es más adelante, verificá la validez a esa fecha.') + '</p>';
+    h += '<div class="preg"><span>¿La reserva ya tiene los nombres cargados?</span><div class="seg seg-sm" id="reserva"><button type="button" data-r="nueva" class="' + (ST.reserva === 'nueva' ? 'on' : '') + '">No, es nueva</button><button type="button" data-r="existe" class="' + (ST.reserva === 'existe' ? 'on' : '') + '">Sí, ya están</button></div></div>';
     // ---- paso 1: nombres ----
     var nom = ULT.secciones.nombres;
     var pend = ST.reserva === 'existe' ? [] : nom.filter(function (l) { return !l.id || !ST.cargados[l.id]; });
@@ -245,7 +298,7 @@
     var uso = p.docUsar === 'NI' || (!p.ppNum && p.ciNum) ? 'NI' : 'PP';
     var adultos = ST.pax.filter(function (q) { return q.id !== p.id && info[q.id] && info[q.id].tipo === 'ADT'; });
     var h = '<article class="pax" data-id="' + p.id + '">';
-    h += '<div class="ph" data-meta></div>';
+    h += '<div class="ph" data-meta></div><ul class="avisos arriba" data-venc></ul>';
     h += '<div class="pgrid">';
     h += '<div class="nomrow"><div><label>Apellidos</label><input class="nm" data-f="apellidos" value="' + esc(p.apellidos) + '" autocomplete="off" spellcheck="false"></div>';
     h += '<div class="mover"><button type="button" data-mv="an" title="Pasar el primer apellido a nombres">◀</button><button type="button" data-mv="na" title="Pasar el último nombre a apellidos">▶</button></div>';
@@ -283,10 +336,12 @@
     var tipoTxt = { ADT: 'Adulto', CHD: 'Niño', INF: 'Infante' }[i.tipo];
     var src = p.fuentes.filter(function (f, k, a) { return a.indexOf(f) === k; }).join(' · ');
     var ver = p.verificado === true ? '<span class="tag ok">✓ Documento leído y verificado</span>' : (p.verificado === false ? '<span class="tag warn">Leído con dudas</span>' : '');
-    art.querySelector('[data-meta]').innerHTML = '<span class="num">' + num + '</span><span class="who">' + esc((L(p.apellidos) || '—') + ' / ' + (L(p.nombres) || '—')) + '</span><span class="tag">' + tipoTxt + (i.tit ? ' · ' + i.tit : '') + '</span>' + ver + (src ? '<span class="tag" title="Origen de los datos">' + esc(src) + '</span>' : '') + '<button type="button" class="s del" data-del="' + p.id + '" title="Quitar pasajero">Quitar</button>';
+    art.querySelector('[data-meta]').innerHTML = '<span class="num">' + num + '</span><span class="who">' + esc((L(p.apellidos) || '—') + ' / ' + (L(p.nombres) || '—')) + '</span><span class="tag">' + tipoTxt + (i.tit ? ' · ' + i.tit : '') + '</span>' + etiquetaValidez(p) + ver + (src ? '<span class="tag" title="Origen de los datos">' + esc(src) + '</span>' : '') + '<button type="button" class="s del" data-del="' + p.id + '" title="Quitar pasajero">Quitar</button>';
     var e = art.querySelector('[data-edad]'); if (e) e.textContent = i.edad !== null && i.edad !== undefined ? i.edad + (i.edad === 1 ? ' año' : ' años') + (ST.fviaje ? ' al viajar' : '') : '';
     var sx = art.querySelector('.sx'); if (sx) sx.classList.toggle('falta', !p.sexo);
-    art.querySelector('[data-av]').innerHTML = avisos(p, i).map(function (a) { return '<li class="' + (a.k === 'err' ? 'err' : (a.k === 'ok' ? 'ok' : '')) + '">' + esc(a.t) + (a.i !== undefined ? ' <button type="button" class="lnk" data-oc="' + a.i + '" title="Ocultar este aviso">ocultar</button>' : '') + '</li>'; }).join('');
+    var todos = avisos(p, i), arriba = todos.filter(function (a) { return a.k === 'fuerte'; });
+    var cv = art.querySelector('[data-venc]'); if (cv) cv.innerHTML = arriba.map(function (a) { return '<li class="fuerte">' + esc(a.t) + '</li>'; }).join('');
+    art.querySelector('[data-av]').innerHTML = todos.filter(function (a) { return a.k !== 'fuerte'; }).map(function (a) { return '<li class="' + ({ err: 'err', ok: 'ok', fuerte: 'fuerte', tenue: 'tenue' }[a.k] || '') + '">' + esc(a.t) + (a.i !== undefined ? ' <button type="button" class="lnk" data-oc="' + a.i + '" title="Ocultar este aviso">ocultar</button>' : '') + '</li>'; }).join('');
   }
   function render(todo) {
     var info = calcular();
