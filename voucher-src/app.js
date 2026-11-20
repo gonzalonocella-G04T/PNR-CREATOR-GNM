@@ -308,7 +308,7 @@ function claveItem(it){return [it.tipo,it.f?iso(it.f):'',norm(it.titulo||''),nor
 function itemAManual(it){ // un servicio leído del texto pasa al formulario para corregirlo
   var x={tipo:it.tipo==='hotel'?'exc':it.tipo,fecha:it.f?it.f.y+'-'+('0'+it.f.m).slice(-2)+'-'+('0'+it.f.d).slice(-2):'',hora:'',det:''};
   var mh=(it.det||'').match(/(\d{1,2}):(\d{2})/);if(mh)x.hora=('0'+mh[1]).slice(-2)+':'+mh[2];
-  if(x.tipo==='exc'){x.exc=it.titulo||'';x.det=(it.det||'').replace(/(?:Hora:\s*)?\d{1,2}:\d{2}(\s*hs)?/,'').replace(/^[\s·]+|[\s·]+$/g,'');var md=x.exc.match(/\b(medio d[ií]a|d[ií]a completo|full day|half day)\b/i);if(md)x.dur=/medio|half/i.test(md[1])?'Medio día':'Día completo';}
+  if(x.tipo==='exc'){x.exc=it.titulo||'';x.det=(it.det||'').replace(/(?:Hora:\s*)?\d{1,2}:\d{2}(\s*hs)?/,'').replace(/^[\s·]+|[\s·]+$/g,'');if(it.from&&it.to)x.det=[it.from+' → '+it.to,x.det].filter(Boolean).join(' · ');var md=x.exc.match(/\b(medio d[ií]a|d[ií]a completo|full day|half day)\b/i);if(md)x.dur=/medio|half/i.test(md[1])?'Medio día':'Día completo';}
   else{x.kind=/privad/i.test(it.titulo||'')?'Privado':'Regular';x.desde=it.from||'';x.hasta=it.to||'';
     if(it.vuelo){x.vuelo=it.vuelo.aero+' '+it.vuelo.num;x.aero=it.vuelo.al||AIRN[it.vuelo.aero]||'';x.vhora=(it.tipo==='in'?it.vuelo.arr||it.vuelo.dep:it.vuelo.dep)||'';if(x.vhora&&!/^\d{2}:\d{2}$/.test(x.vhora))x.vhora='';}}
   return x;
