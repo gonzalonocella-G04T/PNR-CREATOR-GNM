@@ -14,7 +14,7 @@
     <div id="drop" class="drop" tabindex="0" role="button" aria-label="Cargar archivos del pasaporte o la cédula">
       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#148D7E" stroke-width="1.6" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="9" cy="9" r="2.2"/><path d="M13 8h4M13 11h3M7 15.5h10M7 18h10" stroke-dasharray="1.2 1.2"/></svg>
       <b>Arrastrá los archivos acá</b>
-      <span>o <button type="button" id="elegir" class="lnk">elegilos de la computadora</button><br>También podés pegar una captura con Ctrl+V</span>
+      <span>o <button type="button" id="elegir" class="lnk">elegilos de la computadora</button><br>También podés pegar una captura con Ctrl+V: del documento o con los datos escritos</span>
       <input type="file" id="file" accept="image/*,.pdf,application/pdf" multiple hidden>
     </div>
     <p class="hint priv"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Se lee en este navegador: las imágenes no se suben a ningún lado.</p>
@@ -25,17 +25,23 @@
     <textarea id="txt" placeholder="Mail, WhatsApp o planilla de Excel. También una captura o un PDF con los datos escritos (Ctrl+V o arrastrar). Por ejemplo:&#10;Nombre: Gonzalo Andrés Nocella Massaferro&#10;Fecha de nacimiento: 05/11/1986&#10;Pasaporte: D345678 · Vto.: 12/05/2030&#10;Mail: … · Cel: 098 584 260"></textarea>
     <div class="btns">
       <button type="button" class="p" id="leer">Leer texto</button>
-      <button type="button" class="s" id="txtArch" title="Captura, foto o PDF con los datos escritos">Imagen o PDF</button>
+      <button type="button" class="s" id="txtArch" title="Elegir una captura, foto o PDF con los datos escritos">Subir PDF o imagen</button>
+      <button type="button" class="s" id="txtPegar" title="Pegar la captura o el texto que copiaste">Pegar captura</button>
       <input type="file" id="fileTxt" accept="image/*,.pdf,application/pdf" multiple hidden>
       <button type="button" class="s" id="manual" tabindex="-1">+ Pasajero a mano</button>
       <button type="button" class="s clr" id="limpiar">Limpiar todo</button>
     </div>
 
+    <label for="pnrTxt">Reservas <i>(opcional: pegá el PNR)</i></label>
+    <textarea id="pnrTxt" class="pnr" placeholder="RT de Amadeus o *A de Sabre, de una o varias reservas. Se toman los números de pasajero (P1, P2…), los infantes con su adulto y las fechas de ida y vuelta."></textarea>
+    <div class="btns">
+      <button type="button" class="p" id="leerPnr">Leer PNR</button>
+      <span class="hint" style="margin:0">Separa los pasajeros por reserva y calcula edades y vencimientos con la fecha del viaje.</span>
+    </div>
+
     <details class="opc" id="opc">
       <summary>Opciones</summary>
       <label class="chk"><input type="checkbox" id="docsComp"><span>DOCS con los datos del documento <i>(APIS completo: número, país y vencimiento)</i></span></label>
-      <label for="fviaje">Fecha del viaje <i>(para niños, infantes y vencimientos)</i></label>
-      <input type="text" id="fviaje" placeholder="dd/mm/aaaa (si se deja vacío, se usa hoy)" inputmode="numeric" maxlength="11" autocomplete="off">
       <div class="r2">
         <div><label for="titF">Título de mujer adulta</label><select id="titF"><option value="MRS">MRS</option><option value="MS">MS</option></select></div>
         <div><label for="codpais">Código de país del celular</label><input type="text" id="codpais" value="598" inputmode="numeric" maxlength="4"></div>

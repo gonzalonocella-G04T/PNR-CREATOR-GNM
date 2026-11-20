@@ -5,7 +5,7 @@ here = os.path.dirname(os.path.abspath(__file__)); root = os.path.dirname(here)
 def rd(p): return open(os.path.join(here, p), encoding='utf-8').read()
 paises = json.load(open(os.path.join(here, 'paises.json'), encoding='utf-8'))
 js = ('var PAISES=' + json.dumps(paises, ensure_ascii=False, separators=(',', ':')) + ';\n'
-      + rd('datos.js') + rd('mrz.js') + rd('zona.js') + rd('texto.js') + rd('cmd.js') + rd('ocr.js') + rd('app.js'))
+      + rd('datos.js') + rd('mrz.js') + rd('zona.js') + rd('texto.js') + rd('cmd.js') + rd('pnr.js') + rd('ocr.js') + rd('app.js'))
 assert '</script' not in js.lower()
 VERSION_TXT = (datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None) - datetime.timedelta(hours=3)).strftime('%d/%m %H:%M')
 html = ('<!doctype html>\n<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'

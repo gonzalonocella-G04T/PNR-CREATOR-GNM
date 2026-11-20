@@ -1,7 +1,7 @@
 // Pruebas rápidas de lectura y comandos:  node datapax-src/pruebas.js
 var vm = require('vm'), fs = require('fs'), path = require('path'), D = __dirname;
 global.PAISES = JSON.parse(fs.readFileSync(path.join(D, 'paises.json'), 'utf8'));
-['datos.js', 'mrz.js', 'texto.js', 'cmd.js'].forEach(function (f) { vm.runInThisContext(fs.readFileSync(path.join(D, f), 'utf8'), { filename: f }); });
+['datos.js', 'mrz.js', 'texto.js', 'cmd.js', 'pnr.js'].forEach(function (f) { vm.runInThisContext(fs.readFileSync(path.join(D, f), 'utf8'), { filename: f }); });
 var fallas = 0;
 function eq(nombre, a, b) { var ok = JSON.stringify(a) === JSON.stringify(b); if (!ok) fallas++; console.log((ok ? 'ok   ' : 'FALLA') + ' ' + nombre + (ok ? '' : '\n      obtenido: ' + JSON.stringify(a) + '\n      esperado: ' + JSON.stringify(b))); }
 
@@ -94,5 +94,16 @@ eq('reserva ya cargada: el DOCS del infante espera el adulto elegido', gC.seccio
 fam[2].infanteDe = 2;
 var gD = CMD.generar(fam, { gds: 'A', fechaViaje: new Date(2026, 11, 1), infanteConfirmar: true });
 eq('infante asociado a mano a otro adulto', gD.secciones.docs.map(function (l) { return l.t; }).filter(function (l) { return /LUCIA/.test(l); }), ['SR DOCS HK1-----10JUN25-FI--PEREZ-LUCIA/P1']);
+// Reservas (PNR) pegadas: Amadeus y Sabre, varias juntas
+var rtA = 'RP/MVDU1280N/MVDU1280N            AA/SU  20NOV26/1512Z   ABC123\n  1.GOMEZ/ANA MRS   2.PEREZ/JUAN MR(INF/LUCIA/10JUN25)\n  3.PEREZ/TOMAS MSTR(CHD/01DEC20)\n  4  IB6012 Y 15MAR 1 MVDMAD HK3  2350 1540+1\n  5  IB6011 Y 30MAR 2 MADMVD HK3  2355 0640+1\n'
+  + 'RP/MVDU1280N/MVDU1280N            AA/SU  18NOV26/1300Z   DEF456\n  1.NOCELLA MASSAFERRO/GONZALO ANDRES MR\n  2  LA 800 Y 10JAN 6 MVDSCL HK1  0600 0900\n  3  LA 801 Y 05DEC 5 SCLMVD HX1  1000 1300\n  4  LA 801 Y 20JAN 2 SCLMVD HK1  1000 1300';
+var pa = PNR.parse(rtA, new Date(2026, 10, 20));
+eq('PNR Amadeus: reservas, fechas y pasajeros', pa.map(function (r) { return r.loc + ' ' + r.gds + ' ' + [r.ida, r.vuelta].map(function (f) { return f.d + '/' + f.m + '/' + f.y; }).join('-') + ' ' + r.pax.map(function (x) { return x.num + ':' + x.apellidos + '/' + x.nombres + (x.titulo ? ' ' + x.titulo : '') + (x.tipo !== 'ADT' ? ' ' + x.tipo : '') + (x.inf ? ' +INF ' + x.inf.nombres : ''); }).join(', '); }),
+  ['ABC123 A 15/3/2027-30/3/2027 1:GOMEZ/ANA MRS, 2:PEREZ/JUAN MR +INF LUCIA, 3:PEREZ/TOMAS MSTR CHD', 'DEF456 A 10/1/2027-20/1/2027 1:NOCELLA MASSAFERRO/GONZALO ANDRES MR']);
+var sb = PNR.parse('7XKQ2L\n 1.1GOMEZ/ANA MRS  2.2PEREZ/JUAN MR/TOMAS MSTR*CHD\n 3.1I/PEREZ/LUCIA*10JUN25\n 1 IB6012Y 15MAR M MVDMAD HK3  2350  1540  /DCIB*ABCDEF /E\n 2 IB6011Y 30MAR M MADMVD HK3  2355  0640  /DCIB*ABCDEF /E\nGENERAL FACTS\n  1.SSR INFT IB NN1 PEREZ/LUCIA/10JUN25-2.1\nMVD.MVD1*AXX 1512/20NOV26 7XKQ2L H', new Date(2026, 10, 20))[0];
+eq('PNR Sabre: números 1.1/2.1/2.2 e infante con su adulto', [sb.loc, sb.gds, sb.pax.map(function (x) { return x.num + '.' + x.sub + (x.tipo !== 'ADT' ? x.tipo : '') + (x.adulto ? '>' + x.adulto : ''); }).join(' ')], ['7XKQ2L', 'S', '1.1 2.1 2.2CHD 3.1INF>2.1']);
+eq('detectar PNR', [PNR.detectar(rtA), PNR.detectar('Juan Perez 05/03/1980 pasaporte C1234567')], [true, false]);
+var gS2 = CMD.generar([{ id: 1, apellidos: 'PEREZ', nombres: 'JUAN', sexo: 'M', nac: { y: 1980, m: 3, d: 5 }, numManual: '2.1' }, { id: 2, apellidos: 'PEREZ', nombres: 'TOMAS', sexo: 'M', nac: { y: 2020, m: 12, d: 1 }, numManual: '2.2' }], { gds: 'S', fechaViaje: new Date(2027, 2, 15) });
+eq('Sabre con números del PNR', gS2.secciones.docs.map(function (l) { return l.t; }), ['3DOCS/DB/05MAR80/M/PEREZ/JUAN-2.1', '3DOCS/DB/01DEC20/M/PEREZ/TOMAS-2.2', '3CHLD/01DEC20-2.2']);
 console.log(fallas ? '\n' + fallas + ' pruebas fallaron' : '\nTodo bien');
 process.exit(fallas ? 1 : 0);

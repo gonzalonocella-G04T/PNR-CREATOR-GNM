@@ -1,8 +1,9 @@
 /* ===== DataPax · interfaz ===== */
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var ST = { pax: [], gds: 'A', docsComp: false, titF: 'MRS', fviaje: '', codpais: '598', hechos: {}, reserva: 'nueva', cargados: {} };
-  var uid = 1, LIENZOS = {}, ultimo = null;
+  // Reservas: cada una con su código, fechas de ida y vuelta, y si ya tiene los nombres cargados (estado 'existe')
+  var ST = { pax: [], gds: 'A', docsComp: false, titF: 'MRS', codpais: '598', hechos: {}, cargados: {}, grupos: [{ id: 1, loc: '', ida: '', vuelta: '', estado: 'nueva', pnr: false }] };
+  var uid = 1, gid = 2, LIENZOS = {}, ultimo = null;
   var CONF = ['gds', 'docsComp', 'titF', 'codpais'];
   try { var g = JSON.parse(localStorage.getItem('hv-pax-conf') || '{}'); CONF.forEach(function (k) { if (g[k] !== undefined) ST[k] = g[k]; }); } catch (e) { }
   function guardarConf() { try { var o = {}; CONF.forEach(function (k) { o[k] = ST[k]; }); localStorage.setItem('hv-pax-conf', JSON.stringify(o)); } catch (e) { } }
@@ -43,7 +44,21 @@
   function deIso(s) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? { y: +m[1], m: +m[2], d: +m[3] } : null; }
   function dmy(d) { return d ? (d.d < 10 ? '0' : '') + d.d + '/' + (d.m < 10 ? '0' : '') + d.m + '/' + d.y : ''; }
   function fecha(d) { return d ? new Date(d.y, d.m - 1, d.d) : null; }
-  function refViaje() { var f = deDmy(ST.fviaje); return f ? fecha(f) : new Date(); }
+  function grupo(id) { return ST.grupos.filter(function (g) { return g.id === +id; })[0] || ST.grupos[0]; }
+  function grupoDe(p) { return grupo(p && p.grupo); }
+  function nuevoGrupo(o) { var g = { id: gid++, loc: '', ida: '', vuelta: '', estado: 'nueva', pnr: false }; for (var k in o) g[k] = o[k]; ST.grupos.push(g); return g; }
+  // Reserva para pasajeros nuevos que no vienen de un PNR: la primera que no salió de un PNR (o una nueva)
+  function grupoPorDefecto() { return ST.grupos.filter(function (g) { return !g.pnr; })[0] || nuevoGrupo(); }
+  function etiquetaG(g) { var k = ST.grupos.indexOf(g) + 1; return 'Reserva ' + (g.loc || k); }
+  function refGrupo(g) { var f = deDmy(g && g.ida); return f ? fecha(f) : new Date(); }
+  function refViaje(p) { return refGrupo(grupoDe(p)); }
+  function conFecha(p) { return !!deDmy(grupoDe(p).ida); }
+  // Saca reservas vacías (salvo que quede una sola) y ubica a los pasajeros sin reserva válida
+  function ordenarGrupos() {
+    ST.pax.forEach(function (p) { if (!ST.grupos.some(function (g) { return g.id === p.grupo; })) p.grupo = grupoPorDefecto().id; });
+    var con = ST.grupos.filter(function (g) { return ST.pax.some(function (p) { return p.grupo === g.id; }); });
+    ST.grupos = con.length ? con : [ST.grupos[0]];
+  }
   function L(s) { return TEXTO.limpiaNombre(s || ''); }
   function paisNom(a3) { return a3 && PAISES[a3] ? PAISES[a3][1] : ''; }
   function toast(t) { var e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(function () { e.classList.remove('on'); }, 1800); }
@@ -55,8 +70,9 @@
 
   // ---------- pasajeros desde cada fuente ----------
   function nuevo(o) {
-    var p = { id: uid++, apellidos: '', nombres: '', sexo: '', sexoNombre: '', sexoDuda: '', nac: null, nacionalidad: '', ppNum: '', ppEmisor: '', ppVenc: null, ciNum: '', ciEmisor: '', ciVenc: null, docUsar: '', email: '', tel: '', tituloManual: '', tipoManual: '', numManual: '', infanteDe: 0, fuentes: [], avisosF: [], ocultos: {}, verificado: null, fotos: [] };
+    var p = { id: uid++, grupo: 0, apellidos: '', nombres: '', sexo: '', sexoNombre: '', sexoDuda: '', nac: null, nacionalidad: '', ppNum: '', ppEmisor: '', ppVenc: null, ciNum: '', ciEmisor: '', ciVenc: null, docUsar: '', email: '', tel: '', tituloManual: '', tipoManual: '', numManual: '', infanteDe: 0, fuentes: [], avisosF: [], ocultos: {}, verificado: null, fotos: [] };
     for (var k in o) if (o[k] !== undefined && o[k] !== null && o[k] !== '') p[k] = o[k];
+    if (!p.grupo) p.grupo = grupoPorDefecto().id;
     return p;
   }
   function desdeMRZ(r, fuente) {
@@ -161,15 +177,19 @@
     var v = uso === 'NI' ? p.ciVenc : p.ppVenc, doc = uso === 'NI' ? 'la cédula' : 'el pasaporte';
     var hayDoc = uso === 'NI' ? !!p.ciNum : !!p.ppNum;
     if (!v) return { nivel: hayDoc ? 'sin' : '', doc: doc };
-    var viaje = deDmy(ST.fviaje), h = hoy0(), ref = viaje ? fecha(viaje) : h, fv = fecha(v);
+    var g = grupoDe(p), viaje = deDmy(g.ida), vu = deDmy(g.vuelta), h = hoy0(), ref = viaje ? fecha(viaje) : h, fv = fecha(v);
     if (ref < h) ref = h;
-    var r = { v: v, fv: fv, ref: ref, viaje: !!viaje, doc: doc };
+    var vuelta = vu ? fecha(vu) : null; if (vuelta && vuelta < ref) vuelta = null;
+    var r = { v: v, fv: fv, ref: ref, viaje: !!viaje, vuelta: vuelta, doc: doc };
     if (fv < h) r.nivel = 'vencido';
     else if (fv < ref) r.nivel = 'antesViaje';
+    else if (vuelta && fv < vuelta) r.nivel = 'durante';
     else if (fv < sumarMeses(ref, 6)) r.nivel = 'menos6';
-    else if (fv < sumarMeses(ref, 18)) r.nivel = 'menos18';
+    else if (vuelta && fv < sumarMeses(vuelta, 6)) r.nivel = 'menos6Vuelta';
+    else if (!vuelta && fv < sumarMeses(ref, 18)) r.nivel = 'menos18';
     else r.nivel = 'ok';
     r.plazo = fv >= ref ? plazo(ref, fv) : '';
+    if (vuelta && fv >= vuelta) r.plazoV = plazo(vuelta, fv);
     return r;
   }
   function avisoValidez(p) {
@@ -177,6 +197,8 @@
     switch (r.nivel) {
       case 'vencido': return { t: '⚠ DOCUMENTO VENCIDO: ' + r.doc + ' venció el ' + d + '. No sirve para viajar.', k: 'fuerte' };
       case 'antesViaje': return { t: '⚠ VENCE ANTES DEL VIAJE: ' + r.doc + ' vence el ' + d + '.', k: 'fuerte' };
+      case 'durante': return { t: '⚠ VENCE DURANTE EL VIAJE: ' + r.doc + ' vence el ' + d + ', antes de la vuelta (' + dmy({ y: r.vuelta.getFullYear(), m: r.vuelta.getMonth() + 1, d: r.vuelta.getDate() }) + ').', k: 'fuerte' };
+      case 'menos6Vuelta': return { t: Doc + ' vence el ' + d + ': a la vuelta le quedan ' + r.plazoV + '. Algunos países piden 6 meses de validez también a la salida: verificá los requisitos del destino.', k: 'warn' };
       case 'menos6': return { t: '⚠ VENCE EN MENOS DE 6 MESES: ' + r.doc + ' vence el ' + d + ' (' + (r.viaje ? 'a ' + r.plazo + ' de la fecha del viaje' : 'en ' + r.plazo) + '). Muchos destinos y aerolíneas exigen 6 meses de validez al ingresar.', k: 'fuerte' };
       case 'menos18': return { t: Doc + ' vence el ' + d + ' (' + (r.viaje ? 'le quedan ' + r.plazo + ' al viajar' : 'en ' + r.plazo) + '). ' + (r.viaje ? 'Verificá que a la fecha de regreso le sigan quedando 6 meses.' : 'Si el viaje es dentro de varios meses, verificá que a esa fecha le sigan quedando 6 meses de validez.'), k: 'tenue' };
       case 'sin': return { t: 'Sin fecha de vencimiento del documento: no se puede controlar la validez.', k: 'tenue' };
@@ -187,6 +209,8 @@
     var r = validez(p);
     if (r.nivel === 'vencido') return '<span class="tag venc">⚠ Documento vencido</span>';
     if (r.nivel === 'antesViaje') return '<span class="tag venc">⚠ Vence antes del viaje</span>';
+    if (r.nivel === 'durante') return '<span class="tag venc">⚠ Vence durante el viaje</span>';
+    if (r.nivel === 'menos6Vuelta') return '<span class="tag tenue">A la vuelta le quedan ' + r.plazoV + '</span>';
     if (r.nivel === 'menos6') return '<span class="tag venc">⚠ ' + (r.viaje ? 'Al viajar le quedan ' + r.plazo : 'Vence en ' + r.plazo) + '</span>';
     if (r.nivel === 'menos18') return '<span class="tag tenue">' + (r.viaje ? 'Al viajar le quedan ' + r.plazo : 'Vence en ' + r.plazo) + '</span>';
     return '';
@@ -203,13 +227,14 @@
     if (p.ciNum && (p.ciEmisor || 'URY') === 'URY' && /^\d{7,8}$/.test(p.ciNum) && !TEXTO.ciValida(p.ciNum)) a.push({ t: 'El dígito verificador de la cédula no coincide: revisá el número.', k: 'err' });
     if (!p.ppNum && !p.ciNum) a.push({ t: 'Sin documento: no se arma el FOID.', k: 'warn' });
     if (tipo === 'INF' && info && !info.adulto) a.push({ t: 'El infante necesita un adulto con quien viajar: cargá al adulto y elegilo en «Adulto al que está asociado en la reserva».', k: 'err' });
-    if (tipo === 'INF' && info && info.adulto && !p.infanteDe) a.push(ST.reserva === 'existe'
+    if (tipo === 'INF' && info && info.adulto && !p.infanteDe) a.push(grupoDe(p).estado === 'existe'
       ? { t: 'Elegí a qué adulto está asociado el infante en la reserva: hasta entonces no se arma su DOCS.', k: 'err' }
       : { t: 'Se asoció a ' + nombreDe(info.adulto).trim() + '. Si en la reserva va con otro adulto, cambialo en «Adulto al que está asociado en la reserva».', k: 'warn' });
     // cumple 2 años cerca del viaje: deja de ser infante
     if (p.nac && !p.tipoManual && tipo === 'INF') {
-      var dos = new Date(p.nac.y + 2, p.nac.m - 1, p.nac.d), ref = refViaje(), dias = Math.round((dos - ref) / 864e5);
-      if (tipo === 'INF' && !ST.fviaje) a.push({ t: 'Es infante calculando con la fecha de hoy: cumple 2 años el ' + dmy({ y: dos.getFullYear(), m: dos.getMonth() + 1, d: dos.getDate() }) + '. Si viaja desde ese día, va como niño con asiento.', k: 'warn', fv: 1 });
+      var dos = new Date(p.nac.y + 2, p.nac.m - 1, p.nac.d), ref = refViaje(p), dias = Math.round((dos - ref) / 864e5), vu = deDmy(grupoDe(p).vuelta);
+      if (tipo === 'INF' && !conFecha(p)) a.push({ t: 'Es infante calculando con la fecha de hoy: cumple 2 años el ' + dmy({ y: dos.getFullYear(), m: dos.getMonth() + 1, d: dos.getDate() }) + '. Si viaja desde ese día, va como niño con asiento.', k: 'warn', fv: 1 });
+      else if (tipo === 'INF' && vu) { if (dos <= fecha(vu)) a.push({ t: 'Cumple 2 años el ' + dmy({ y: dos.getFullYear(), m: dos.getMonth() + 1, d: dos.getDate() }) + ', durante el viaje: en la vuelta (' + dmy(vu) + ') ya no viaja como infante.', k: 'warn' }); }
       else if (tipo === 'INF' && dias <= 90) a.push({ t: 'Cumple 2 años el ' + dmy({ y: dos.getFullYear(), m: dos.getMonth() + 1, d: dos.getDate() }) + ', ' + dias + (dias === 1 ? ' día' : ' días') + ' después de la ida: si la vuelta es desde esa fecha, en el regreso ya no viaja como infante.', k: 'warn' });
     }
     if (p.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email.trim())) a.push({ t: 'El mail no parece válido.', k: 'warn' });
@@ -228,13 +253,20 @@
       return c;
     });
   }
-  var ULT = null;
+  var ULT = null, GR = {};
   function calcular() {
-    ULT = CMD.generar(limpios(), { gds: ST.gds, docsCompleto: ST.docsComp, tituloF: ST.titF, fechaViaje: refViaje(), contactoTodos: true, infanteConfirmar: ST.reserva === 'existe' });
-    var info = {};
-    ULT.orden.forEach(function (x) { info[x.p.id] = { n: x.n, tipo: x.tipo, edad: x.edad, tit: x.tit, adulto: x.adulto ? x.adulto.p.id : 0 }; });
+    ordenarGrupos();
+    var info = {}, todos = limpios(), orden = [], avs = []; GR = {};
+    ST.grupos.forEach(function (g) {
+      var ps = todos.filter(function (p) { return p.grupo === g.id; }); if (!ps.length) return;
+      var u = CMD.generar(ps, { gds: ST.gds, docsCompleto: ST.docsComp, tituloF: ST.titF, fechaViaje: refGrupo(g), contactoTodos: true, infanteConfirmar: g.estado === 'existe' });
+      GR[g.id] = u; orden = orden.concat(u.orden); avs = avs.concat(u.avisos);
+      u.orden.forEach(function (x) { info[x.p.id] = { n: x.n, nS: x.nS, tipo: x.tipo, edad: x.edad, tit: x.tit, adulto: x.adulto ? x.adulto.p.id : 0, grupo: g.id }; });
+    });
+    ULT = { orden: orden, avisos: avs };
     return info;
   }
+  function numTxt(i) { return ST.gds === 'S' ? (i.nS || i.n + '.1') : 'P' + i.n; }
   // Límites por entrada de cada GDS (ajustables acá). Amadeus: una línea por comando.
   // Sabre: los comandos van en una sola entrada, encadenados con § (el separador cuenta como caracter).
   var LIMITE = {
@@ -257,25 +289,27 @@
     return out;
   }
   function chars(ls) { var lim = LIMITE[ST.gds] || { sep: '\n' }; return ls.map(function (l) { return l.t; }).join(lim.sep).length; }
-  function lineaHtml(l) {
-    return '<button type="button" class="ln' + (ST.hechos[l.t] ? ' hecho' : '') + '" data-t="' + esc(l.t) + '"><span>' + esc(l.t) + '</span>' + (l.nota ? '<span class="nota">' + esc(l.nota) + '</span>' : '') + '<span class="cp">' + (ST.hechos[l.t] ? '✓ copiado' : 'copiar') + '</span></button>';
+  function hecho(g, t) { return !!ST.hechos[g + '|' + t]; }
+  function lineaHtml(l, g) {
+    var hh = hecho(g, l.t);
+    return '<button type="button" class="ln' + (hh ? ' hecho' : '') + '" data-g="' + g + '" data-t="' + esc(l.t) + '"><span>' + esc(l.t) + '</span>' + (l.nota ? '<span class="nota">' + esc(l.nota) + '</span>' : '') + '<span class="cp">' + (hh ? '✓ copiado' : 'copiar') + '</span></button>';
   }
   function faltaHtml(l) { return '<div class="ln falta">Falta ' + esc(l.falta) + (l.id ? ' · ' + esc(nombreDe(l.id)) : '') + '</div>'; }
   var TANDAS = {};
-  function bloqueTandas(clave, ls, etiqueta) {
+  function bloqueTandas(clave, ls, etiqueta, g) {
     var ts = tandas(ls), h = '', lim = LIMITE[ST.gds], S = ST.gds === 'S';
     var unidad = S ? ['comando', 'comandos'] : ['línea', 'líneas'];
     if (ts.length > 1) h += '<div class="aviso-tanda">Son ' + ls.length + ' ' + unidad[1] + ' y ' + chars(ls) + ' caracteres. ' + lim.gds + ' admite hasta '
       + (lim.lineas ? lim.lineas + ' líneas y ' : '') + lim.chars + ' caracteres por entrada: pegá <b>' + ts.length + ' tandas</b> por separado, en orden.</div>';
     ts.forEach(function (t, k) {
-      var id = clave + k; TANDAS[id] = t.map(function (l) { return l.t; });
-      var hecha = t.every(function (l) { return ST.hechos[l.t]; }), c = chars(t);
+      var id = clave + k; TANDAS[id] = { g: g, ls: t.map(function (l) { return l.t; }) };
+      var hecha = t.every(function (l) { return hecho(g, l.t); }), c = chars(t);
       h += '<div class="tanda' + (hecha ? ' hecha' : '') + '"><div class="tandah"><span>' + (ts.length > 1 ? '<b>Tanda ' + (k + 1) + ' de ' + ts.length + '</b> · ' : '')
         + t.length + ' ' + unidad[t.length === 1 ? 0 : 1] + ' · ' + c + ' caracteres' + (S && t.length > 1 ? ' · encadenados con §' : '')
         + (c > lim.chars ? ' · <b class="exc">supera el límite de ' + lim.chars + '</b>' : '') + '</span>'
         + '<button type="button" class="' + (hecha ? 's' : 'p') + ' sm" data-tanda="' + id + '">' + (hecha ? '✓ Copiada' : (ts.length > 1 ? 'Copiar tanda ' + (k + 1) : 'Copiar ' + etiqueta)) + '</button></div>';
       var sec = '';
-      t.forEach(function (l) { if (l.sec && l.sec !== sec) { sec = l.sec; h += '<div class="seclbl">' + esc(sec) + '</div>'; } h += lineaHtml(l); });
+      t.forEach(function (l) { if (l.sec && l.sec !== sec) { sec = l.sec; h += '<div class="seclbl">' + esc(sec) + '</div>'; } h += lineaHtml(l, g); });
       if (S && t.length > 1) h += '<div class="entrada" title="Así se copia: una sola entrada">' + esc(t.map(function (l) { return l.t; }).join('§')) + '</div>';
       h += '</div>';
     });
@@ -283,58 +317,74 @@
   }
   function renderOut() {
     $('outT').textContent = 'Comandos para ' + (ST.gds === 'S' ? 'Sabre' : 'Amadeus');
-    var o = $('out'), A = ST.gds !== 'S';
+    var o = $('out');
     if (!ST.pax.length) { o.innerHTML = '<p class="hint">Los comandos aparecen acá a medida que cargás pasajeros.</p>'; return; }
     TANDAS = {};
-    var fuertes = [], tenues = [];
-    ST.pax.forEach(function (p) {
+    var gs = ST.grupos.filter(function (g) { return GR[g.id]; }), multi = gs.length > 1;
+    o.innerHTML = gs.map(function (g) { return bloqueGrupo(g, GR[g.id], multi); }).join('');
+  }
+  // Comandos de una reserva: vencimientos, paso 1 (nombres, si la reserva es nueva) y paso 2 (DOCS, FOID y contactos)
+  function bloqueGrupo(g, U, multi) {
+    var A = ST.gds !== 'S', ps = ST.pax.filter(function (p) { return p.grupo === g.id; }), fuertes = [], tenues = [], h = '';
+    ps.forEach(function (p) {
       var r = validez(p), nom = (L(p.apellidos) || '—') + ' / ' + (L(p.nombres).split(' ')[0] || '');
-      if (/vencido|antesViaje|menos6/.test(r.nivel)) fuertes.push(esc(nom) + ' — ' + (r.nivel === 'vencido' ? 'VENCIDO desde el ' + dmy(r.v) : (r.nivel === 'antesViaje' ? 'vence antes del viaje (' + dmy(r.v) + ')' : 'vence el ' + dmy(r.v) + ', ' + (r.viaje ? 'a ' + r.plazo + ' del viaje' : 'en ' + r.plazo))));
-      else if (r.nivel === 'menos18') tenues.push(nom);
+      if (/vencido|antesViaje|durante|menos6$/.test(r.nivel)) fuertes.push(esc(nom) + ' — ' + (r.nivel === 'vencido' ? 'VENCIDO desde el ' + dmy(r.v) : r.nivel === 'antesViaje' ? 'vence antes del viaje (' + dmy(r.v) + ')' : r.nivel === 'durante' ? 'vence durante el viaje (' + dmy(r.v) + ')' : 'vence el ' + dmy(r.v) + ', ' + (r.viaje ? 'a ' + r.plazo + ' del viaje' : 'en ' + r.plazo)));
+      else if (r.nivel === 'menos18' || r.nivel === 'menos6Vuelta') tenues.push(r.nivel);
     });
-    var h = '';
+    h += '<section class="gout" data-g="' + g.id + '">';
+    if (multi) h += '<div class="gouth"><b>' + esc(etiquetaG(g)) + '</b><span>' + ps.length + (ps.length === 1 ? ' pasajero' : ' pasajeros') + (g.ida ? ' · ida ' + g.ida.slice(0, 5) : '') + (g.vuelta ? ' · vuelta ' + g.vuelta.slice(0, 5) : '') + '</span></div>';
     if (fuertes.length) h += '<div class="alerta-venc"><b>⚠ ' + (fuertes.length === 1 ? 'Documento vencido o con menos de 6 meses de validez' : fuertes.length + ' documentos vencidos o con menos de 6 meses de validez') + '</b><ul>' + fuertes.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div>';
-    if (tenues.length) h += '<p class="aviso-tenue">' + (tenues.length === 1 ? '1 documento vence' : tenues.length + ' documentos vencen') + (deDmy(ST.fviaje) ? ' dentro de los 18 meses posteriores al viaje: verificá que a la fecha de regreso le sigan quedando 6 meses.' : ' dentro de los próximos 18 meses: si el viaje es más adelante, verificá la validez a esa fecha.') + '</p>';
-    h += '<div class="preg"><span>¿La reserva ya tiene los nombres cargados?</span><div class="seg seg-sm" id="reserva"><button type="button" data-r="nueva" class="' + (ST.reserva === 'nueva' ? 'on' : '') + '">No, es nueva</button><button type="button" data-r="existe" class="' + (ST.reserva === 'existe' ? 'on' : '') + '">Sí, ya están</button></div></div>';
+    if (tenues.length) h += '<p class="aviso-tenue">' + (tenues.indexOf('menos6Vuelta') >= 0 ? (tenues.length === 1 ? '1 documento queda' : tenues.length + ' documentos quedan') + ' con menos de 6 meses de validez a la vuelta: verificá los requisitos del destino.' : (tenues.length === 1 ? '1 documento vence' : tenues.length + ' documentos vencen') + (g.ida ? ' dentro de los 18 meses posteriores al viaje: cargá la vuelta para saber si a esa fecha le quedan 6 meses.' : ' dentro de los próximos 18 meses: cargá la fecha del viaje para saber si alcanza.')) + '</p>';
+    if (g.pnr) h += '<p class="nota-gds">Reserva leída del PNR' + (g.loc ? ' <b>' + esc(g.loc) + '</b>' : '') + ': los nombres ya están cargados y los ' + (A ? '<b>/P</b>' : 'números <b>-1.1, -2.1…</b>') + ' son los de la reserva.</p>';
+    else h += '<div class="preg"><span>¿' + (multi ? 'Esta reserva' : 'La reserva') + ' ya tiene los nombres cargados?</span><div class="seg seg-sm"><button type="button" data-r="nueva" data-g="' + g.id + '" class="' + (g.estado === 'nueva' ? 'on' : '') + '">No, es nueva</button><button type="button" data-r="existe" data-g="' + g.id + '" class="' + (g.estado === 'existe' ? 'on' : '') + '">Sí, ya están</button></div></div>';
     // ---- paso 1: nombres ----
-    var nom = ULT.secciones.nombres;
-    var pend = ST.reserva === 'existe' ? [] : nom.filter(function (l) { return !l.id || !ST.cargados[l.id]; });
+    var nom = U.secciones.nombres;
+    var pend = g.estado === 'existe' ? [] : nom.filter(function (l) { return !l.id || !ST.cargados[l.id]; });
     var pendOk = pend.filter(function (l) { return l.t; }), pendFalta = pend.filter(function (l) { return !l.t; });
-    var nCarg = ST.pax.filter(function (p) { return ST.cargados[p.id]; }).length;
-    if (ST.reserva === 'nueva') {
+    var nCarg = ps.filter(function (p) { return ST.cargados[p.id]; }).length;
+    if (g.estado === 'nueva') {
       h += '<div class="paso' + (pend.length ? '' : ' listo') + '"><div class="pasoh"><span class="pn">1</span><b>Cargar los nombres</b>';
-      if (!pend.length) h += '<span class="ok">✓ ' + nCarg + (nCarg === 1 ? ' nombre cargado' : ' nombres cargados') + '</span><button type="button" class="lnk" id="nomVolver">volver a mostrarlos</button></div></div>';
+      if (!pend.length) h += '<span class="ok">✓ ' + nCarg + (nCarg === 1 ? ' nombre cargado' : ' nombres cargados') + '</span><button type="button" class="lnk" data-nomvolver="' + g.id + '">volver a mostrarlos</button></div></div>';
       else {
         h += '</div><p class="hint" style="margin:0 0 8px">' + (A ? 'Primero se crean los pasajeros: sin los nombres en la reserva, Amadeus no acepta los DOCS asociados a cada /P. Los nombres nunca se mezclan con otros comandos.' : 'Primero se crean los pasajeros: sin los nombres en la reserva, Sabre no acepta los datos asociados a cada pasajero (-1.1, -2.1…). Los nombres nunca se encadenan con otros comandos.') + '</p>';
-        h += bloqueTandas('n', pendOk.map(function (l) { return { t: l.t, nota: l.nota, id: l.id }; }), 'los nombres');
+        h += bloqueTandas('n' + g.id + '_', pendOk.map(function (l) { return { t: l.t, nota: l.nota, id: l.id }; }), 'los nombres', g.id);
         h += pendFalta.map(faltaHtml).join('');
-        if (pendOk.length) h += '<button type="button" class="p listo-btn" id="nomListos">Listo, los nombres ya están en la reserva →</button>';
+        if (pendOk.length) h += '<button type="button" class="p listo-btn" data-nomlistos="' + g.id + '">Listo, los nombres ya están en la reserva →</button>';
         h += '</div>';
       }
-    } else {
-      h += '<p class="nota-gds">' + (A ? 'Los <b>/P1, /P2…</b> siguen el orden alfabético por apellido que usa Amadeus. Verificá con RT que coincidan y, si no, corregí el N.º en la tarjeta del pasajero.' : 'Los números <b>-1.1, -2.1…</b> tienen que coincidir con los de la reserva: verificalos y, si no, corregí el N.º en la tarjeta del pasajero.') + '</p>';
+    } else if (!g.pnr) {
+      h += '<p class="nota-gds">' + (A ? 'Los <b>/P1, /P2…</b> siguen el orden alfabético por apellido que usa Amadeus. Verificá con RT que coincidan y, si no, corregí el N.º en la tarjeta del pasajero (o pegá el PNR).' : 'Los números <b>-1.1, -2.1…</b> tienen que coincidir con los de la reserva: verificalos y, si no, corregí el N.º en la tarjeta del pasajero (o pegá el PNR).') + '</p>';
     }
     // ---- paso 2: DOCS, FOID y contactos ----
-    var bloqueado = ST.reserva === 'nueva' && pend.length > 0;
-    h += '<div class="paso' + (bloqueado ? ' bloq' : '') + '"><div class="pasoh"><span class="pn">' + (ST.reserva === 'nueva' ? '2' : '1') + '</span><b>DOCS, FOID y contactos</b></div>';
+    var bloqueado = g.estado === 'nueva' && pend.length > 0;
+    h += '<div class="paso' + (bloqueado ? ' bloq' : '') + '"><div class="pasoh"><span class="pn">' + (g.estado === 'nueva' ? '2' : '1') + '</span><b>DOCS, FOID y contactos</b></div>';
     if (bloqueado) h += '<p class="hint" style="margin:0">Se habilita cuando confirmes que los nombres ya están en la reserva.</p>';
     else {
       var ls = [], faltan = [];
-      SECS2.forEach(function (s) { ULT.secciones[s[0]].forEach(function (l) { if (l.t) ls.push({ t: l.t, nota: l.nota, id: l.id, sec: s[1] }); else faltan.push(l); }); });
-      if (ls.length) h += bloqueTandas('d', ls, 'todo');
+      SECS2.forEach(function (sx) { U.secciones[sx[0]].forEach(function (l) { if (l.t) ls.push({ t: l.t, nota: l.nota, id: l.id, sec: sx[1] }); else faltan.push(l); }); });
+      if (ls.length) h += bloqueTandas('d' + g.id + '_', ls, 'todo', g.id);
       h += faltan.map(faltaHtml).join('');
     }
     h += '</div>';
-    if (ULT.avisos.length) h += ULT.avisos.map(function (a) { return '<div class="ln falta">' + esc(a) + '</div>'; }).join('');
-    o.innerHTML = h;
+    if (U.avisos.length) h += U.avisos.map(function (a) { return '<div class="ln falta">' + esc(a) + '</div>'; }).join('');
+    return h + '</section>';
   }
 
   // ---------- tarjetas ----------
   var DOCS_OPC = '<datalist id="paises">' + Object.keys(PAISES).filter(function (k) { return k.length === 3 && !/^GB[DNOPS]$/.test(k); }).map(function (k) { return '<option value="' + k + '">' + esc(PAISES[k][1]) + '</option>'; }).join('') + '</datalist>';
+  // Encabezado de cada reserva: código, ida y vuelta (con ellas se calculan edades y validez de los documentos)
+  function cabGrupo(g, n, multi) {
+    var h = '<div class="grupoh"><div class="gt"><b>' + esc(multi || g.loc ? etiquetaG(g) : 'Reserva') + '</b><span class="cnt">' + n + (n === 1 ? ' pasajero' : ' pasajeros') + '</span>' + (g.pnr ? '<span class="tag ok">PNR leído</span>' : '') + '</div>';
+    h += '<div class="gf"><label>Código<input data-gf="loc" value="' + esc(g.loc) + '" placeholder="opcional" maxlength="6" autocomplete="off" spellcheck="false"></label>';
+    h += '<label>Ida<input data-gf="ida" value="' + esc(g.ida) + '" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="11" autocomplete="off"></label>';
+    h += '<label>Vuelta<input data-gf="vuelta" value="' + esc(g.vuelta) + '" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="11" autocomplete="off"></label></div>';
+    if (!g.ida) h += '<div class="small">Sin fecha de ida, las edades y la validez de los documentos se calculan con la fecha de hoy.</div>';
+    return h + '</div>';
+  }
   function tarjeta(p, info) {
     var i = info[p.id] || { tipo: 'ADT', n: '' }, S = ST.gds === 'S';
     var uso = p.docUsar === 'NI' || (!p.ppNum && p.ciNum) ? 'NI' : 'PP';
-    var adultos = ST.pax.filter(function (q) { return q.id !== p.id && info[q.id] && info[q.id].tipo === 'ADT'; });
+    var adultos = ST.pax.filter(function (q) { return q.id !== p.id && q.grupo === p.grupo && info[q.id] && info[q.id].tipo === 'ADT'; });
     var h = '<article class="pax" data-id="' + p.id + '">';
     h += '<div class="ph" data-meta></div><ul class="avisos arriba" data-venc></ul>';
     h += '<div class="pgrid">';
@@ -345,8 +395,8 @@
     h += '<div class="c4"><label>Nacimiento</label><input data-f="nac" data-fecha="nac" value="' + dmy(p.nac) + '" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" maxlength="11"><div class="small" data-edad></div></div>';
     h += '<div class="c5"><label>Nacionalidad</label><input data-f="nacionalidad" list="paises" value="' + esc(p.nacionalidad) + '" maxlength="3" autocomplete="off"><div class="small">' + esc(paisNom(p.nacionalidad)) + '</div></div>';
     if (i.tipo === 'INF') {
-      var nAd = function (q) { var n = info[q.id] ? info[q.id].n : ''; return n ? (S ? n + '.1' : 'P' + n) + ' · ' : ''; };
-      var auto = !p.infanteDe && i.adulto ? porId(i.adulto) : null, falta = !p.infanteDe && (ST.reserva === 'existe' || !auto);
+      var nAd = function (q) { return info[q.id] && info[q.id].n ? numTxt(info[q.id]) + ' · ' : ''; };
+      var auto = !p.infanteDe && i.adulto ? porId(i.adulto) : null, falta = !p.infanteDe && (grupoDe(p).estado === 'existe' || !auto);
       h += '<div class="c12 infbox' + (falta ? ' falta' : '') + '"><div class="ih"><b>Infante</b><span>menos de 2 años al viajar · va en brazos de un adulto · no lleva FOID · DOCS con ' + (p.sexo === 'F' ? 'FI' : p.sexo === 'M' ? 'MI' : 'MI / FI') + ' y la ' + (S ? 'asociación' : '/P') + ' del adulto</span></div>';
       h += '<label for="inf' + p.id + '">Adulto al que está asociado en la reserva</label><select id="inf' + p.id + '" data-f="infanteDe"><option value="">' + (auto ? 'Automático: ' + esc(nAd(auto) + L(auto.nombres).split(' ')[0] + ' ' + L(auto.apellidos)) : 'Elegí el adulto…') + '</option>' + adultos.map(function (q) { return '<option value="' + q.id + '"' + (+p.infanteDe === q.id ? ' selected' : '') + '>' + esc(nAd(q) + L(q.nombres).split(' ')[0] + ' ' + L(q.apellidos)) + '</option>'; }).join('') + '</select>';
       h += '<div class="small">Si los nombres ya están en la reserva, elegí el mismo adulto que tiene al infante en el ' + (S ? 'PNR' : 'PNR (RT)') + '. Sin adulto asociado, Amadeus y Sabre no aceptan el DOCS del infante.</div></div>';
@@ -358,9 +408,10 @@
     h += '<div class="c4"><label>Vencimiento</label><input data-f="' + (uso === 'NI' ? 'ciVenc' : 'ppVenc') + '" data-fecha="venc" value="' + dmy(ve) + '" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" maxlength="11"></div>';
     h += '<div class="c6"><label>Mail</label><input type="email" data-f="email" value="' + esc(p.email) + '" autocomplete="off" spellcheck="false"></div>';
     h += '<div class="c6"><label>Celular</label><input type="tel" data-f="tel" value="' + esc(p.tel) + '" autocomplete="off" placeholder="598…"></div>';
-    h += '<div class="c4"><label>Tipo</label><select data-f="tipoManual"><option value="">Automático</option><option value="ADT"' + (p.tipoManual === 'ADT' ? ' selected' : '') + '>Adulto</option><option value="CHD"' + (p.tipoManual === 'CHD' ? ' selected' : '') + '>Niño (2 a 11)</option><option value="INF"' + (p.tipoManual === 'INF' ? ' selected' : '') + '>Infante (menos de 2)</option></select></div>';
-    h += '<div class="c4"><label>Título</label><select data-f="tituloManual"><option value="">Automático</option>' + ['MR', 'MRS', 'MS', 'MSTR', 'MISS'].map(function (t) { return '<option' + (p.tituloManual === t ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select></div>';
-    if (i.tipo !== 'INF') h += '<div class="c4"><label>N.º en la reserva</label><input data-f="numManual" value="' + esc(p.numManual) + '" inputmode="numeric" maxlength="2" placeholder="auto"></div>';
+    h += '<div class="c3"><label>Reserva</label><select data-f="grupo">' + ST.grupos.map(function (g) { return '<option value="' + g.id + '"' + (g.id === p.grupo ? ' selected' : '') + '>' + esc(etiquetaG(g)) + '</option>'; }).join('') + '<option value="nueva">+ Nueva reserva</option></select></div>';
+    h += '<div class="c3"><label>Tipo</label><select data-f="tipoManual"><option value="">Automático</option><option value="ADT"' + (p.tipoManual === 'ADT' ? ' selected' : '') + '>Adulto</option><option value="CHD"' + (p.tipoManual === 'CHD' ? ' selected' : '') + '>Niño (2 a 11)</option><option value="INF"' + (p.tipoManual === 'INF' ? ' selected' : '') + '>Infante (menos de 2)</option></select></div>';
+    h += '<div class="c3"><label>Título</label><select data-f="tituloManual"><option value="">Automático</option>' + ['MR', 'MRS', 'MS', 'MSTR', 'MISS'].map(function (t) { return '<option' + (p.tituloManual === t ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select></div>';
+    if (i.tipo !== 'INF') h += '<div class="c3"><label>N.º en la reserva</label><input data-f="numManual" value="' + esc(p.numManual) + '" inputmode="decimal" maxlength="4" placeholder="auto"' + (p.numPNR ? ' title="Tomado del PNR ' + esc(p.numPNR) + '"' : '') + '></div>';
     h += '</div><ul class="avisos" data-av></ul>';
     if (p.fotos.length) {
       h += '<div class="thumbs">';
@@ -376,12 +427,12 @@
   function meta(p, info) {
     var art = document.querySelector('.pax[data-id="' + p.id + '"]'); if (!art) return;
     var i = info[p.id] || { tipo: 'ADT' }, S = ST.gds === 'S';
-    var num = i.tipo === 'INF' ? (i.adulto ? 'INF · con ' + (S ? i.n + '.1' : 'P' + i.n) : 'INF') : (S ? i.n + '.1' : 'P' + i.n);
+    var num = i.tipo === 'INF' ? (i.adulto ? 'INF · con ' + numTxt(i) : 'INF') : numTxt(i);
     var tipoTxt = { ADT: 'Adulto', CHD: 'Niño', INF: 'Infante' }[i.tipo];
     var src = p.fuentes.filter(function (f, k, a) { return a.indexOf(f) === k; }).join(' · ');
     var ver = p.verificado === true ? '<span class="tag ok">✓ Documento leído y verificado</span>' : (p.verificado === false ? '<span class="tag warn">Leído con dudas</span>' : '');
     art.querySelector('[data-meta]').innerHTML = '<span class="num">' + num + '</span><span class="who">' + esc((L(p.apellidos) || '—') + ' / ' + (L(p.nombres) || '—')) + '</span><span class="tag">' + tipoTxt + (i.tit ? ' · ' + i.tit : '') + '</span>' + etiquetaValidez(p) + ver + (src ? '<span class="tag" title="Origen de los datos">' + esc(src) + '</span>' : '') + '<button type="button" class="s del" tabindex="-1" data-del="' + p.id + '" title="Quitar pasajero">Quitar</button>';
-    var e = art.querySelector('[data-edad]'); if (e) e.textContent = i.edad !== null && i.edad !== undefined ? i.edad + (i.edad === 1 ? ' año' : ' años') + (ST.fviaje ? ' al viajar' : '') : '';
+    var e = art.querySelector('[data-edad]'); if (e) e.textContent = i.edad !== null && i.edad !== undefined ? i.edad + (i.edad === 1 ? ' año' : ' años') + (conFecha(p) ? ' al viajar' : ' hoy') : '';
     var sx = art.querySelector('.sx'); if (sx) sx.classList.toggle('falta', !p.sexo);
     var sxn = art.querySelector('[data-sxn]'); if (sxn) { sxn.textContent = p.sexo && p.sexoNombre ? 'Según el nombre' : (!p.sexo && p.sexoDuda ? 'Nombre de ambos sexos' : ''); sxn.title = p.sexoNombre ? 'Deducido de ' + p.sexoNombre + ': si no corresponde, tocá la otra letra' : ''; }
     var todos = avisos(p, i), arriba = todos.filter(function (a) { return a.k === 'fuerte'; });
@@ -394,9 +445,12 @@
       var c = $('paxs');
       if (!ST.pax.length) c.innerHTML = '<div class="vacio"><b>Todavía no hay pasajeros.</b><br>Cargá la foto o el PDF del pasaporte, o pegá los datos en texto.<br><button type="button" class="s agregar" data-add tabindex="-1">+ Cargar un pasajero a mano</button></div>';
       else {
-        var orden = ULT.orden.map(function (x) { return x.p.id; });
-        var ps = ST.pax.slice().sort(function (a, b) { return orden.indexOf(a.id) - orden.indexOf(b.id); });
-        c.innerHTML = ps.map(function (p) { return tarjeta(p, info); }).join('') + '<button type="button" class="s agregar" data-add tabindex="-1">+ Agregar otro pasajero</button>' + DOCS_OPC;
+        var orden = ULT.orden.map(function (x) { return x.p.id; }), multi = ST.grupos.length > 1;
+        c.innerHTML = ST.grupos.map(function (g) {
+          var ps = ST.pax.filter(function (p) { return p.grupo === g.id; }).sort(function (a, b) { return orden.indexOf(a.id) - orden.indexOf(b.id); });
+          return '<section class="grupo" data-g="' + g.id + '">' + cabGrupo(g, ps.length, multi) + ps.map(function (p) { return tarjeta(p, info); }).join('')
+            + '<button type="button" class="s agregar" data-add="' + g.id + '" tabindex="-1">+ Agregar ' + (multi ? 'pasajero a ' + esc(etiquetaG(g)) : 'otro pasajero') + '</button></section>';
+        }).join('') + '<button type="button" class="s agregar nuevag" data-nuevag tabindex="-1">+ Nueva reserva (otro grupo de pasajeros)</button>' + DOCS_OPC;
       }
       firmaCartas = firma();
       $('npax').textContent = ST.pax.length ? '(' + ST.pax.length + ')' : '';
@@ -406,7 +460,7 @@
     if (todo && ultimo) { var a = document.querySelector('.pax[data-id="' + ultimo + '"]'); if (a) { a.classList.add('marca'); setTimeout(function () { a.classList.remove('marca'); }, 1300); } ultimo = null; }
   }
   var tRender = null;
-  function firma() { return JSON.stringify(ULT ? ULT.orden.map(function (x) { return [x.p.id, x.tipo, x.n, x.adulto ? 1 : 0]; }) : []); }
+  function firma() { return JSON.stringify(ULT ? ULT.orden.map(function (x) { return [x.p.id, x.p.grupo, x.tipo, x.n, x.adulto ? 1 : 0]; }) : []) + ST.grupos.length; }
   var firmaCartas = '';
   // Mientras se escribe sólo se actualizan encabezados, avisos y comandos (sin reconstruir las tarjetas)
   function cambio() {
@@ -416,20 +470,34 @@
   // Reconstruye las tarjetas (orden, tipo) conservando el campo donde estaba el cursor
   function rehacer() {
     var a = document.activeElement, art = a && a.closest && a.closest('.pax'), f = a && a.getAttribute && a.getAttribute('data-f');
-    var sxf = a && a.getAttribute && a.getAttribute('data-sx');
+    var sxf = a && a.getAttribute && a.getAttribute('data-sx'), gf = a && a.getAttribute && a.getAttribute('data-gf'), gsec = a && a.closest && a.closest('.grupo'), gidF = gsec && gsec.getAttribute('data-g');
     var id = art && art.getAttribute('data-id'), sel = a && typeof a.selectionStart === 'number' ? a.selectionStart : null;
     render(true);
     if (id && f) { var n = document.querySelector('.pax[data-id="' + id + '"] [data-f="' + f + '"]'); if (n) { n.focus(); try { if (sel !== null) n.setSelectionRange(sel, sel); } catch (e) { } } }
     else if (id && sxf) { var x = document.querySelector('.pax[data-id="' + id + '"] [data-sx="' + sxf + '"]'); if (x) x.focus(); }
+    else if (gf && gidF) { var y = document.querySelector('.grupo[data-g="' + gidF + '"] [data-gf="' + gf + '"]'); if (y) { y.focus(); try { if (sel !== null) y.setSelectionRange(sel, sel); } catch (e) { } } }
   }
   $('paxs').addEventListener('focusout', function () {
     setTimeout(function () { calcular(); if (firma() !== firmaCartas) rehacer(); }, 0);
+  });
+  $('paxs').addEventListener('input', function (e) {
+    var f = e.target.getAttribute && e.target.getAttribute('data-gf'); if (!f) return;
+    if (f === 'loc') { var c = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6); if (c !== e.target.value) e.target.value = c; }
+    else { mascaraFecha(e.target, e); e.target.classList.remove('mal'); }
+  });
+  $('paxs').addEventListener('change', function (e) {
+    var f = e.target.getAttribute && e.target.getAttribute('data-gf'); if (!f) return;
+    var g = grupo(e.target.closest('.grupo').getAttribute('data-g')), v = e.target.value.trim();
+    if (f === 'loc') { g.loc = v.toUpperCase(); rehacer(); return; }
+    var d = deDmy(v); if (v && !d) { e.target.classList.add('mal'); return; }
+    g[f] = d ? dmy(d) : ''; e.target.value = g[f];
+    rehacer();
   });
   function porId(id) { return ST.pax.filter(function (p) { return p.id === +id; })[0]; }
 
   // eventos de las tarjetas
   $('paxs').addEventListener('input', function (e) {
-    var f = e.target.getAttribute('data-f'), art = e.target.closest('.pax'); if (!f || !art) return;
+    var f = e.target.getAttribute('data-f'), art = e.target.closest('.pax'); if (!f || !art || f === 'grupo') return;
     var p = porId(art.getAttribute('data-id')), v = e.target.value;
     if (/^(nac|ppVenc|ciVenc)$/.test(f)) {
       mascaraFecha(e.target, e); v = e.target.value;
@@ -454,12 +522,19 @@
     }
     if (f === 'tel' && p.tel) { var t = TEXTO.telefono(p.tel, ST.codpais); if (t) { p.tel = t.num; e.target.value = t.num; if (t.aviso) toast(t.aviso); } }
     if (/^(nacionalidad|ppEmisor|ciEmisor)$/.test(f)) { e.target.value = p[f]; if (p[f] && !PAISES[p[f]]) toast('Código de país desconocido: usá el de 3 letras (URY, ARG, BRA…)'); }
+    if (f === 'grupo') {
+      var gN = e.target.value === 'nueva' ? nuevoGrupo() : grupo(e.target.value);
+      p.grupo = gN.id; if (p.infanteDe && porId(p.infanteDe) && porId(p.infanteDe).grupo !== gN.id) p.infanteDe = 0;
+      ST.pax.forEach(function (q) { if (q.infanteDe === p.id && q.grupo !== gN.id) q.infanteDe = 0; });
+      ultimo = p.id; render(true); toast('Pasó a ' + etiquetaG(gN)); return;
+    }
     if (f === 'docUsar' || f === 'tipoManual' || f === 'infanteDe') { p[f] = f === 'infanteDe' ? (+e.target.value || 0) : e.target.value; rehacer(); return; }
     cambio();
   });
   $('paxs').addEventListener('click', function (e) {
     var b = e.target.closest('button,img'); if (!b) return;
-    if (b.hasAttribute('data-add')) { agregarAMano(); return; }
+    if (b.hasAttribute('data-add')) { agregarAMano(+b.getAttribute('data-add') || 0); return; }
+    if (b.hasAttribute('data-nuevag')) { agregarAMano(nuevoGrupo().id); return; }
     var art = b.closest('.pax'), p = art && porId(art.getAttribute('data-id'));
     if (b.hasAttribute('data-del')) { ST.pax = ST.pax.filter(function (q) { return q !== p; }); render(true); toast('Pasajero quitado'); return; }
     if (b.hasAttribute('data-sx')) { elegirSexo(art, p, b.getAttribute('data-sx')); return; }
@@ -472,7 +547,7 @@
       p.avisosF.forEach(function (a, k) { if (/nombres y cuáles apellidos/.test(a.t)) p.ocultos[k] = 1; });
       cambio(); return;
     }
-    if (b.hasAttribute('data-irfv')) { $('opc').open = true; var fv = $('fviaje'); fv.scrollIntoView({ block: 'center', behavior: 'smooth' }); fv.focus({ preventScroll: true }); return; }
+    if (b.hasAttribute('data-irfv')) { var fv = document.querySelector('.grupo[data-g="' + p.grupo + '"] [data-gf="ida"]'); if (fv) { fv.scrollIntoView({ block: 'center', behavior: 'smooth' }); fv.focus({ preventScroll: true }); } return; }
     if (b.hasAttribute('data-oc')) { p.ocultos[+b.getAttribute('data-oc')] = 1; render(false); return; }
     if (b.hasAttribute('data-ver')) { var f = p.fotos[+b.getAttribute('data-ver')]; verImagen(f.lienzo && LIENZOS[f.lienzo] ? LIENZOS[f.lienzo] : null, f.mrz || f.foto); return; }
     if (b.hasAttribute('data-rel')) { zonaManual(b.getAttribute('data-rel'), p.id); return; }
@@ -481,36 +556,95 @@
   // comandos: copiar, tandas y pasos
   $('out').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
-    if (b.hasAttribute('data-t')) { var t = b.getAttribute('data-t'); copiar(t).then(function () { ST.hechos[t] = 1; b.classList.add('hecho'); b.querySelector('.cp').textContent = '✓ copiado'; toast('Copiado: ' + t.slice(0, 40)); }); return; }
+    if (b.hasAttribute('data-t')) { var t = b.getAttribute('data-t'), g0 = b.getAttribute('data-g'); copiar(t).then(function () { ST.hechos[g0 + '|' + t] = 1; b.classList.add('hecho'); b.querySelector('.cp').textContent = '✓ copiado'; toast('Copiado: ' + t.slice(0, 40)); }); return; }
     if (b.hasAttribute('data-tanda')) {
-      var ls = TANDAS[b.getAttribute('data-tanda')] || [], lim = LIMITE[ST.gds] || { sep: '\n' }, S = ST.gds === 'S';
-      copiar(ls.join(lim.sep)).then(function () { ls.forEach(function (x) { ST.hechos[x] = 1; }); renderOut(); toast(S ? (ls.length === 1 ? '1 comando copiado' : ls.length + ' comandos copiados en una entrada (con §)') : (ls.length === 1 ? '1 línea copiada' : ls.length + ' líneas copiadas')); });
+      var td = TANDAS[b.getAttribute('data-tanda')] || { ls: [] }, ls = td.ls, lim = LIMITE[ST.gds] || { sep: '\n' }, S = ST.gds === 'S';
+      copiar(ls.join(lim.sep)).then(function () { ls.forEach(function (x) { ST.hechos[td.g + '|' + x] = 1; }); renderOut(); toast(S ? (ls.length === 1 ? '1 comando copiado' : ls.length + ' comandos copiados en una entrada (con §)') : (ls.length === 1 ? '1 línea copiada' : ls.length + ' líneas copiadas')); });
       return;
     }
-    if (b.hasAttribute('data-r')) { ST.reserva = b.getAttribute('data-r'); if (ST.pax.some(function (q) { return ULT && ULT.orden.some(function (x) { return x.p.id === q.id && x.tipo === 'INF'; }); })) rehacer(); else renderOut(); return; }
-    if (b.id === 'nomListos') {
-      ULT.orden.forEach(function (x) { if (x.tipo !== 'INF' || x.adulto) { if (L(x.p.apellidos) && L(x.p.nombres)) ST.cargados[x.p.id] = 1; } });
+    if (b.hasAttribute('data-r')) { grupo(b.getAttribute('data-g')).estado = b.getAttribute('data-r'); rehacer(); return; }
+    if (b.hasAttribute('data-nomlistos')) {
+      var U = GR[+b.getAttribute('data-nomlistos')];
+      if (U) U.orden.forEach(function (x) { if (x.tipo !== 'INF' || x.adulto) { if (L(x.p.apellidos) && L(x.p.nombres)) ST.cargados[x.p.id] = 1; } });
       renderOut(); toast('Paso 2 habilitado'); return;
     }
-    if (b.id === 'nomVolver') { ST.cargados = {}; renderOut(); return; }
+    if (b.hasAttribute('data-nomvolver')) { var gv = +b.getAttribute('data-nomvolver'); ST.pax.forEach(function (p) { if (p.grupo === gv) delete ST.cargados[p.id]; }); renderOut(); return; }
   });
 
   // ---------- texto ----------
+  // ---------- reservas (PNR) ----------
+  var TIT_SEXO = { MR: 'M', MSTR: 'M', MSTER: 'M', SR: 'M', MRS: 'F', MS: 'F', MISS: 'F', SRA: 'F', SRTA: 'F' };
+  function coincide(p, ape, nom) {
+    var A = L(p.apellidos).replace(/ /g, ''), B = L(ape).replace(/ /g, '');
+    var n1 = L(p.nombres).split(' ')[0], n2 = L(nom).split(' ')[0];
+    var apOk = A && B && (A === B || A.indexOf(B) === 0 || B.indexOf(A) === 0);
+    var nOk = n1 && n2 && (n1 === n2 || (n1.length >= 3 && n2.length >= 3 && (n1.indexOf(n2) === 0 || n2.indexOf(n1) === 0)));
+    return apOk && nOk;
+  }
+  function leerPNR(texto) {
+    var rs = PNR.parse(texto);
+    if (!rs.length) { toast('No encontré pasajeros en el PNR'); return false; }
+    var gdsP = rs[0].gds, cambioGds = false;
+    if (rs.every(function (r) { return r.gds === gdsP; }) && gdsP !== ST.gds) { ST.gds = gdsP; guardarConf(); sincOpc(); cambioGds = true; }
+    var usados = {}, resumen = [];
+    rs.forEach(function (r) {
+      var g = (r.loc && ST.grupos.filter(function (x) { return x.loc === r.loc; })[0]) || nuevoGrupo();
+      g.loc = r.loc; g.pnr = true; g.estado = 'existe';
+      if (r.ida) g.ida = dmy(r.ida); if (r.vuelta) g.vuelta = dmy(r.vuelta);
+      var porNum = {}, nuevos = 0, ya = 0;
+      function tomar(x, tipo) {
+        // pasajero ya cargado con ese nombre (sin repetir uno ya asignado a esta lectura) o uno nuevo con los datos del PNR
+        var p = ST.pax.filter(function (q) { return !usados[q.id] && coincide(q, x.apellidos, x.nombres); })
+          .sort(function (a, b) { return (grupo(a.grupo).pnr ? 1 : 0) - (grupo(b.grupo).pnr ? 1 : 0); })[0];
+        if (p) ya++;
+        else { p = nuevo({ apellidos: L(x.apellidos), nombres: L(x.nombres), fuentes: ['PNR' + (r.loc ? ' ' + r.loc : '')], grupo: g.id }); ST.pax.push(p); nuevos++; }
+        usados[p.id] = 1; p.grupo = g.id;
+        var sx = TIT_SEXO[x.titulo];
+        if (sx && (!p.sexo || p.sexoNombre)) { p.sexo = sx; p.sexoNombre = ''; p.sexoDuda = ''; }
+        if (!p.sexo && !p.sexoDuda) deducirSexo(p);
+        if (x.nac && !p.nac) p.nac = x.nac;
+        if (tipo && !p.nac) p.tipoManual = tipo;   // sin fecha de nacimiento, el tipo es el del PNR
+        return p;
+      }
+      r.pax.filter(function (x) { return x.tipo !== 'INF'; }).forEach(function (x) {
+        var p = tomar(x, x.tipo === 'CHD' ? 'CHD' : '');
+        p.numManual = r.gds === 'S' ? x.num + '.' + x.sub : String(x.num); p.numPNR = r.loc || 'PNR';
+        porNum[x.num + '.' + x.sub] = p;
+        if (x.inf) { var q = tomar(x.inf, 'INF'); q.infanteDe = p.id; q.numManual = ''; }
+      });
+      r.pax.filter(function (x) { return x.tipo === 'INF'; }).forEach(function (x) {   // Sabre: infantes en su propio renglón
+        var q = tomar(x, 'INF'); q.numManual = '';
+        if (x.adulto && porNum[x.adulto]) q.infanteDe = porNum[x.adulto].id;
+      });
+      resumen.push((r.loc || 'Reserva') + ': ' + (ya + nuevos) + (ya + nuevos === 1 ? ' pasajero' : ' pasajeros') + (r.ida ? ', ida ' + dmy(r.ida).slice(0, 5) : '') + (r.vuelta ? ', vuelta ' + dmy(r.vuelta).slice(0, 5) : ''));
+    });
+    render(true);
+    toast((rs.length === 1 ? resumen[0] : rs.length + ' reservas leídas') + (cambioGds ? ' · se cambió a ' + (ST.gds === 'S' ? 'Sabre' : 'Amadeus') : ''));
+    return true;
+  }
+  $('leerPnr').addEventListener('click', function () {
+    var t = $('pnrTxt').value; if (!t.trim()) { toast('Pegá primero el PNR en el recuadro'); return; }
+    leerPNR(t);
+  });
+
   function leerTexto() {
     var t = $('txt').value; if (!t.trim()) { toast('Pegá primero los datos en el recuadro'); return; }
+    if (PNR.detectar(t)) { $('pnrTxt').value = ($('pnrTxt').value.trim() ? $('pnrTxt').value.replace(/\s+$/, '') + '\n' : '') + t.trim(); leerPNR(t); return; }
     var r = TEXTO.parse(t, { codPais: ST.codpais }), n = 0, antes = ST.pax.length;
-    r.pasajeros.forEach(function (x) { var q = x.mrz ? desdeMRZ(x.mrz, 'MRZ pegada') : desdeTexto(x, 'texto'); if (fusionar(q)) n++; });
+    var tocados = {};
+    r.pasajeros.forEach(function (x) { var q = x.mrz ? desdeMRZ(x.mrz, 'MRZ pegada') : desdeTexto(x, 'texto'), e = fusionar(q); if (e) { n++; tocados[e.grupo] = 1; } });
+    if (!Object.keys(tocados).length) ST.grupos.forEach(function (g) { tocados[g.id] = 1; });
     // un solo mail o celular en el texto: vale para todos los pasajeros (también los cargados antes)
     var c = r.comun || {}, conMail = 0, conTel = 0;
     if (ST.pax.length > 1) ST.pax.forEach(function (p) {
-      if (CMD.tipoPax(p, refViaje()) === 'INF') return;   // los infantes no llevan contactos
+      if (!tocados[p.grupo] || CMD.tipoPax(p, refViaje(p)) === 'INF') return;   // los infantes no llevan contactos; sólo en las reservas del texto
       if (c.email && !p.email) { p.email = c.email; conMail++; }
       if (c.telefono && !p.tel) { var tt = TEXTO.telefono(c.telefono, ST.codpais); p.tel = tt ? tt.num : c.telefono; conTel++; }
     });
     if (!n && !conMail && !conTel) { toast('No encontré datos de pasajeros en el texto'); return; }
     var nuevos = ST.pax.length - antes;
     render(true);
-    var msj = nuevos ? (nuevos === 1 ? 'Se agregó 1 pasajero' : 'Se agregaron ' + nuevos + ' pasajeros') : 'Datos sumados al pasajero existente';
+    var msj = nuevos ? (nuevos === 1 ? 'Se agregó 1 pasajero' : 'Se agregaron ' + nuevos + ' pasajeros') : (n > 1 ? 'Datos sumados a ' + n + ' pasajeros ya cargados' : 'Datos sumados al pasajero ya cargado');
     var dig = function (v) { return String(v || '').replace(/\D/g, ''); };
     var nM = c.email ? ST.pax.filter(function (p) { return (p.email || '').toLowerCase() === c.email.toLowerCase(); }).length : 0;
     var nT = c.telefono ? ST.pax.filter(function (p) { return p.tel && (dig(p.tel) === dig(c.telefono) || dig(p.tel).slice(-8) === dig(c.telefono).slice(-8)); }).length : 0;
@@ -519,11 +653,11 @@
   }
   $('leer').addEventListener('click', leerTexto);
   $('txt').addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); leerTexto(); } });
-  function agregarAMano() {
-    var p = nuevo({ fuentes: ['a mano'] }); ST.pax.push(p); ultimo = p.id; render(true);
+  function agregarAMano(g) {
+    var p = nuevo({ fuentes: ['a mano'], grupo: g || (ST.grupos[ST.grupos.length - 1] || {}).id }); ST.pax.push(p); ultimo = p.id; render(true);
     var i = document.querySelector('.pax[data-id="' + p.id + '"] [data-f=apellidos]'); if (i) { i.focus(); i.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
   }
-  $('manual').addEventListener('click', agregarAMano);
+  $('manual').addEventListener('click', function () { agregarAMano(); });
   function pintarSexo(art, p, foco) {
     var hay = art.querySelector('[data-sx="' + (p.sexo || 'M') + '"]');
     art.querySelectorAll('[data-sx]').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-sx') === p.sexo); x.tabIndex = x === hay ? 0 : -1; });
@@ -551,7 +685,7 @@
       return;
     }
     clearTimeout(b._t); delete b.dataset.ok; b.textContent = 'Limpiar todo';
-    ST.pax = []; ST.hechos = {}; ST.cargados = {}; ST.reserva = 'nueva'; $('txt').value = ''; $('cola').innerHTML = ''; LIENZOS = {}; render(true); toast('Se borraron los pasajeros');
+    ST.pax = []; ST.hechos = {}; ST.cargados = {}; ST.grupos = [{ id: gid++, loc: '', ida: '', vuelta: '', estado: 'nueva', pnr: false }]; $('txt').value = ''; $('cola').innerHTML = ''; LIENZOS = {}; render(true); toast('Se borraron los pasajeros');
   });
 
   // ---------- archivos ----------
@@ -586,6 +720,15 @@
     render(true);
   }
   var colaTrabajo = Promise.resolve();
+  // Imagen o PDF sin zona MRZ: se lee el texto (captura de WhatsApp, mail, ficha) y, si trae pasajeros, se cargan
+  async function leerComoTexto(lienzos, it) {
+    var textos = [];
+    for (var k = 0; k < lienzos.length; k++) { it.estado('No es un documento: leyendo el texto…'); textos.push(TEXTO.arreglarOCR(await OCR.leerTextoImagen(lienzos[k], it.estado))); }
+    var t = textos.join('\n\n');
+    if (!TEXTO.parse(t, { codPais: ST.codpais }).pasajeros.length) return false;
+    sumarAlCampo(t); it.fin('ok', '✓ Texto leído'); leerTexto();
+    return true;
+  }
   function procesar(files) {
     files = Array.prototype.slice.call(files || []).filter(function (f) { return /^image\//.test(f.type) || /pdf$/i.test(f.type) || /\.(pdf|jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(f.name); });
     if (!files.length) { toast('Elegí imágenes (JPG, PNG) o PDF'); return; }
@@ -607,11 +750,19 @@
               else if (tx.length) { tx.forEach(function (x) { fusionar(desdeTexto(x, etq)); }); algo = true; }
             }
             if (algo) { it.fin('ok', '✓ Leído'); render(true); }
-            else agregarLectura({ mrz: null }, pags[0].canvas, nombre, it);
+            else if (!(await leerComoTexto(pags.map(function (x) { return x.canvas; }), it))) agregarLectura({ mrz: null }, pags[0].canvas, nombre, it);
           } else {
             it.estado('Abriendo…');
             var cv = await OCR.cargarImagen(f);
-            var res = await OCR.leerCanvas(cv, it.estado);
+            // 1) zona MRZ localizada (rápido); 2) si no aparece, el texto de la imagen: si trae pasajeros y no parece
+            // un documento, se cargan; 3) si no, la imagen entera en 4 orientaciones (foto torcida de un pasaporte)
+            var res = await OCR.leerCanvas(cv, it.estado, { sinB: true });
+            if (!res.mrz) {
+              it.estado('Leyendo el texto de la imagen…');
+              var tx = TEXTO.arreglarOCR(await OCR.leerTextoImagen(cv, it.estado));
+              if (!pareceMRZ(tx) && TEXTO.parse(tx, { codPais: ST.codpais }).pasajeros.length) { sumarAlCampo(tx); it.fin('ok', '✓ Texto leído'); leerTexto(); return; }
+              res = await OCR.leerCanvas(cv, it.estado, { soloB: true });
+            }
             agregarLectura(res, cv, nombre, it);
           }
         } catch (err) {
@@ -674,12 +825,35 @@
   }
   $('txtArch').addEventListener('click', function () { $('fileTxt').click(); });
   $('fileTxt').addEventListener('change', function () { procesarDatos(this.files); this.value = ''; });
-  $('txt').addEventListener('paste', function (e) {
-    var cd = e.clipboardData; if (!cd) return;
-    if ((cd.getData('text/plain') || '').trim()) return;   // si hay texto (por ej. celdas de Excel), se pega el texto
+  // Archivos (imagen o PDF) del portapapeles, salvo que lo pegado sea texto de verdad: celdas de Excel (traen además
+  // una imagen de la tabla) o un mensaje. Una imagen copiada del navegador trae a veces su dirección como texto.
+  function pegado(cd) {
     var fs = [];
     for (var i = 0; cd.items && i < cd.items.length; i++) if (cd.items[i].kind === 'file') { var f = cd.items[i].getAsFile(); if (f) fs.push(f); }
-    if (fs.length) { e.preventDefault(); e.stopPropagation(); procesarDatos(fs); }
+    if (!fs.length) return null;
+    var tx = (cd.getData('text/plain') || '').trim(), html = cd.getData('text/html') || '';
+    var esImagen = !tx || /^(https?:|blob:|data:|file:)\S*$/i.test(tx) || (/<img/i.test(html) && !/<table/i.test(html) && !/[\t\n]/.test(tx) && tx.length < 200);
+    return esImagen ? fs : null;
+  }
+  $('txt').addEventListener('paste', function (e) {
+    var cd = e.clipboardData; if (!cd) return;
+    var fs = pegado(cd);
+    if (fs) { e.preventDefault(); e.stopPropagation(); procesarDatos(fs); }
+  });
+  // Botón «Pegar captura»: lee el portapapeles (el navegador puede pedir permiso la primera vez)
+  $('txtPegar').addEventListener('click', async function () {
+    if (!navigator.clipboard || !navigator.clipboard.read) { $('txt').focus(); toast('Hacé clic en el recuadro y pegá con Ctrl+V'); return; }
+    try {
+      var items = await navigator.clipboard.read(), fs = [], tx = '';
+      for (var i = 0; i < items.length; i++) {
+        var tipo = items[i].types.filter(function (t) { return /^image\//.test(t); })[0];
+        if (tipo) { var bl = await items[i].getType(tipo); fs.push(new File([bl], 'captura.' + tipo.split('/')[1], { type: tipo })); }
+        else if (items[i].types.indexOf('text/plain') >= 0) tx += await (await items[i].getType('text/plain')).text();
+      }
+      if (fs.length) procesarDatos(fs);
+      else if (tx.trim()) { sumarAlCampo(tx); leerTexto(); }
+      else toast('No hay una captura ni texto copiados');
+    } catch (err) { $('txt').focus(); toast('El navegador no dejó leer lo copiado: hacé clic en el recuadro y pegá con Ctrl+V'); }
   });
   ['dragenter', 'dragover'].forEach(function (t) { $('txt').addEventListener(t, function (e) { if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') >= 0) { e.preventDefault(); e.stopPropagation(); $('txt').classList.add('sobre'); } }); });
   ['dragleave', 'drop'].forEach(function (t) { $('txt').addEventListener(t, function () { $('txt').classList.remove('sobre'); }); });
@@ -695,13 +869,12 @@
   $('drop').addEventListener('drop', function (e) { e.preventDefault(); procesar(e.dataTransfer.files); });
   window.addEventListener('dragover', function (e) { e.preventDefault(); });
   window.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer && e.dataTransfer.files.length) procesar(e.dataTransfer.files); });
+  // Pegar en cualquier parte de la página: si es la foto de un pasaporte o cédula se lee la zona MRZ;
+  // si no, se lee el texto de la captura. Si lo copiado es texto, se pega normalmente.
   document.addEventListener('paste', function (e) {
-    // pegando en un campo con texto en el portapapeles (por ej. celdas de Excel, que traen además una imagen): se pega el texto
-    var ed = e.target && e.target.closest && e.target.closest('input,textarea,[contenteditable]');
-    if (ed && e.clipboardData && (e.clipboardData.getData('text/plain') || '').trim()) return;
-    var it = e.clipboardData && e.clipboardData.items, fs = [];
-    for (var i = 0; it && i < it.length; i++) if (it[i].kind === 'file') { var f = it[i].getAsFile(); if (f) fs.push(f); }
-    if (fs.length) { e.preventDefault(); procesar(fs); }
+    var cd = e.clipboardData; if (!cd) return;
+    var fs = pegado(cd); if (!fs) return;
+    e.preventDefault(); procesar(fs);
   });
 
   // ---------- modal: ver imagen / marcar zona ----------
@@ -764,17 +937,12 @@
   // ---------- opciones ----------
   function sincOpc() {
     document.querySelectorAll('#gds button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-g') === ST.gds); });
-    $('docsComp').checked = !!ST.docsComp; $('titF').value = ST.titF; $('codpais').value = ST.codpais; $('fviaje').value = ST.fviaje;
+    $('docsComp').checked = !!ST.docsComp; $('titF').value = ST.titF; $('codpais').value = ST.codpais;
   }
   $('gds').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; ST.gds = b.getAttribute('data-g'); guardarConf(); sincOpc(); render(true); });
   $('docsComp').addEventListener('change', function () { ST.docsComp = this.checked; guardarConf(); render(false); });
   $('titF').addEventListener('change', function () { ST.titF = this.value; guardarConf(); render(false); });
   $('codpais').addEventListener('change', function () { ST.codpais = this.value.replace(/\D/g, '') || '598'; this.value = ST.codpais; guardarConf(); });
-  $('fviaje').addEventListener('input', function (e) { mascaraFecha(this, e); this.classList.remove('mal'); });
-  $('fviaje').addEventListener('change', function () {
-    var f = deDmy(this.value); this.classList.toggle('mal', !!this.value.trim() && !f);
-    if (f || !this.value.trim()) { ST.fviaje = f ? dmy(f) : ''; this.value = ST.fviaje; render(true); }
-  });
   sincOpc(); render(true);
   // precarga del lector en segundo plano cuando la página queda quieta
   if ('requestIdleCallback' in window) requestIdleCallback(function () { OCR.motor().catch(function () { }); }, { timeout: 6000 });
