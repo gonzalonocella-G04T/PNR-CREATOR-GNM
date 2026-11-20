@@ -45,5 +45,13 @@ var pe = TEXTO.parse('pedro porro lopez\n05-10-1962\npasaporte uruguayo d345678\
 eq('una cosa por línea, en minúscula', pe.length === 1 && [pe[0].apellidos, pe[0].nombres, pe[0].nacimiento.d + '/' + pe[0].nacimiento.m + '/' + pe[0].nacimiento.y, pe[0].pasaporte, pe[0].nacionalidad, pe[0].email, pe[0].telefono], ['PORRO LOPEZ', 'PEDRO', '5/10/1962', 'D345678', 'URY', 'pplopez@gmail.com', '59898653333']);
 eq('celular con 598 y una cifra de menos', TEXTO.telefono('5989865333').num, '5989865333');
 eq('saludo no es nombre', TEXTO.parse('hola te paso los datos\njuan perez\n12/04/1978').pasajeros.map(function (p) { return p.apellidos + '/' + p.nombres; }), ['PEREZ/JUAN']);
+// Máscara de fechas: las barras se ponen solas al tipear
+vm.runInThisContext(fn('mascaraFecha'));
+function tipea(txt) { var el = { value: '', selectionStart: 0, setSelectionRange: function (a) { this.selectionStart = a; } };
+  txt.split('').forEach(function (c) { if (c === '<') { el.value = el.value.slice(0, -1); el.selectionStart = el.value.length; mascaraFecha(el, { inputType: 'deleteContentBackward' }); }
+    else { el.value += c; el.selectionStart = el.value.length; mascaraFecha(el, { inputType: 'insertText' }); } });
+  return el.value; }
+eq('máscara de fechas', ['05101962', '051062', '5/10/1962', '5-10-62', '05/10/1962', '05<', '0510<', '0510<<', '05101962<<<<', '051019621', '05NOV86', '5.3.1990'].map(tipea),
+  ['05/10/1962', '05/10/62', '05/10/1962', '05/10/62', '05/10/1962', '05', '05/10', '05/1', '05/10', '05/10/1962', '05NOV86', '05/03/1990']);
 console.log(fallas ? '\n' + fallas + ' pruebas fallaron' : '\nTodo bien');
 process.exit(fallas ? 1 : 0);

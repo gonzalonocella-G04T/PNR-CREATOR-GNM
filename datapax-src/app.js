@@ -19,6 +19,27 @@
     var t = new Date(f.y, f.m - 1, f.d);
     return t.getFullYear() === f.y && t.getMonth() === f.m - 1 && t.getDate() === f.d ? f : null;
   }
+  // Máscara de fecha: pone las barras solas mientras se escribe (05101962 → 05/10/1962).
+  // Acepta separadores escritos a mano (5/10/62, 5-10-1962) y no actúa con texto (05NOV86) ni al borrar.
+  function mascaraFecha(el, ev) {
+    var v = el.value, alFinal = el.selectionStart === v.length;
+    if (!alFinal) return;
+    if (/[^\d\/\-. ]/.test(v)) {   // con letras (05NOV86) no se enmascara; se saca la barra que se puso sola
+      var sl = v.replace(/^(\d{1,2})\/(?=[A-Za-z])/, '$1');
+      if (sl !== v) { el.value = sl; try { el.setSelectionRange(sl.length, sl.length); } catch (e) { } }
+      return;
+    }
+    var borrando = ev && /^delete/.test(ev.inputType || '');
+    var segs = v.replace(/[\-. ]/g, '/').split('/'), dig = '';
+    segs.forEach(function (sg, k) { if (k < segs.length - 1 && k < 2 && sg.length === 1) sg = '0' + sg; dig += sg; });
+    dig = dig.replace(/\D/g, '').slice(0, 8);
+    var out = dig.slice(0, 2);
+    if (dig.length > 2) out += '/' + dig.slice(2, 4);
+    if (dig.length > 4) out += '/' + dig.slice(4, 8);
+    if (!borrando && (dig.length === 2 || dig.length === 4)) out += '/';
+    if (out !== v) { el.value = out; try { el.setSelectionRange(out.length, out.length); } catch (e) { } }
+  }
+  function cifras(v) { return String(v || '').replace(/\D/g, '').length; }
   function deIso(s) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? { y: +m[1], m: +m[2], d: +m[3] } : null; }
   function dmy(d) { return d ? (d.d < 10 ? '0' : '') + d.d + '/' + (d.m < 10 ? '0' : '') + d.m + '/' + d.y : ''; }
   function fecha(d) { return d ? new Date(d.y, d.m - 1, d.d) : null; }
@@ -385,10 +406,11 @@
     var f = e.target.getAttribute('data-f'), art = e.target.closest('.pax'); if (!f || !art) return;
     var p = porId(art.getAttribute('data-id')), v = e.target.value;
     if (/^(nac|ppVenc|ciVenc)$/.test(f)) {
+      mascaraFecha(e.target, e); v = e.target.value;
       var fd = deDmy(v);
       // año de 2 cifras en nacimiento: siglo pasado si quedaría en el futuro
       if (fd && f === 'nac' && /\d{2}$/.test(v.trim()) && !/\d{4}$/.test(v.trim()) && new Date(fd.y, fd.m - 1, fd.d) > new Date()) fd.y -= 100;
-      p[f] = fd; e.target.classList.toggle('mal', !!v.trim() && !fd);
+      p[f] = fd; e.target.classList.toggle('mal', !fd && (cifras(v) >= 8 || /[A-Za-z]{3}\d{2,4}$/.test(v)));
     }
     else if (/^(nacionalidad|ppEmisor|ciEmisor)$/.test(f)) p[f] = v.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
     else if (f === 'infanteDe') p[f] = +v || 0;
@@ -399,7 +421,10 @@
     var f = e.target.getAttribute('data-f'), art = e.target.closest('.pax'); if (!f || !art) return;
     var p = porId(art.getAttribute('data-id'));
     if (f === 'apellidos' || f === 'nombres') { p[f] = L(e.target.value); e.target.value = p[f]; }
-    if (/^(nac|ppVenc|ciVenc)$/.test(f) && p[f]) { e.target.value = dmy(p[f]); e.target.classList.remove('mal'); }
+    if (/^(nac|ppVenc|ciVenc)$/.test(f)) {
+      if (p[f]) { e.target.value = dmy(p[f]); e.target.classList.remove('mal'); }
+      else e.target.classList.toggle('mal', !!e.target.value.trim());
+    }
     if (f === 'tel' && p.tel) { var t = TEXTO.telefono(p.tel, ST.codpais); if (t) { p.tel = t.num; e.target.value = t.num; if (t.aviso) toast(t.aviso); } }
     if (/^(nacionalidad|ppEmisor|ciEmisor)$/.test(f)) { e.target.value = p[f]; if (p[f] && !PAISES[p[f]]) toast('Código de país desconocido: usá el de 3 letras (URY, ARG, BRA…)'); }
     if (f === 'docUsar' || f === 'tipoManual' || f === 'infanteDe') { rehacer(); return; }
@@ -617,6 +642,7 @@
   $('docsComp').addEventListener('change', function () { ST.docsComp = this.checked; guardarConf(); render(false); });
   $('titF').addEventListener('change', function () { ST.titF = this.value; guardarConf(); render(false); });
   $('codpais').addEventListener('change', function () { ST.codpais = this.value.replace(/\D/g, '') || '598'; this.value = ST.codpais; guardarConf(); });
+  $('fviaje').addEventListener('input', function (e) { mascaraFecha(this, e); this.classList.remove('mal'); });
   $('fviaje').addEventListener('change', function () {
     var f = deDmy(this.value); this.classList.toggle('mal', !!this.value.trim() && !f);
     if (f || !this.value.trim()) { ST.fviaje = f ? dmy(f) : ''; this.value = ST.fviaje; render(true); }
