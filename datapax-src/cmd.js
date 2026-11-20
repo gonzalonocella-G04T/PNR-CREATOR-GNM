@@ -41,13 +41,17 @@ var CMD = (function () {
     var con = ps.filter(function (x) { return x.tipo !== 'INF'; }), inf = ps.filter(function (x) { return x.tipo === 'INF'; });
     // Amadeus muestra los nombres por orden alfabético de apellido; se cargan en ese mismo orden
     con.sort(function (a, b) { return cmp(a.p, b.p); });
-    con.forEach(function (x, i) { x.n = x.p.numManual ? +x.p.numManual : i + 1; });
+    con.forEach(function (x, i) {
+      var nm = String(x.p.numManual || '').trim();
+      x.n = nm ? parseInt(nm, 10) : i + 1;
+      if (/^\d+\.\d$/.test(nm)) x.nS = nm;   // Sabre: 1.2 = segundo nombre del campo 1
+    });
     var adultos = con.filter(function (x) { return x.tipo === 'ADT'; }), avisos = [];
     inf.forEach(function (x) {
       var a = x.p.infanteDe ? adultos.filter(function (y) { return y.p.id === x.p.infanteDe; })[0] : null;
       if (!a) a = adultos.filter(function (y) { return !y.inf && y.p.apellidos && x.p.apellidos && (' ' + x.p.apellidos + ' ').indexOf(' ' + y.p.apellidos.split(' ')[0] + ' ') >= 0; })[0];
       if (!a) a = adultos.filter(function (y) { return !y.inf; })[0];
-      if (a && !a.inf) { a.inf = x; x.adulto = a; x.n = a.n; }
+      if (a && !a.inf) { a.inf = x; x.adulto = a; x.n = a.n; x.nS = a.nS; }
       else avisos.push('El infante ' + (x.p.apellidos || '') + ' ' + (x.p.nombres || '') + ' no tiene un adulto libre con quien viajar');
     });
     return { con: con, inf: inf, todos: con.concat(inf), avisos: avisos, multi: con.length > 1 || inf.length > 0 };
@@ -66,7 +70,7 @@ var CMD = (function () {
     var P = preparar(lista, o), S = o.gds === 'S', out = { nombres: [], docs: [], foid: [], ctc: [], extra: [] };
     function L(sec, t, x, nota) { out[sec].push({ t: t, id: x && x.p.id, nota: nota || '' }); }
     function F(sec, x, que) { out[sec].push({ t: null, id: x && x.p.id, falta: que }); }
-    function asoc(n) { return S ? '-' + n + '.1' : (P.multi ? '/P' + n : ''); }
+    function asoc(x) { return S ? '-' + (x.nS || x.n + '.1') : (P.multi ? '/P' + x.n : ''); }
     var ap = function (x) { return x.p.apellidos || ''; }, no = function (x) { return x.p.nombres || ''; };
 
     // ---- nombres ----
@@ -102,13 +106,13 @@ var CMD = (function () {
       var nm = no(x).split(' '), first = nm[0], mid = nm.slice(1).join(' ');
       if (S) {
         var nmS = ap(x) + '/' + first + (mid ? '/' + mid : '');
-        if (comp) L('docs', '3DOCS/' + d.docs + '/' + d.em + '/' + d.num + '/' + (p.nacionalidad || d.em) + '/' + f(p.nac) + '/' + g + '/' + f(d.venc) + '/' + nmS + asoc(x.n), x);
-        else L('docs', '3DOCS/DB/' + f(p.nac) + '/' + g + '/' + nmS + asoc(x.n), x);
-        if (x.tipo === 'CHD') L('docs', '3CHLD/' + f(p.nac) + asoc(x.n), x, 'Niño');
-        if (x.tipo === 'INF') L('docs', '3INFT/' + ap(x) + '/' + no(x) + '/' + f(p.nac) + asoc(x.n), x, 'Infante');
+        if (comp) L('docs', '3DOCS/' + d.docs + '/' + d.em + '/' + d.num + '/' + (p.nacionalidad || d.em) + '/' + f(p.nac) + '/' + g + '/' + f(d.venc) + '/' + nmS + asoc(x), x);
+        else L('docs', '3DOCS/DB/' + f(p.nac) + '/' + g + '/' + nmS + asoc(x), x);
+        if (x.tipo === 'CHD') L('docs', '3CHLD/' + f(p.nac) + asoc(x), x, 'Niño');
+        if (x.tipo === 'INF') L('docs', '3INFT/' + ap(x) + '/' + no(x) + '/' + f(p.nac) + asoc(x), x, 'Infante');
       } else {
-        if (comp) L('docs', 'SR DOCS HK1-' + d.docs + '-' + d.em + '-' + d.num + '-' + (p.nacionalidad || d.em) + '-' + f(p.nac) + '-' + g + '-' + f(d.venc) + '-' + ap(x) + '-' + no(x) + asoc(x.n), x);
-        else L('docs', 'SR DOCS HK1-----' + f(p.nac) + '-' + g + '--' + ap(x) + '-' + no(x) + asoc(x.n), x);
+        if (comp) L('docs', 'SR DOCS HK1-' + d.docs + '-' + d.em + '-' + d.num + '-' + (p.nacionalidad || d.em) + '-' + f(p.nac) + '-' + g + '-' + f(d.venc) + '-' + ap(x) + '-' + no(x) + asoc(x), x);
+        else L('docs', 'SR DOCS HK1-----' + f(p.nac) + '-' + g + '--' + ap(x) + '-' + no(x) + asoc(x), x);
       }
     });
 
@@ -117,7 +121,7 @@ var CMD = (function () {
       var d = docData(x.p), em2 = pais2(d.em);
       var fl = falta(x, [['número de documento', d.num], ['país del documento', em2]]);
       if (fl) { F('foid', x, fl); return; }
-      L('foid', (S ? '3FOID/' : 'SR FOID-') + d.foid + em2 + d.num + asoc(x.n), x);
+      L('foid', (S ? '3FOID/' : 'SR FOID-') + d.foid + em2 + d.num + asoc(x), x);
     });
 
     // ---- contactos ----
@@ -138,8 +142,8 @@ var CMD = (function () {
     }
     P.con.forEach(function (x) {
       var e = cE || x.p.email, t = cT || x.p.tel;
-      if (e && (S || !cE)) linea('email', e, x, asoc(x.n));
-      if (t && (S || !cT)) linea('tel', t, x, asoc(x.n));
+      if (e && (S || !cE)) linea('email', e, x, asoc(x));
+      if (t && (S || !cT)) linea('tel', t, x, asoc(x));
     });
     if (!P.con.some(function (x) { return x.p.email || x.p.tel; }) && P.con.length) out.ctc.push({ t: null, falta: 'mail y celular del pasajero (contacto obligatorio)' });
 

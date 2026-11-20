@@ -193,3 +193,23 @@ textarea#txt.sobre{border-color:var(--sky);background:#E4F7F3;box-shadow:0 0 0 3
 .infbox select{max-width:420px}
 .infbox.falta{background:#FFF6E0;border-color:#F0D79A}
 .infbox.falta select{border-color:#E2B33C;box-shadow:0 0 0 2px #FBE7B3}
+
+/* Reservas: encabezado con código, ida y vuelta; los comandos de cada una por separado */
+.grupo{margin-bottom:6px}
+.grupoh{background:#fff;border:1px solid var(--line2);border-left:4px solid var(--sky);border-radius:10px;padding:8px 12px 10px;margin:0 0 10px}
+.grupoh .gt{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.grupoh .gt b{font-family:Oswald,sans-serif;font-weight:600;font-size:15px;color:var(--navy);letter-spacing:.3px}
+.grupoh .cnt{font-size:12px;color:var(--ink2)}
+.grupoh .gf{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.grupoh .gf label{margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:var(--ink2);display:flex;flex-direction:column;gap:3px}
+.grupoh .gf input{width:118px;padding:6px 8px;font-size:13.5px;border:1px solid var(--line2);border-radius:8px;background:#fff}
+.grupoh .gf input[data-gf=loc]{width:96px;text-transform:uppercase;font-weight:600;letter-spacing:.5px}
+.grupoh .gf input.mal{border-color:#E2B33C;box-shadow:0 0 0 2px #FBE7B3}
+button.agregar.nuevag{border-style:dotted;background:#fff;color:var(--navy);border-color:var(--line2);font-size:13px;margin-top:4px}
+.gout{border:1px solid var(--line2);border-radius:12px;padding:10px 12px;margin-bottom:14px;background:#FBFEFE}
+.gout+.gout{margin-top:4px}
+.gouth{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:8px}
+.gouth b{font-family:Oswald,sans-serif;font-weight:600;font-size:15px;color:var(--navy);letter-spacing:.3px}
+.gouth span{font-size:12px;color:var(--ink2)}
+.gout:only-child{border:0;padding:0;background:none;margin:0}
+textarea.pnr{min-height:96px}
