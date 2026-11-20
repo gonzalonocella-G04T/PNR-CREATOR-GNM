@@ -40,5 +40,10 @@ eq('limpieza de nombres', ['Muñoz Ñandú', 'Gonçalves Conceição', "D'Alessa
   ['MUNOZ NANDU', 'GONCALVES CONCEICAO', 'DALESSANDRO', 'OBRIEN', 'PEREZ GOMEZ', 'MULLER', 'STRASSE', 'LUKASZ', 'DVORAK', 'AERO', 'ST JOHN']);
 var tn = TEXTO.parse('Nombre: Iñaki Peña Gonçalves\nFecha de nacimiento: 01/02/1990').pasajeros[0];
 eq('nombre con Ñ y Ç desde texto', [tn.apellidos, tn.nombres], ['PENA GONCALVES', 'INAKI']);
+// Texto en minúscula, una cosa por línea (ejemplo de Gonzalo)
+var pe = TEXTO.parse('pedro porro lopez\n05-10-1962\npasaporte uruguayo d345678\n pplopez@gmail.com\n 59898653333').pasajeros;
+eq('una cosa por línea, en minúscula', pe.length === 1 && [pe[0].apellidos, pe[0].nombres, pe[0].nacimiento.d + '/' + pe[0].nacimiento.m + '/' + pe[0].nacimiento.y, pe[0].pasaporte, pe[0].nacionalidad, pe[0].email, pe[0].telefono], ['PORRO LOPEZ', 'PEDRO', '5/10/1962', 'D345678', 'URY', 'pplopez@gmail.com', '59898653333']);
+eq('celular con 598 y una cifra de menos', TEXTO.telefono('5989865333').num, '5989865333');
+eq('saludo no es nombre', TEXTO.parse('hola te paso los datos\njuan perez\n12/04/1978').pasajeros.map(function (p) { return p.apellidos + '/' + p.nombres; }), ['PEREZ/JUAN']);
 console.log(fallas ? '\n' + fallas + ' pruebas fallaron' : '\nTodo bien');
 process.exit(fallas ? 1 : 0);

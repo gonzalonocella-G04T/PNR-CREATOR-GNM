@@ -84,16 +84,19 @@ var TEXTO = (function () {
     if (!d) return null;
     if (plus) return { num: d, aviso: '' };
     if (pais === '598') {
-      if (/^598\d{8}$/.test(d)) return { num: d, aviso: '' };
+      if (/^5989\d{7}$/.test(d)) return { num: d, aviso: '' };
+      if (/^598[24]\d{7}$/.test(d)) return { num: d, aviso: 'Parece un teléfono fijo; el CTCM es para celular' };
+      if (/^598/.test(d) && d.length !== 11) return { num: d, aviso: 'El celular tiene ' + (d.length - 3) + ' cifras después del 598 y un celular uruguayo lleva 8 (598 9X XXX XXX): falta o sobra un número' };
       if (/^09\d{7}$/.test(d)) return { num: '598' + d.slice(1), aviso: '' };
       if (/^9\d{7}$/.test(d)) return { num: '598' + d, aviso: '' };
       if (/^[24]\d{7}$/.test(d)) return { num: '598' + d, aviso: 'Parece un teléfono fijo; el CTCM es para celular' };
     }
+    if (d.indexOf(pais) === 0 && d.length >= pais.length + 7) return { num: d, aviso: 'Verificá el teléfono: ya parece incluir el código ' + pais };
     if (d.length >= 11) return { num: d, aviso: 'Verificá el código de país del teléfono' };
     return { num: pais + d.replace(/^0/, ''), aviso: 'Verificá el teléfono: se agregó el código ' + pais };
   }
   var RE_MAIL = /[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/gi;
-  var RE_TEL = /(?:\+|00)?\d[\d\s().\-]{6,}\d/g;
+  var RE_TEL = /(?:\+|00)?\d[\d \t().\-]{6,}\d/g; // nunca cruza un salto de línea
   var RE_CI = /(^|[^\d.])(\d{1}\.?\d{3}\.?\d{3}\s?[-‐–]\s?\d|\d\.\d{3}\.\d{3}\d)(?![\d])/g;
   function ciValida(num) {
     var d = String(num).replace(/\D/g, '');
@@ -128,7 +131,7 @@ var TEXTO = (function () {
     ['mail', /\b(?:E-?MAIL|MAIL|CORREO(?:\s+ELECTRONICO)?)\b/],
     ['tel', /\b(?:CELULAR|CEL|MOVIL|MOBILE|TEL(?:EFONO|EFONE|F)?|PHONE|WHATSAPP|WSP|WPP|WA|CONTACTO)\b\.?/]
   ];
-  var STOP = { HOLA: 1, BUENAS: 1, BUENOS: 1, BUEN: 1, DIA: 1, DIAS: 1, TARDES: 1, NOCHES: 1, DATOS: 1, DATO: 1, SALUDOS: 1, GRACIAS: 1, SR: 1, SRA: 1, SRTA: 1, MR: 1, MRS: 1, MS: 1, MISS: 1, MSTR: 1, ADULTO: 1, MENOR: 1, NINO: 1, NINA: 1, INFANTE: 1, BEBE: 1, VIAJA: 1, VIAJAN: 1, VUELO: 1, VUELOS: 1, RESERVA: 1, PASAJEROS: 1, ADJUNTO: 1, ENVIO: 1, ABRAZO: 1, ATTE: 1, ATENTAMENTE: 1, CORDIALES: 1, URUGUAY: 1, ARGENTINA: 1, MONTEVIDEO: 1, ESPOSA: 1, ESPOSO: 1, HIJO: 1, HIJA: 1, HIJOS: 1, MAMA: 1, PAPA: 1, Y: 1, E: 1, CON: 1, PARA: 1, POR: 1, EL: 1, LA: 1, LOS: 1, LAS: 1, DE: 1, DEL: 1, MI: 1, SU: 1, TE: 1, LE: 1, PASO: 1, SON: 1, ES: 1 };
+  var STOP = { CLIENTE: 1, CLIENTA: 1, PASAJERA: 1, SENOR: 1, SENORA: 1, FAMILIA: 1, VIAJE: 1, VIAJERO: 1, VIAJEROS: 1, QUE: 1, COMO: 1, ESTE: 1, ESTA: 1, ESTOS: 1, ESTAS: 1, UN: 1, UNA: 1, AL: 1, LO: 1, ME: 1, NOS: 1, SE: 1, SI: 1, NO: 1, YA: 1, AHI: 1, ACA: 1, AQUI: 1, NECESITO: 1, NECESITA: 1, FAVOR: 1, EMITIR: 1, COTIZAR: 1, ENVIAR: 1, MANDO: 1, ENVIO: 1, PASAJE: 1, PASAJES: 1, BOLETO: 1, BOLETOS: 1, NOMBRE: 1, NOMBRES: 1, APELLIDO: 1, APELLIDOS: 1, PASAPORTE: 1, CEDULA: 1, DOCUMENTO: 1, CORREO: 1, MAIL: 1, TELEFONO: 1, CELULAR: 1, ABAJO: 1, SIGUIENTE: 1, SIGUIENTES: 1, HOLA: 1, BUENAS: 1, BUENOS: 1, BUEN: 1, DIA: 1, DIAS: 1, TARDES: 1, NOCHES: 1, DATOS: 1, DATO: 1, SALUDOS: 1, GRACIAS: 1, SR: 1, SRA: 1, SRTA: 1, MR: 1, MRS: 1, MS: 1, MISS: 1, MSTR: 1, ADULTO: 1, MENOR: 1, NINO: 1, NINA: 1, INFANTE: 1, BEBE: 1, VIAJA: 1, VIAJAN: 1, VUELO: 1, VUELOS: 1, RESERVA: 1, PASAJEROS: 1, ADJUNTO: 1, ENVIO: 1, ABRAZO: 1, ATTE: 1, ATENTAMENTE: 1, CORDIALES: 1, URUGUAY: 1, ARGENTINA: 1, MONTEVIDEO: 1, ESPOSA: 1, ESPOSO: 1, HIJO: 1, HIJA: 1, HIJOS: 1, MAMA: 1, PAPA: 1, Y: 1, E: 1, CON: 1, PARA: 1, POR: 1, EL: 1, LA: 1, LOS: 1, LAS: 1, DE: 1, DEL: 1, MI: 1, SU: 1, TE: 1, LE: 1, PASO: 1, SON: 1, ES: 1 };
   var PART = { DE: 1, DEL: 1, LA: 1, LAS: 1, LOS: 1, DA: 1, DAS: 1, DO: 1, DOS: 1, DI: 1, VAN: 1, VON: 1, DER: 1, DEN: 1, MC: 1, MAC: 1, SAN: 1, SANTA: 1 };
 
   // Separa "nombres apellidos" escritos de corrido. orden: 'NA' (nombre primero) o 'AN' (apellido primero)
@@ -225,7 +228,7 @@ var TEXTO = (function () {
         if (sx) { var c = sx[1][0]; p.sexo = c === 'F' || sx[1] === 'MUJER' ? 'F' : (c === 'M' || c === 'H' || c === 'V' ? 'M' : 'X'); marcar(h.vi, h.vi + sx[0].length); }
       }
       else if (h.t === 'mail') { var me = v.match(RE_MAIL); if (me) { p.email = me[0]; marcar(h.vi, h.vi + v.indexOf(me[0]) + me[0].length); } }
-      else if (h.t === 'tel') { var mt = v.match(/(?:\+|00)?\d[\d\s().\-]{6,}\d/); if (mt) { p.telRaw = mt[0]; marcar(h.vi, h.vi + v.indexOf(mt[0]) + mt[0].length); } }
+      else if (h.t === 'tel') { var mt = v.match(/(?:\+|00)?\d[\d \t().\-]{6,}\d/); if (mt) { p.telRaw = mt[0]; marcar(h.vi, h.vi + v.indexOf(mt[0]) + mt[0].length); } }
     });
     // ---- datos sin etiqueta ----
     if (!p.sexo) {
@@ -257,9 +260,9 @@ var TEXTO = (function () {
       else return;
       marcar(f.i, f.i + f.l);
     });
-    libre(/(?:^|[^A-Z0-9])([A-Z]{1,3}\d{6,9})(?![A-Z0-9])/g, function (m, i, f) {
+    libre(/(?:^|[^A-Z0-9])([A-Z]{1,3}\d{6,9})(?![A-Z0-9])/gi, function (m, i, f) {
       if (p.pasaporte) return false;
-      p.pasaporte = m[1]; p.ppSuelto = 1;
+      p.pasaporte = m[1].toUpperCase(); p.ppSuelto = 1;
       for (var k = i; k < f; k++) usado[k] = 1; return false;
     });
     libre(new RegExp(RE_TEL.source, 'g'), function (m) {
@@ -278,6 +281,15 @@ var TEXTO = (function () {
       var libreTxt = '';
       for (var k = 0; k < txt.length; k++) libreTxt += usado[k] ? '|' : txt[k];
       var lineas = libreTxt.split(/\n|[,;|•·]| - | – /);
+      // Primero: una línea entera hecha sólo de palabras (2 a 6), aunque esté toda en minúscula
+      for (var lq = 0; lq < lineas.length && !p.completo; lq++) {
+        var lt = lineas[lq].replace(/^\s*\d{1,2}\s*[).\-–]\s*/, '').trim();
+        if (!/^[\p{L}'’\-]+(?:\s+[\p{L}'’\-]+){1,5}$/u.test(lt)) continue;
+        var pw = lt.split(/\s+/).map(limpiaNombre);
+        var comunes = pw.filter(function (w, k) { return (STOP[w] && !(PART[w] && k > 0 && k < pw.length - 1)) || MES[w] || ETQ.some(function (e) { return e[1].test(w); }); });
+        if (comunes.length || pais(lt) && pw.length <= 2) continue;
+        p.completo = lt;
+      }
       for (var li = 0; li < lineas.length && !p.completo; li++) {
         var ws = lineas[li].replace(/^\s*\d+\s*[).\-–]?\s*/, '').split(/\s+/).filter(Boolean), run = [];
         for (var wi = 0; wi <= ws.length; wi++) {
@@ -351,7 +363,7 @@ var TEXTO = (function () {
     ls.forEach(function (l) {
       var L = N(l);
       if (!l.trim()) { cerrar(); vistos = {}; return; }
-      var nuevo = /^\s*(?:\d{1,2}\s*[).\-–]|(?:PAX|PASAJER[OA])\s*\d+|[-•*]\s)/.test(L);
+      var nuevo = /^\s*(?:\d{1,2}\s*[).\-–](?!\s*\d)|(?:PAX|PASAJER[OA])\s*\d+|[-•*]\s)/.test(L);
       // una etiqueta de nombre que se repite indica otro pasajero
       var etq = /^\s*(APELLIDOS?|NOMBRES?\s+Y\s+APELLIDOS?|NOMBRE\s+COMPLETO|PASAJER[OA]|NOMBRES?)\b/.exec(L);
       if (etq) { var k = etq[1].replace(/S$/, ''); if (vistos[k]) nuevo = true; }
