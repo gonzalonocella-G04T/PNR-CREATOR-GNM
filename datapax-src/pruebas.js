@@ -35,5 +35,10 @@ function F(y, m, d) { return new Date(y, m - 1, d); }
 eq('31/08 + 6 meses = 28/02', sumarMeses(F(2026, 8, 31), 6).getTime(), F(2027, 2, 28).getTime());
 eq('plazos', [plazo(F(2026, 11, 20), F(2027, 5, 19)), plazo(F(2026, 11, 20), F(2027, 5, 20)), plazo(F(2026, 11, 20), F(2026, 12, 5)), plazo(F(2026, 11, 20), F(2028, 1, 15))], ['5 meses', '6 meses', '15 días', '1 año y 1 mes']);
 eq('umbral 6 meses', [F(2027, 5, 19) < sumarMeses(F(2026, 11, 20), 6), F(2027, 5, 20) < sumarMeses(F(2026, 11, 20), 6)], [true, false]);
+// Nombres para GDS: Ñ → N, Ç → C, sin tildes, apóstrofos ni signos
+eq('limpieza de nombres', ['Muñoz Ñandú', 'Gonçalves Conceição', "D'Alessandro", 'O’Brien', 'Pérez-Gómez', 'Müller', 'Straße', 'Łukasz', 'Dvořák', 'Ærø', 'St. John'].map(TEXTO.limpiaNombre),
+  ['MUNOZ NANDU', 'GONCALVES CONCEICAO', 'DALESSANDRO', 'OBRIEN', 'PEREZ GOMEZ', 'MULLER', 'STRASSE', 'LUKASZ', 'DVORAK', 'AERO', 'ST JOHN']);
+var tn = TEXTO.parse('Nombre: Iñaki Peña Gonçalves\nFecha de nacimiento: 01/02/1990').pasajeros[0];
+eq('nombre con Ñ y Ç desde texto', [tn.apellidos, tn.nombres], ['PENA GONCALVES', 'INAKI']);
 console.log(fallas ? '\n' + fallas + ' pruebas fallaron' : '\nTodo bien');
 process.exit(fallas ? 1 : 0);

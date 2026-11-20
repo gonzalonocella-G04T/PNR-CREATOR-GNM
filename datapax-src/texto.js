@@ -22,9 +22,14 @@ var TEXTO = (function () {
     });
   }
   function N(s) { return sinTildes(s).toUpperCase(); }
-  // Nombre apto para GDS: sin tildes, guiones → espacio, sin apóstrofos ni signos
+  // Nombre apto para GDS: Ñ → N, Ç → C, sin tildes ni diéresis, sin apóstrofos ni signos (guiones → espacio).
+  // Las letras especiales se transliteran como en la MRZ del pasaporte (ß → SS, Æ → AE, Ł → L…).
+  var LIG = { 'Æ': 'AE', 'æ': 'AE', 'Œ': 'OE', 'œ': 'OE', 'ß': 'SS', 'ẞ': 'SS', 'Ø': 'O', 'ø': 'O', 'Ł': 'L', 'ł': 'L', 'Đ': 'D', 'đ': 'D', 'Ð': 'D', 'ð': 'D', 'Þ': 'TH', 'þ': 'TH', 'ı': 'I', 'Ħ': 'H', 'ħ': 'H' };
   function limpiaNombre(s) {
-    return N(s).replace(/['’`´]/g, '').replace(/[-‐–_.]/g, ' ').replace(/[^A-Z ]/g, ' ').replace(/\s+/g, ' ').trim();
+    s = String(s || '').replace(/[ÆæŒœßẞØøŁłĐđÐðÞþıĦħ]/g, function (c) { return LIG[c]; });
+    if (s.normalize) s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    else s = sinTildes(s);
+    return s.toUpperCase().replace(/['’‘`´ʼ]/g, '').replace(/[-‐‑–—_.]/g, ' ').replace(/[^A-Z ]/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
   // ---------- fechas ----------
@@ -199,7 +204,7 @@ var TEXTO = (function () {
       else if (h.t === 'nombres') { p.nombres = ((p.nombres ? p.nombres + ' ' : '') + limpiaNombre(v.split(/\s{2,}|\t|[|;]/)[0])).trim(); marcar(h.vi, h.vf); }
       else if (h.t === 'completo' || h.t === 'completoAN') {
         var val = v.split(/\s{2,}|\t|[|;]| - /)[0].replace(/\b(?:sr|sra|srta|mr|mrs|ms)\b\.?/ig, '').replace(/^\s*\d+\s*/, '');
-        var m = val.match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñÇçÃãÕõÂâÊêÔô'’\-\/, ]+/);
+        var m = val.match(/[\p{L}'’\-\/, ]+/u);
         if (m && m[0].trim().split(/\s+/).length >= 1) { p.completo = m[0].trim(); orden = h.t === 'completoAN' ? 'AN' : 'NA'; marcar(h.vi, h.vi + val.length); }
       }
       else if (h.t === 'nac' || h.t === 'venc' || h.t === 'emi') {
@@ -278,8 +283,8 @@ var TEXTO = (function () {
         for (var wi = 0; wi <= ws.length; wi++) {
           var x = ws[wi] ? ws[wi].replace(/[.,:;!?)]+$/, '').replace(/^[(¿¡"']+/, '') : '', X = x ? limpiaNombre(x) : '';
           var corta = ws[wi] && /[.,:;!?]$/.test(ws[wi]);
-          var esPal = x && /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñÇçÃãÕõÂâÊêÔôß'’\-]+$/.test(x);
-          var mayus = x && (/^[A-ZÁÉÍÓÚÜÑÇÃÕÂÊÔ]/.test(x) || (PART[X] && run.length));
+          var esPal = x && /^[\p{L}'’\-]+$/u.test(x);
+          var mayus = x && (/^\p{Lu}/u.test(x) || (PART[X] && run.length));
           if (esPal && mayus && X && (!STOP[X] || (PART[X] && run.length)) && !MES[X]) { run.push(x); if (!corta) continue; }
           while (run.length && PART[limpiaNombre(run[run.length - 1])]) run.pop();
           if (run.length >= 2) { p.completo = run.join(' '); break; }
@@ -362,7 +367,7 @@ var TEXTO = (function () {
       var hayEtq = ETQ.slice(0, 4).some(function (e) { return e[1].test(N(b)); });
       var reCi = new RegExp(RE_CI.source);
       var conDato = lns.filter(function (l) { return fechas(N(l), 'nac').length || /[A-Z]{1,3}\d{6,9}/.test(N(l)) || reCi.test(l); });
-      var soloNombres = lns.length >= 2 && lns.every(function (l) { return /^\s*(?:\d{1,2}\s*[).\-–]\s*)?[A-Za-zÁÉÍÓÚÜÑáéíóúüñÇçÃãÕõÂâÊêÔô'’\-\/]+(?:\s+[A-Za-zÁÉÍÓÚÜÑáéíóúüñÇçÃãÕõÂâÊêÔô'’\-\/]+){1,6}\s*$/.test(l) && !/^\s*(HOLA|BUEN|SALUDOS|GRACIAS)/i.test(sinTildes(l)); });
+      var soloNombres = lns.length >= 2 && lns.every(function (l) { return /^\s*(?:\d{1,2}\s*[).\-–]\s*)?[\p{L}'’\-\/]+(?:\s+[\p{L}'’\-\/]+){1,6}\s*$/u.test(l) && !/^\s*(HOLA|BUEN|SALUDOS|GRACIAS)/i.test(sinTildes(l)); });
       if (!hayEtq && ((lns.length >= 2 && conDato.length >= 2 && conDato.length >= lns.length - 1) || soloNombres)) lns.forEach(function (l) { out.push(l); });
       else out.push(b);
     });
