@@ -78,10 +78,10 @@ var CMD = (function () {
         L('nombres', '-' + ap(x) + '/' + no(x) + tit, x);
       } else {
         var extra = '';
-        if (x.tipo === 'CHD' && x.p.nac) extra = ' (CHD/' + f(x.p.nac) + ')';
+        if (x.tipo === 'CHD' && x.p.nac) extra = '(CHD/' + f(x.p.nac) + ')';
         if (x.inf) {
           var i = x.inf, sa = ap(i) === ap(x) ? '' : ap(i);
-          extra = i.p.nac ? ' (INF' + sa + '/' + no(i) + '/' + f(i.p.nac) + ')' : '';
+          extra = i.p.nac ? '(INF' + sa + '/' + no(i) + '/' + f(i.p.nac) + ')' : '';
           if (!i.p.nac) F('nombres', i, 'fecha de nacimiento del infante');
         }
         L('nombres', 'NM1' + ap(x) + '/' + no(x) + tit + extra, x);
@@ -92,6 +92,7 @@ var CMD = (function () {
     // ---- DOCS ----
     P.todos.forEach(function (x) {
       if (x.tipo === 'INF' && !x.adulto) return;
+      if (x.tipo === 'INF' && o.infanteConfirmar && !x.p.infanteDe) { F('docs', x, 'a qué adulto está asociado el infante en la reserva (elegilo en su tarjeta)'); return; }
       var p = x.p, g = p.sexo === 'M' || p.sexo === 'F' ? p.sexo + (x.tipo === 'INF' ? 'I' : '') : (p.sexo === 'X' ? 'X' : '');
       var d = docData(p), comp = !!o.docsCompleto;
       var need = [['fecha de nacimiento', p.nac], ['sexo', g], ['apellido', ap(x)], ['nombre', no(x)]];
@@ -120,17 +121,27 @@ var CMD = (function () {
     });
 
     // ---- contactos ----
-    var conCtc = P.con.filter(function (x) { return x.p.email || x.p.tel; });
-    var todos = o.contactoTodos && conCtc.length === 1 && P.con.length > 1;
+    // Mail o celular igual para todos (o uno solo, con contactoTodos): en Amadeus una sola línea sin /P, que vale para todos;
+    // en Sabre se repite para cada pasajero. Los infantes no llevan contactos.
+    function norm(c, v) { return c === 'email' ? String(v || '').trim().toLowerCase() : tel(v); }
+    function comun(c) {
+      if (P.con.length < 2) return null;
+      var con = P.con.filter(function (x) { return x.p[c]; }), u = {};
+      con.forEach(function (x) { u[norm(c, x.p[c])] = 1; });
+      return Object.keys(u).length === 1 && (con.length === P.con.length || o.contactoTodos) ? con[0].p[c] : null;
+    }
+    var cE = comun('email'), cT = comun('tel');
+    function linea(c, v, x, a, nota) { L('ctc', (c === 'email' ? (S ? '3CTCE/' : 'SRCTCE-') + mail(v) : (S ? '3CTCM/' : 'SRCTCM-') + tel(v)) + a, x, nota); }
+    if (!S) {
+      if (cE) linea('email', cE, P.con[0], '', 'Para todos los pasajeros');
+      if (cT) linea('tel', cT, P.con[0], '', 'Para todos los pasajeros');
+    }
     P.con.forEach(function (x) {
-      var src = todos ? conCtc[0] : x;
-      if (todos && S === false && x !== conCtc[0]) return; // en Amadeus sin asociación vale para todos
-      if (!src.p.email && !src.p.tel) return;
-      var a = todos && !S ? '' : asoc(x.n);
-      if (src.p.email) L('ctc', (S ? '3CTCE/' : 'SRCTCE-') + mail(src.p.email) + a, x, todos && !S ? 'Para todos los pasajeros' : '');
-      if (src.p.tel) L('ctc', (S ? '3CTCM/' : 'SRCTCM-') + tel(src.p.tel) + a, x, todos && !S ? 'Para todos los pasajeros' : '');
+      var e = cE || x.p.email, t = cT || x.p.tel;
+      if (e && (S || !cE)) linea('email', e, x, asoc(x.n));
+      if (t && (S || !cT)) linea('tel', t, x, asoc(x.n));
     });
-    if (!conCtc.length && P.con.length) out.ctc.push({ t: null, falta: 'mail y celular del pasajero (contacto obligatorio)' });
+    if (!P.con.some(function (x) { return x.p.email || x.p.tel; }) && P.con.length) out.ctc.push({ t: null, falta: 'mail y celular del pasajero (contacto obligatorio)' });
 
     return { secciones: out, orden: P.todos, avisos: P.avisos };
   }

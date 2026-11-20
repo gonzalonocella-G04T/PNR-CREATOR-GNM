@@ -28,6 +28,37 @@ var OCR = (function () {
     })().catch(function (e) { cargando = null; throw e; });
     return cargando;
   }
+  // ---- texto común (capturas de WhatsApp, mails, PDF escaneados): modelo de español ----
+  var wTexto = null, cargandoT = null, progresoT = null;
+  function motorTexto(aviso) {
+    if (wTexto) return Promise.resolve(wTexto);
+    if (!cargandoT) cargandoT = (async function () {
+      aviso && aviso('Preparando el lector de texto (sólo la primera vez)…');
+      if (typeof Tesseract === 'undefined') await script(url('vendor/ocr/tesseract.min.js'));
+      if (typeof SPA_MODELO === 'undefined') await script(url('vendor/ocr/lang/spa-modelo.js'));
+      var b = atob(SPA_MODELO), datos = new Uint8Array(b.length);
+      for (var i = 0; i < b.length; i++) datos[i] = b.charCodeAt(i);
+      var w = await Tesseract.createWorker([{ code: 'spa', data: datos }], 1, {
+        workerPath: url('vendor/ocr/worker.min.js'),
+        corePath: url('vendor/ocr').replace(/\/$/, ''),
+        cacheMethod: 'none',
+        workerBlobURL: false,
+        logger: function (m) { if (progresoT && m && m.status === 'recognizing text') progresoT(m.progress); }
+      });
+      await w.setParameters({ tessedit_pageseg_mode: '3', preserve_interword_spaces: '1', user_defined_dpi: '300' });
+      wTexto = w; return w;
+    })().catch(function (e) { cargandoT = null; throw e; });
+    return cargandoT;
+  }
+  async function leerTextoImagen(canvas, aviso, escMax) {
+    var w = await motorTexto(aviso), lado = Math.max(canvas.width, canvas.height), c = canvas;
+    // las capturas de pantalla tienen letra chica: se agrandan para leer mejor
+    var esc = Math.max(1, Math.min(escMax || 2.5, 2200 / lado));
+    if (esc > 1.05) { c = document.createElement('canvas'); c.width = Math.round(canvas.width * esc); c.height = Math.round(canvas.height * esc); var g = c.getContext('2d'); g.imageSmoothingQuality = 'high'; g.drawImage(canvas, 0, 0, c.width, c.height); }
+    progresoT = function (v) { aviso && aviso('Leyendo el texto… ' + Math.round(v * 100) + ' %'); };
+    try { var r = await w.recognize(c); return (r.data.text || '').replace(/[ \t]+\n/g, '\n'); }
+    finally { progresoT = null; }
+  }
   async function psm(w, m) { if (psmActual !== m) { await w.setParameters({ tessedit_pageseg_mode: m }); psmActual = m; } }
   function aCanvas(pix) {
     var c = document.createElement('canvas'); c.width = pix.width; c.height = pix.height;
@@ -137,5 +168,5 @@ var OCR = (function () {
     return { mrz: best, recorte: recorte };
   }
 
-  return { motor: motor, cargarImagen: cargarImagen, paginasPDF: paginasPDF, leerCanvas: leerCanvas, leerZona: leerZona };
+  return { motorTexto: motorTexto, leerTextoImagen: leerTextoImagen, motor: motor, cargarImagen: cargarImagen, paginasPDF: paginasPDF, leerCanvas: leerCanvas, leerZona: leerZona };
 })();

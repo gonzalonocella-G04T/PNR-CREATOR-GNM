@@ -54,5 +54,45 @@ function tipea(txt) { var el = { value: '', selectionStart: 0, setSelectionRange
 eq('máscara de fechas', ['05101962', '051062', '5/10/1962', '5-10-62', '05/10/1962', '05<', '0510<', '0510<<', '05101962<<<<', '051019621', '05NOV86', '5.3.1990'].map(tipea),
   ['05/10/1962', '05/10/62', '05/10/1962', '05/10/62', '05/10/1962', '05', '05/10', '05/1', '05/10', '05/10/1962', '05NOV86', '05/03/1990']);
 eq('pasajero sin apellido va al final', CMD.preparar([{ id: 1, apellidos: '', nombres: '' }, { id: 2, apellidos: 'PEREZ', nombres: 'JUAN' }, { id: 3, apellidos: 'ALVAREZ', nombres: 'ANA' }], {}).todos.map(function (x) { return x.p.id + ':' + x.n; }), ['3:1', '2:2', '1:3']);
+// Sexo según el nombre
+eq('sexo por nombre', ['Juan Pedro', 'María José', 'José María', 'Andrea', 'Andrea Sofía', 'Alex Juan', 'María del Carmen', 'Iñaki', 'Conceição', 'Rosario', 'Consuelo', 'Luca', 'Bautista', 'Taiel', 'Xiomara', 'Ariel', 'Noa', 'Kim', 'Simone', 'Trinidad'].map(function (n) { var r = TEXTO.sexoPorNombre(n); return r.sexo || (r.unisex ? 'U' : '-'); }),
+  ['M', 'F', 'M', 'U', 'F', 'M', 'F', 'M', 'F', 'F', 'F', 'M', 'M', '-', 'F', 'M', 'U', 'U', 'U', 'U']);
+// Un solo mail / celular en el texto vale para todos
+var cc = TEXTO.parse('Juan Perez 05/10/1962 pasaporte C123456\nAna Perez 03/04/1965 pasaporte C654321\nLucas Perez 01/02/2001 pasaporte C111222\n\nmail: familia.perez@gmail.com\ncel: 098 584 260');
+eq('un mail y un celular para todos', cc.pasajeros.map(function (p) { return (p.email || '-') + ' ' + (p.telefono || '-'); }), ['familia.perez@gmail.com 59898584260', 'familia.perez@gmail.com 59898584260', 'familia.perez@gmail.com 59898584260']);
+var c2 = TEXTO.parse('Nombre: Juan Perez\nMail: juan@x.com\n\nNombre: Ana Perez\nMail: ana@x.com\n\nNombre: Lucas Perez');
+eq('dos mails distintos: no se reparte', [c2.comun.email, c2.pasajeros[2].email || ''], ['', '']);
+var c3 = TEXTO.parse('mail: grupo@x.com · cel 099123456');
+eq('sólo contacto (para pasajeros ya cargados)', [c3.comun.email, c3.comun.telefono], ['grupo@x.com', '59899123456']);
+// Texto con renglones en blanco en medio (WhatsApp, texto leído de una captura)
+var wa = TEXTO.parse(TEXTO.arreglarOCR('Hola! Te paso los datos para la reserva:\n\nJuan Pablo Rodríguez Silva\n05/03/1980\n\nPasaporte uruguayo C1234567\nvence 12/08/2029\n\nMaría Laura Gómez Pérez\n22/11/1983\n\nPasaporte uruguayo D7654321\nvence 03/02/2027\n\nmail: juanrodriguezegmail.com\ncel: 099 123 456')).pasajeros;
+eq('bloques sin nombre se unen al pasajero anterior', wa.map(function (p) { return [p.apellidos, p.nombres, p.pasaporte, p.vencimiento && p.vencimiento.y, p.email, p.telefono].join('|'); }),
+  ['RODRIGUEZ SILVA|JUAN PABLO|C1234567|2029|juanrodriguez@gmail.com|59899123456', 'GOMEZ PEREZ|MARIA LAURA|D7654321|2027|juanrodriguez@gmail.com|59899123456']);
+eq('@ mal leída en una imagen', ['juanrodriguezegmail.com', 'andrea.nunezGhotmail.com', 'andrea.nunezOhotmail.com', 'gnocellaGhiperviajes.com.uy', 'pp@live.com', 'www.awesome.com', 'olive.com'].map(TEXTO.arreglarOCR),
+  ['juanrodriguez@gmail.com', 'andrea.nunez@hotmail.com', 'andrea.nunez@hotmail.com', 'gnocella@hiperviajes.com.uy', 'pp@live.com', 'www.awesome.com', 'olive.com']);
+var apil = TEXTO.parse('Juan Perez\n05/03/1980\nAna Gomez\n06/04/1985').pasajeros;
+eq('nombre/fecha/nombre/fecha sin renglón en blanco', apil.map(function (p) { return p.nombres + ' ' + p.apellidos + ' ' + p.nacimiento.y; }), ['JUAN PEREZ 1980', 'ANA GOMEZ 1985']);
+var vto = TEXTO.parse('Juan Perez\nPasaporte C1234567\nvence 12/08/2029').pasajeros;
+eq('vencimiento en su propio renglón', [vto.length, vto[0].pasaporte, vto[0].vencimiento && vto[0].vencimiento.y], [1, 'C1234567', 2029]);
+// Infantes: menos de 2 años a la fecha del viaje, sin FOID, DOCS con MI/FI y la /P del adulto
+var fam = [{ id: 1, apellidos: 'PEREZ', nombres: 'JUAN', sexo: 'M', nac: { y: 1980, m: 3, d: 5 }, ppNum: 'C1234567', ppEmisor: 'URY', email: 'fam@x.com' },
+  { id: 2, apellidos: 'GOMEZ', nombres: 'ANA', sexo: 'F', nac: { y: 1985, m: 4, d: 6 }, ppNum: 'C7654321', ppEmisor: 'URY', email: 'fam@x.com' },
+  { id: 3, apellidos: 'PEREZ', nombres: 'LUCIA', sexo: 'F', nac: { y: 2025, m: 6, d: 10 }, ppNum: 'C5555555', ppEmisor: 'URY' },
+  { id: 4, apellidos: 'PEREZ', nombres: 'TOMAS', sexo: 'M', nac: { y: 2024, m: 12, d: 1 }, ppNum: 'C6666666', ppEmisor: 'URY' }];
+var gA = CMD.generar(fam, { gds: 'A', fechaViaje: new Date(2026, 11, 1), contactoTodos: true }), sec = gA.secciones;
+var tx = function (k) { return sec[k].map(function (l) { return l.t || ('FALTA ' + l.falta); }); };
+eq('infante: tipos (cumple 2 el día del viaje = niño)', gA.orden.map(function (x) { return x.p.nombres + ':' + x.tipo; }).sort(), ['ANA:ADT', 'JUAN:ADT', 'LUCIA:INF', 'TOMAS:CHD']);
+eq('infante: nombre con el adulto', tx('nombres').filter(function (l) { return /INF/.test(l); }), ['NM1PEREZ/JUAN MR(INF/LUCIA/10JUN25)']);
+eq('infante: DOCS con FI y /P del adulto', tx('docs').filter(function (l) { return /LUCIA/.test(l); }), ['SR DOCS HK1-----10JUN25-FI--PEREZ-LUCIA/P2']);
+eq('infante: sin FOID', tx('foid').filter(function (l) { return /5555555/.test(l); }), []);
+eq('mismo mail para todos: una línea sin /P', tx('ctc'), ['SRCTCE-FAM//X.COM']);
+var gS = CMD.generar(fam, { gds: 'S', fechaViaje: new Date(2026, 11, 1), contactoTodos: true });
+eq('Sabre: infante y contactos', gS.secciones.docs.map(function (l) { return l.t; }).filter(function (l) { return /LUCIA/.test(l); }).concat(gS.secciones.ctc.map(function (l) { return l.t; })),
+  ['3DOCS/DB/10JUN25/FI/PEREZ/LUCIA-2.1', '3INFT/PEREZ/LUCIA/10JUN25-2.1', '3CTCE/FAM//X.COM-1.1', '3CTCE/FAM//X.COM-2.1', '3CTCE/FAM//X.COM-3.1']);
+var gC = CMD.generar(fam, { gds: 'A', fechaViaje: new Date(2026, 11, 1), infanteConfirmar: true });
+eq('reserva ya cargada: el DOCS del infante espera el adulto elegido', gC.secciones.docs.filter(function (l) { return !l.t; }).map(function (l) { return l.falta; }), ['a qué adulto está asociado el infante en la reserva (elegilo en su tarjeta)']);
+fam[2].infanteDe = 2;
+var gD = CMD.generar(fam, { gds: 'A', fechaViaje: new Date(2026, 11, 1), infanteConfirmar: true });
+eq('infante asociado a mano a otro adulto', gD.secciones.docs.map(function (l) { return l.t; }).filter(function (l) { return /LUCIA/.test(l); }), ['SR DOCS HK1-----10JUN25-FI--PEREZ-LUCIA/P1']);
 console.log(fallas ? '\n' + fallas + ' pruebas fallaron' : '\nTodo bien');
 process.exit(fallas ? 1 : 0);
