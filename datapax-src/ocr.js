@@ -117,10 +117,12 @@ var OCR = (function () {
   }
 
   // ---- lectura de la MRZ en una imagen ----
-  async function leerCanvas(canvas, aviso) {
+  // opc.sinB: sólo la zona localizada (rápido) · opc.soloB: sólo la imagen entera en 4 orientaciones (lento)
+  async function leerCanvas(canvas, aviso, opc) {
+    opc = opc || {};
     var w = await motor(aviso), img = pixeles(canvas), best = null, recorte = null;
     aviso && aviso('Buscando la zona de lectura…');
-    var cs = ZONA.candidatos(img);
+    var cs = opc.soloB ? [] : ZONA.candidatos(img);
     for (var k = 0; k < cs.length; k++) {
       for (var v = 0; v < 2; v++) {
         var cr = ZONA.recorte(img, cs[k], 0.08, 1500, !!v), cv = aCanvas(cr);
@@ -129,6 +131,7 @@ var OCR = (function () {
         if (best && best.verificado) return { mrz: best, recorte: recorte };
       }
     }
+    if (opc.sinB) return { mrz: best, recorte: recorte };
     // Plan B: la imagen entera, en las 4 orientaciones
     var rots = [0, 180, 90, 270];
     for (var j = 0; j < rots.length; j++) {

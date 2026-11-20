@@ -720,6 +720,15 @@
     render(true);
   }
   var colaTrabajo = Promise.resolve();
+  // Imagen o PDF sin zona MRZ: se lee el texto (captura de WhatsApp, mail, ficha) y, si trae pasajeros, se cargan
+  async function leerComoTexto(lienzos, it) {
+    var textos = [];
+    for (var k = 0; k < lienzos.length; k++) { it.estado('No es un documento: leyendo el texto…'); textos.push(TEXTO.arreglarOCR(await OCR.leerTextoImagen(lienzos[k], it.estado))); }
+    var t = textos.join('\n\n');
+    if (!TEXTO.parse(t, { codPais: ST.codpais }).pasajeros.length) return false;
+    sumarAlCampo(t); it.fin('ok', '✓ Texto leído'); leerTexto();
+    return true;
+  }
   function procesar(files) {
     files = Array.prototype.slice.call(files || []).filter(function (f) { return /^image\//.test(f.type) || /pdf$/i.test(f.type) || /\.(pdf|jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(f.name); });
     if (!files.length) { toast('Elegí imágenes (JPG, PNG) o PDF'); return; }
@@ -741,11 +750,19 @@
               else if (tx.length) { tx.forEach(function (x) { fusionar(desdeTexto(x, etq)); }); algo = true; }
             }
             if (algo) { it.fin('ok', '✓ Leído'); render(true); }
-            else agregarLectura({ mrz: null }, pags[0].canvas, nombre, it);
+            else if (!(await leerComoTexto(pags.map(function (x) { return x.canvas; }), it))) agregarLectura({ mrz: null }, pags[0].canvas, nombre, it);
           } else {
             it.estado('Abriendo…');
             var cv = await OCR.cargarImagen(f);
-            var res = await OCR.leerCanvas(cv, it.estado);
+            // 1) zona MRZ localizada (rápido); 2) si no aparece, el texto de la imagen: si trae pasajeros y no parece
+            // un documento, se cargan; 3) si no, la imagen entera en 4 orientaciones (foto torcida de un pasaporte)
+            var res = await OCR.leerCanvas(cv, it.estado, { sinB: true });
+            if (!res.mrz) {
+              it.estado('Leyendo el texto de la imagen…');
+              var tx = TEXTO.arreglarOCR(await OCR.leerTextoImagen(cv, it.estado));
+              if (!pareceMRZ(tx) && TEXTO.parse(tx, { codPais: ST.codpais }).pasajeros.length) { sumarAlCampo(tx); it.fin('ok', '✓ Texto leído'); leerTexto(); return; }
+              res = await OCR.leerCanvas(cv, it.estado, { soloB: true });
+            }
             agregarLectura(res, cv, nombre, it);
           }
         } catch (err) {
@@ -808,12 +825,35 @@
   }
   $('txtArch').addEventListener('click', function () { $('fileTxt').click(); });
   $('fileTxt').addEventListener('change', function () { procesarDatos(this.files); this.value = ''; });
-  $('txt').addEventListener('paste', function (e) {
-    var cd = e.clipboardData; if (!cd) return;
-    if ((cd.getData('text/plain') || '').trim()) return;   // si hay texto (por ej. celdas de Excel), se pega el texto
+  // Archivos (imagen o PDF) del portapapeles, salvo que lo pegado sea texto de verdad: celdas de Excel (traen además
+  // una imagen de la tabla) o un mensaje. Una imagen copiada del navegador trae a veces su dirección como texto.
+  function pegado(cd) {
     var fs = [];
     for (var i = 0; cd.items && i < cd.items.length; i++) if (cd.items[i].kind === 'file') { var f = cd.items[i].getAsFile(); if (f) fs.push(f); }
-    if (fs.length) { e.preventDefault(); e.stopPropagation(); procesarDatos(fs); }
+    if (!fs.length) return null;
+    var tx = (cd.getData('text/plain') || '').trim(), html = cd.getData('text/html') || '';
+    var esImagen = !tx || /^(https?:|blob:|data:|file:)\S*$/i.test(tx) || (/<img/i.test(html) && !/<table/i.test(html) && !/[\t\n]/.test(tx) && tx.length < 200);
+    return esImagen ? fs : null;
+  }
+  $('txt').addEventListener('paste', function (e) {
+    var cd = e.clipboardData; if (!cd) return;
+    var fs = pegado(cd);
+    if (fs) { e.preventDefault(); e.stopPropagation(); procesarDatos(fs); }
+  });
+  // Botón «Pegar captura»: lee el portapapeles (el navegador puede pedir permiso la primera vez)
+  $('txtPegar').addEventListener('click', async function () {
+    if (!navigator.clipboard || !navigator.clipboard.read) { $('txt').focus(); toast('Hacé clic en el recuadro y pegá con Ctrl+V'); return; }
+    try {
+      var items = await navigator.clipboard.read(), fs = [], tx = '';
+      for (var i = 0; i < items.length; i++) {
+        var tipo = items[i].types.filter(function (t) { return /^image\//.test(t); })[0];
+        if (tipo) { var bl = await items[i].getType(tipo); fs.push(new File([bl], 'captura.' + tipo.split('/')[1], { type: tipo })); }
+        else if (items[i].types.indexOf('text/plain') >= 0) tx += await (await items[i].getType('text/plain')).text();
+      }
+      if (fs.length) procesarDatos(fs);
+      else if (tx.trim()) { sumarAlCampo(tx); leerTexto(); }
+      else toast('No hay una captura ni texto copiados');
+    } catch (err) { $('txt').focus(); toast('El navegador no dejó leer lo copiado: hacé clic en el recuadro y pegá con Ctrl+V'); }
   });
   ['dragenter', 'dragover'].forEach(function (t) { $('txt').addEventListener(t, function (e) { if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') >= 0) { e.preventDefault(); e.stopPropagation(); $('txt').classList.add('sobre'); } }); });
   ['dragleave', 'drop'].forEach(function (t) { $('txt').addEventListener(t, function () { $('txt').classList.remove('sobre'); }); });
@@ -829,13 +869,12 @@
   $('drop').addEventListener('drop', function (e) { e.preventDefault(); procesar(e.dataTransfer.files); });
   window.addEventListener('dragover', function (e) { e.preventDefault(); });
   window.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer && e.dataTransfer.files.length) procesar(e.dataTransfer.files); });
+  // Pegar en cualquier parte de la página: si es la foto de un pasaporte o cédula se lee la zona MRZ;
+  // si no, se lee el texto de la captura. Si lo copiado es texto, se pega normalmente.
   document.addEventListener('paste', function (e) {
-    // pegando en un campo con texto en el portapapeles (por ej. celdas de Excel, que traen además una imagen): se pega el texto
-    var ed = e.target && e.target.closest && e.target.closest('input,textarea,[contenteditable]');
-    if (ed && e.clipboardData && (e.clipboardData.getData('text/plain') || '').trim()) return;
-    var it = e.clipboardData && e.clipboardData.items, fs = [];
-    for (var i = 0; it && i < it.length; i++) if (it[i].kind === 'file') { var f = it[i].getAsFile(); if (f) fs.push(f); }
-    if (fs.length) { e.preventDefault(); procesar(fs); }
+    var cd = e.clipboardData; if (!cd) return;
+    var fs = pegado(cd); if (!fs) return;
+    e.preventDefault(); procesar(fs);
   });
 
   // ---------- modal: ver imagen / marcar zona ----------

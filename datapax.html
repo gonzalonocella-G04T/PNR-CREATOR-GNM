@@ -218,7 +218,7 @@ textarea.pnr{min-height:96px}
   <img src="datapax-fav/favicon-48.png?v=1" alt="" width="34" height="34" class="logo">
   <h1>DataPax</h1>
   <span class="hint" style="margin:0">Pasaporte, cédula o texto → nombres, DOCS, FOID y contactos para el GDS</span>
-  <span class="hint ver">versión 20/11 15:34</span>
+  <span class="hint ver">versión 20/11 15:41</span>
   <a href="index.html" class="volver">← Volver a Tu Itinerario</a>
 </header>
 <div class="wrap">
@@ -230,7 +230,7 @@ textarea.pnr{min-height:96px}
     <div id="drop" class="drop" tabindex="0" role="button" aria-label="Cargar archivos del pasaporte o la cédula">
       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#148D7E" stroke-width="1.6" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="9" cy="9" r="2.2"/><path d="M13 8h4M13 11h3M7 15.5h10M7 18h10" stroke-dasharray="1.2 1.2"/></svg>
       <b>Arrastrá los archivos acá</b>
-      <span>o <button type="button" id="elegir" class="lnk">elegilos de la computadora</button><br>También podés pegar una captura con Ctrl+V</span>
+      <span>o <button type="button" id="elegir" class="lnk">elegilos de la computadora</button><br>También podés pegar una captura con Ctrl+V: del documento o con los datos escritos</span>
       <input type="file" id="file" accept="image/*,.pdf,application/pdf" multiple hidden>
     </div>
     <p class="hint priv"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Se lee en este navegador: las imágenes no se suben a ningún lado.</p>
@@ -241,7 +241,8 @@ textarea.pnr{min-height:96px}
     <textarea id="txt" placeholder="Mail, WhatsApp o planilla de Excel. También una captura o un PDF con los datos escritos (Ctrl+V o arrastrar). Por ejemplo:&#10;Nombre: Gonzalo Andrés Nocella Massaferro&#10;Fecha de nacimiento: 05/11/1986&#10;Pasaporte: D345678 · Vto.: 12/05/2030&#10;Mail: … · Cel: 098 584 260"></textarea>
     <div class="btns">
       <button type="button" class="p" id="leer">Leer texto</button>
-      <button type="button" class="s" id="txtArch" title="Captura, foto o PDF con los datos escritos">Imagen o PDF</button>
+      <button type="button" class="s" id="txtArch" title="Elegir una captura, foto o PDF con los datos escritos">Subir PDF o imagen</button>
+      <button type="button" class="s" id="txtPegar" title="Pegar la captura o el texto que copiaste">Pegar captura</button>
       <input type="file" id="fileTxt" accept="image/*,.pdf,application/pdf" multiple hidden>
       <button type="button" class="s" id="manual" tabindex="-1">+ Pasajero a mano</button>
       <button type="button" class="s clr" id="limpiar">Limpiar todo</button>
@@ -1774,10 +1775,12 @@ var OCR = (function () {
   }
 
   // ---- lectura de la MRZ en una imagen ----
-  async function leerCanvas(canvas, aviso) {
+  // opc.sinB: sólo la zona localizada (rápido) · opc.soloB: sólo la imagen entera en 4 orientaciones (lento)
+  async function leerCanvas(canvas, aviso, opc) {
+    opc = opc || {};
     var w = await motor(aviso), img = pixeles(canvas), best = null, recorte = null;
     aviso && aviso('Buscando la zona de lectura…');
-    var cs = ZONA.candidatos(img);
+    var cs = opc.soloB ? [] : ZONA.candidatos(img);
     for (var k = 0; k < cs.length; k++) {
       for (var v = 0; v < 2; v++) {
         var cr = ZONA.recorte(img, cs[k], 0.08, 1500, !!v), cv = aCanvas(cr);
@@ -1786,6 +1789,7 @@ var OCR = (function () {
         if (best && best.verificado) return { mrz: best, recorte: recorte };
       }
     }
+    if (opc.sinB) return { mrz: best, recorte: recorte };
     // Plan B: la imagen entera, en las 4 orientaciones
     var rots = [0, 180, 90, 270];
     for (var j = 0; j < rots.length; j++) {
@@ -2549,6 +2553,15 @@ var OCR = (function () {
     render(true);
   }
   var colaTrabajo = Promise.resolve();
+  // Imagen o PDF sin zona MRZ: se lee el texto (captura de WhatsApp, mail, ficha) y, si trae pasajeros, se cargan
+  async function leerComoTexto(lienzos, it) {
+    var textos = [];
+    for (var k = 0; k < lienzos.length; k++) { it.estado('No es un documento: leyendo el texto…'); textos.push(TEXTO.arreglarOCR(await OCR.leerTextoImagen(lienzos[k], it.estado))); }
+    var t = textos.join('\n\n');
+    if (!TEXTO.parse(t, { codPais: ST.codpais }).pasajeros.length) return false;
+    sumarAlCampo(t); it.fin('ok', '✓ Texto leído'); leerTexto();
+    return true;
+  }
   function procesar(files) {
     files = Array.prototype.slice.call(files || []).filter(function (f) { return /^image\//.test(f.type) || /pdf$/i.test(f.type) || /\.(pdf|jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(f.name); });
     if (!files.length) { toast('Elegí imágenes (JPG, PNG) o PDF'); return; }
@@ -2570,11 +2583,19 @@ var OCR = (function () {
               else if (tx.length) { tx.forEach(function (x) { fusionar(desdeTexto(x, etq)); }); algo = true; }
             }
             if (algo) { it.fin('ok', '✓ Leído'); render(true); }
-            else agregarLectura({ mrz: null }, pags[0].canvas, nombre, it);
+            else if (!(await leerComoTexto(pags.map(function (x) { return x.canvas; }), it))) agregarLectura({ mrz: null }, pags[0].canvas, nombre, it);
           } else {
             it.estado('Abriendo…');
             var cv = await OCR.cargarImagen(f);
-            var res = await OCR.leerCanvas(cv, it.estado);
+            // 1) zona MRZ localizada (rápido); 2) si no aparece, el texto de la imagen: si trae pasajeros y no parece
+            // un documento, se cargan; 3) si no, la imagen entera en 4 orientaciones (foto torcida de un pasaporte)
+            var res = await OCR.leerCanvas(cv, it.estado, { sinB: true });
+            if (!res.mrz) {
+              it.estado('Leyendo el texto de la imagen…');
+              var tx = TEXTO.arreglarOCR(await OCR.leerTextoImagen(cv, it.estado));
+              if (!pareceMRZ(tx) && TEXTO.parse(tx, { codPais: ST.codpais }).pasajeros.length) { sumarAlCampo(tx); it.fin('ok', '✓ Texto leído'); leerTexto(); return; }
+              res = await OCR.leerCanvas(cv, it.estado, { soloB: true });
+            }
             agregarLectura(res, cv, nombre, it);
           }
         } catch (err) {
@@ -2637,12 +2658,35 @@ var OCR = (function () {
   }
   $('txtArch').addEventListener('click', function () { $('fileTxt').click(); });
   $('fileTxt').addEventListener('change', function () { procesarDatos(this.files); this.value = ''; });
-  $('txt').addEventListener('paste', function (e) {
-    var cd = e.clipboardData; if (!cd) return;
-    if ((cd.getData('text/plain') || '').trim()) return;   // si hay texto (por ej. celdas de Excel), se pega el texto
+  // Archivos (imagen o PDF) del portapapeles, salvo que lo pegado sea texto de verdad: celdas de Excel (traen además
+  // una imagen de la tabla) o un mensaje. Una imagen copiada del navegador trae a veces su dirección como texto.
+  function pegado(cd) {
     var fs = [];
     for (var i = 0; cd.items && i < cd.items.length; i++) if (cd.items[i].kind === 'file') { var f = cd.items[i].getAsFile(); if (f) fs.push(f); }
-    if (fs.length) { e.preventDefault(); e.stopPropagation(); procesarDatos(fs); }
+    if (!fs.length) return null;
+    var tx = (cd.getData('text/plain') || '').trim(), html = cd.getData('text/html') || '';
+    var esImagen = !tx || /^(https?:|blob:|data:|file:)\S*$/i.test(tx) || (/<img/i.test(html) && !/<table/i.test(html) && !/[\t\n]/.test(tx) && tx.length < 200);
+    return esImagen ? fs : null;
+  }
+  $('txt').addEventListener('paste', function (e) {
+    var cd = e.clipboardData; if (!cd) return;
+    var fs = pegado(cd);
+    if (fs) { e.preventDefault(); e.stopPropagation(); procesarDatos(fs); }
+  });
+  // Botón «Pegar captura»: lee el portapapeles (el navegador puede pedir permiso la primera vez)
+  $('txtPegar').addEventListener('click', async function () {
+    if (!navigator.clipboard || !navigator.clipboard.read) { $('txt').focus(); toast('Hacé clic en el recuadro y pegá con Ctrl+V'); return; }
+    try {
+      var items = await navigator.clipboard.read(), fs = [], tx = '';
+      for (var i = 0; i < items.length; i++) {
+        var tipo = items[i].types.filter(function (t) { return /^image\//.test(t); })[0];
+        if (tipo) { var bl = await items[i].getType(tipo); fs.push(new File([bl], 'captura.' + tipo.split('/')[1], { type: tipo })); }
+        else if (items[i].types.indexOf('text/plain') >= 0) tx += await (await items[i].getType('text/plain')).text();
+      }
+      if (fs.length) procesarDatos(fs);
+      else if (tx.trim()) { sumarAlCampo(tx); leerTexto(); }
+      else toast('No hay una captura ni texto copiados');
+    } catch (err) { $('txt').focus(); toast('El navegador no dejó leer lo copiado: hacé clic en el recuadro y pegá con Ctrl+V'); }
   });
   ['dragenter', 'dragover'].forEach(function (t) { $('txt').addEventListener(t, function (e) { if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') >= 0) { e.preventDefault(); e.stopPropagation(); $('txt').classList.add('sobre'); } }); });
   ['dragleave', 'drop'].forEach(function (t) { $('txt').addEventListener(t, function () { $('txt').classList.remove('sobre'); }); });
@@ -2658,13 +2702,12 @@ var OCR = (function () {
   $('drop').addEventListener('drop', function (e) { e.preventDefault(); procesar(e.dataTransfer.files); });
   window.addEventListener('dragover', function (e) { e.preventDefault(); });
   window.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer && e.dataTransfer.files.length) procesar(e.dataTransfer.files); });
+  // Pegar en cualquier parte de la página: si es la foto de un pasaporte o cédula se lee la zona MRZ;
+  // si no, se lee el texto de la captura. Si lo copiado es texto, se pega normalmente.
   document.addEventListener('paste', function (e) {
-    // pegando en un campo con texto en el portapapeles (por ej. celdas de Excel, que traen además una imagen): se pega el texto
-    var ed = e.target && e.target.closest && e.target.closest('input,textarea,[contenteditable]');
-    if (ed && e.clipboardData && (e.clipboardData.getData('text/plain') || '').trim()) return;
-    var it = e.clipboardData && e.clipboardData.items, fs = [];
-    for (var i = 0; it && i < it.length; i++) if (it[i].kind === 'file') { var f = it[i].getAsFile(); if (f) fs.push(f); }
-    if (fs.length) { e.preventDefault(); procesar(fs); }
+    var cd = e.clipboardData; if (!cd) return;
+    var fs = pegado(cd); if (!fs) return;
+    e.preventDefault(); procesar(fs);
   });
 
   // ---------- modal: ver imagen / marcar zona ----------
