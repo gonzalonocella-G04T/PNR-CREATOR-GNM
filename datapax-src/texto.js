@@ -488,7 +488,8 @@ var TEXTO = (function () {
     var m = Object.keys(mails), t = Object.keys(tels);
     r.comun = { email: m.length === 1 ? mails[m[0]] : '', telefono: t.length === 1 ? tels[t[0]] : '' };
     ps.forEach(function (p) {
-      if (tieneDatos(p)) { if (r.comun.email && !p.email) p.email = r.comun.email; if (r.comun.telefono && !p.telefono) p.telefono = r.comun.telefono; }
+      var bebe = p.nacimiento && (new Date() - new Date(p.nacimiento.y, p.nacimiento.m - 1, p.nacimiento.d)) < 2 * 365.25 * 864e5;   // infante: sin contactos
+      if (tieneDatos(p) && !bebe) { if (r.comun.email && !p.email) p.email = r.comun.email; if (r.comun.telefono && !p.telefono) p.telefono = r.comun.telefono; }
     });
     return r;
   }

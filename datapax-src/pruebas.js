@@ -74,5 +74,25 @@ var apil = TEXTO.parse('Juan Perez\n05/03/1980\nAna Gomez\n06/04/1985').pasajero
 eq('nombre/fecha/nombre/fecha sin renglón en blanco', apil.map(function (p) { return p.nombres + ' ' + p.apellidos + ' ' + p.nacimiento.y; }), ['JUAN PEREZ 1980', 'ANA GOMEZ 1985']);
 var vto = TEXTO.parse('Juan Perez\nPasaporte C1234567\nvence 12/08/2029').pasajeros;
 eq('vencimiento en su propio renglón', [vto.length, vto[0].pasaporte, vto[0].vencimiento && vto[0].vencimiento.y], [1, 'C1234567', 2029]);
+// Infantes: menos de 2 años a la fecha del viaje, sin FOID, DOCS con MI/FI y la /P del adulto
+var fam = [{ id: 1, apellidos: 'PEREZ', nombres: 'JUAN', sexo: 'M', nac: { y: 1980, m: 3, d: 5 }, ppNum: 'C1234567', ppEmisor: 'URY', email: 'fam@x.com' },
+  { id: 2, apellidos: 'GOMEZ', nombres: 'ANA', sexo: 'F', nac: { y: 1985, m: 4, d: 6 }, ppNum: 'C7654321', ppEmisor: 'URY', email: 'fam@x.com' },
+  { id: 3, apellidos: 'PEREZ', nombres: 'LUCIA', sexo: 'F', nac: { y: 2025, m: 6, d: 10 }, ppNum: 'C5555555', ppEmisor: 'URY' },
+  { id: 4, apellidos: 'PEREZ', nombres: 'TOMAS', sexo: 'M', nac: { y: 2024, m: 12, d: 1 }, ppNum: 'C6666666', ppEmisor: 'URY' }];
+var gA = CMD.generar(fam, { gds: 'A', fechaViaje: new Date(2026, 11, 1), contactoTodos: true }), sec = gA.secciones;
+var tx = function (k) { return sec[k].map(function (l) { return l.t || ('FALTA ' + l.falta); }); };
+eq('infante: tipos (cumple 2 el día del viaje = niño)', gA.orden.map(function (x) { return x.p.nombres + ':' + x.tipo; }).sort(), ['ANA:ADT', 'JUAN:ADT', 'LUCIA:INF', 'TOMAS:CHD']);
+eq('infante: nombre con el adulto', tx('nombres').filter(function (l) { return /INF/.test(l); }), ['NM1PEREZ/JUAN MR(INF/LUCIA/10JUN25)']);
+eq('infante: DOCS con FI y /P del adulto', tx('docs').filter(function (l) { return /LUCIA/.test(l); }), ['SR DOCS HK1-----10JUN25-FI--PEREZ-LUCIA/P2']);
+eq('infante: sin FOID', tx('foid').filter(function (l) { return /5555555/.test(l); }), []);
+eq('mismo mail para todos: una línea sin /P', tx('ctc'), ['SRCTCE-FAM//X.COM']);
+var gS = CMD.generar(fam, { gds: 'S', fechaViaje: new Date(2026, 11, 1), contactoTodos: true });
+eq('Sabre: infante y contactos', gS.secciones.docs.map(function (l) { return l.t; }).filter(function (l) { return /LUCIA/.test(l); }).concat(gS.secciones.ctc.map(function (l) { return l.t; })),
+  ['3DOCS/DB/10JUN25/FI/PEREZ/LUCIA-2.1', '3INFT/PEREZ/LUCIA/10JUN25-2.1', '3CTCE/FAM//X.COM-1.1', '3CTCE/FAM//X.COM-2.1', '3CTCE/FAM//X.COM-3.1']);
+var gC = CMD.generar(fam, { gds: 'A', fechaViaje: new Date(2026, 11, 1), infanteConfirmar: true });
+eq('reserva ya cargada: el DOCS del infante espera el adulto elegido', gC.secciones.docs.filter(function (l) { return !l.t; }).map(function (l) { return l.falta; }), ['a qué adulto está asociado el infante en la reserva (elegilo en su tarjeta)']);
+fam[2].infanteDe = 2;
+var gD = CMD.generar(fam, { gds: 'A', fechaViaje: new Date(2026, 11, 1), infanteConfirmar: true });
+eq('infante asociado a mano a otro adulto', gD.secciones.docs.map(function (l) { return l.t; }).filter(function (l) { return /LUCIA/.test(l); }), ['SR DOCS HK1-----10JUN25-FI--PEREZ-LUCIA/P1']);
 console.log(fallas ? '\n' + fallas + ' pruebas fallaron' : '\nTodo bien');
 process.exit(fallas ? 1 : 0);

@@ -184,3 +184,12 @@ button.agregar:hover{background:#E6F5F1}
 }
 
 textarea#txt.sobre{border-color:var(--sky);background:#E4F7F3;box-shadow:0 0 0 3px rgba(20,141,126,.18)}
+
+/* Infante: bloque destacado para elegir el adulto asociado */
+.infbox{background:#EEF6FB;border:1px solid #BFD9EA;border-radius:10px;padding:8px 12px 10px;margin:8px 0 4px}
+.infbox .ih{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:12.5px;color:#24506B}
+.infbox .ih b{font-size:13px;color:#174B6B;text-transform:uppercase;letter-spacing:.4px}
+.infbox label{color:#24506B}
+.infbox select{max-width:420px}
+.infbox.falta{background:#FFF6E0;border-color:#F0D79A}
+.infbox.falta select{border-color:#E2B33C;box-shadow:0 0 0 2px #FBE7B3}

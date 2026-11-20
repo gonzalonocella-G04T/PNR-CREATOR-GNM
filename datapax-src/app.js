@@ -202,8 +202,16 @@
     if (!p.nac) a.push({ t: 'Falta la fecha de nacimiento para el DOCS.', k: 'err' });
     if (p.ciNum && (p.ciEmisor || 'URY') === 'URY' && /^\d{7,8}$/.test(p.ciNum) && !TEXTO.ciValida(p.ciNum)) a.push({ t: 'El dígito verificador de la cédula no coincide: revisá el número.', k: 'err' });
     if (!p.ppNum && !p.ciNum) a.push({ t: 'Sin documento: no se arma el FOID.', k: 'warn' });
-    if (tipo === 'INF' && info && !info.adulto) a.push({ t: 'El infante necesita un adulto con quien viajar.', k: 'err' });
-    if (tipo === 'INF' && info && info.adulto && !p.infanteDe) a.push({ t: 'Se cargó en brazos de ' + nombreDe(info.adulto).trim() + '. Si viaja con otro adulto, elegilo en «Viaja en brazos de».', k: 'ok' });
+    if (tipo === 'INF' && info && !info.adulto) a.push({ t: 'El infante necesita un adulto con quien viajar: cargá al adulto y elegilo en «Adulto al que está asociado en la reserva».', k: 'err' });
+    if (tipo === 'INF' && info && info.adulto && !p.infanteDe) a.push(ST.reserva === 'existe'
+      ? { t: 'Elegí a qué adulto está asociado el infante en la reserva: hasta entonces no se arma su DOCS.', k: 'err' }
+      : { t: 'Se asoció a ' + nombreDe(info.adulto).trim() + '. Si en la reserva va con otro adulto, cambialo en «Adulto al que está asociado en la reserva».', k: 'warn' });
+    // cumple 2 años cerca del viaje: deja de ser infante
+    if (p.nac && !p.tipoManual && tipo === 'INF') {
+      var dos = new Date(p.nac.y + 2, p.nac.m - 1, p.nac.d), ref = refViaje(), dias = Math.round((dos - ref) / 864e5);
+      if (tipo === 'INF' && !ST.fviaje) a.push({ t: 'Es infante calculando con la fecha de hoy: cumple 2 años el ' + dmy({ y: dos.getFullYear(), m: dos.getMonth() + 1, d: dos.getDate() }) + '. Si viaja desde ese día, va como niño con asiento.', k: 'warn', fv: 1 });
+      else if (tipo === 'INF' && dias <= 90) a.push({ t: 'Cumple 2 años el ' + dmy({ y: dos.getFullYear(), m: dos.getMonth() + 1, d: dos.getDate() }) + ', ' + dias + (dias === 1 ? ' día' : ' días') + ' después de la ida: si la vuelta es desde esa fecha, en el regreso ya no viaja como infante.', k: 'warn' });
+    }
     if (p.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email.trim())) a.push({ t: 'El mail no parece válido.', k: 'warn' });
     return a;
   }
@@ -222,7 +230,7 @@
   }
   var ULT = null;
   function calcular() {
-    ULT = CMD.generar(limpios(), { gds: ST.gds, docsCompleto: ST.docsComp, tituloF: ST.titF, fechaViaje: refViaje(), contactoTodos: true });
+    ULT = CMD.generar(limpios(), { gds: ST.gds, docsCompleto: ST.docsComp, tituloF: ST.titF, fechaViaje: refViaje(), contactoTodos: true, infanteConfirmar: ST.reserva === 'existe' });
     var info = {};
     ULT.orden.forEach(function (x) { info[x.p.id] = { n: x.n, tipo: x.tipo, edad: x.edad, tit: x.tit, adulto: x.adulto ? x.adulto.p.id : 0 }; });
     return info;
@@ -336,6 +344,13 @@
     h += '<div class="c3"><label>Sexo</label><div class="sx' + (p.sexo ? '' : ' falta') + '"><button type="button" data-sx="M" title="Masculino (tecla M)" tabindex="' + (p.sexo === 'F' ? -1 : 0) + '" class="' + (p.sexo === 'M' ? 'on' : '') + '">M</button><button type="button" data-sx="F" title="Femenino (tecla F)" tabindex="' + (p.sexo === 'F' ? 0 : -1) + '" class="' + (p.sexo === 'F' ? 'on' : '') + '">F</button></div><div class="small" data-sxn></div></div>';
     h += '<div class="c4"><label>Nacimiento</label><input data-f="nac" data-fecha="nac" value="' + dmy(p.nac) + '" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" maxlength="11"><div class="small" data-edad></div></div>';
     h += '<div class="c5"><label>Nacionalidad</label><input data-f="nacionalidad" list="paises" value="' + esc(p.nacionalidad) + '" maxlength="3" autocomplete="off"><div class="small">' + esc(paisNom(p.nacionalidad)) + '</div></div>';
+    if (i.tipo === 'INF') {
+      var nAd = function (q) { var n = info[q.id] ? info[q.id].n : ''; return n ? (S ? n + '.1' : 'P' + n) + ' · ' : ''; };
+      var auto = !p.infanteDe && i.adulto ? porId(i.adulto) : null, falta = !p.infanteDe && (ST.reserva === 'existe' || !auto);
+      h += '<div class="c12 infbox' + (falta ? ' falta' : '') + '"><div class="ih"><b>Infante</b><span>menos de 2 años al viajar · va en brazos de un adulto · no lleva FOID · DOCS con ' + (p.sexo === 'F' ? 'FI' : p.sexo === 'M' ? 'MI' : 'MI / FI') + ' y la ' + (S ? 'asociación' : '/P') + ' del adulto</span></div>';
+      h += '<label for="inf' + p.id + '">Adulto al que está asociado en la reserva</label><select id="inf' + p.id + '" data-f="infanteDe"><option value="">' + (auto ? 'Automático: ' + esc(nAd(auto) + L(auto.nombres).split(' ')[0] + ' ' + L(auto.apellidos)) : 'Elegí el adulto…') + '</option>' + adultos.map(function (q) { return '<option value="' + q.id + '"' + (+p.infanteDe === q.id ? ' selected' : '') + '>' + esc(nAd(q) + L(q.nombres).split(' ')[0] + ' ' + L(q.apellidos)) + '</option>'; }).join('') + '</select>';
+      h += '<div class="small">Si los nombres ya están en la reserva, elegí el mismo adulto que tiene al infante en el ' + (S ? 'PNR' : 'PNR (RT)') + '. Sin adulto asociado, Amadeus y Sabre no aceptan el DOCS del infante.</div></div>';
+    }
     h += '<div class="c3"><label>Documento</label><select data-f="docUsar"><option value="PP"' + (uso === 'PP' ? ' selected' : '') + '>Pasaporte</option><option value="NI"' + (uso === 'NI' ? ' selected' : '') + '>Cédula / DNI</option></select></div>';
     var num = uso === 'NI' ? p.ciNum : p.ppNum, em = uso === 'NI' ? p.ciEmisor : p.ppEmisor, ve = uso === 'NI' ? p.ciVenc : p.ppVenc;
     h += '<div class="c3"><label>Número</label><input data-f="' + (uso === 'NI' ? 'ciNum' : 'ppNum') + '" value="' + esc(num) + '" autocomplete="off" spellcheck="false" style="text-transform:uppercase"></div>';
@@ -345,8 +360,7 @@
     h += '<div class="c6"><label>Celular</label><input type="tel" data-f="tel" value="' + esc(p.tel) + '" autocomplete="off" placeholder="598…"></div>';
     h += '<div class="c4"><label>Tipo</label><select data-f="tipoManual"><option value="">Automático</option><option value="ADT"' + (p.tipoManual === 'ADT' ? ' selected' : '') + '>Adulto</option><option value="CHD"' + (p.tipoManual === 'CHD' ? ' selected' : '') + '>Niño (2 a 11)</option><option value="INF"' + (p.tipoManual === 'INF' ? ' selected' : '') + '>Infante (menos de 2)</option></select></div>';
     h += '<div class="c4"><label>Título</label><select data-f="tituloManual"><option value="">Automático</option>' + ['MR', 'MRS', 'MS', 'MSTR', 'MISS'].map(function (t) { return '<option' + (p.tituloManual === t ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select></div>';
-    if (i.tipo === 'INF') h += '<div class="c4"><label>Viaja en brazos de</label><select data-f="infanteDe"><option value="">Automático</option>' + adultos.map(function (q) { return '<option value="' + q.id + '"' + (+p.infanteDe === q.id ? ' selected' : '') + '>' + esc(L(q.nombres).split(' ')[0] + ' ' + L(q.apellidos)) + '</option>'; }).join('') + '</select></div>';
-    else h += '<div class="c4"><label>N.º en la reserva</label><input data-f="numManual" value="' + esc(p.numManual) + '" inputmode="numeric" maxlength="2" placeholder="auto"></div>';
+    if (i.tipo !== 'INF') h += '<div class="c4"><label>N.º en la reserva</label><input data-f="numManual" value="' + esc(p.numManual) + '" inputmode="numeric" maxlength="2" placeholder="auto"></div>';
     h += '</div><ul class="avisos" data-av></ul>';
     if (p.fotos.length) {
       h += '<div class="thumbs">';
@@ -372,7 +386,7 @@
     var sxn = art.querySelector('[data-sxn]'); if (sxn) { sxn.textContent = p.sexo && p.sexoNombre ? 'Según el nombre' : (!p.sexo && p.sexoDuda ? 'Nombre de ambos sexos' : ''); sxn.title = p.sexoNombre ? 'Deducido de ' + p.sexoNombre + ': si no corresponde, tocá la otra letra' : ''; }
     var todos = avisos(p, i), arriba = todos.filter(function (a) { return a.k === 'fuerte'; });
     var cv = art.querySelector('[data-venc]'); if (cv) cv.innerHTML = arriba.map(function (a) { return '<li class="fuerte">' + esc(a.t) + '</li>'; }).join('');
-    art.querySelector('[data-av]').innerHTML = todos.filter(function (a) { return a.k !== 'fuerte'; }).map(function (a) { return '<li class="' + ({ err: 'err', ok: 'ok', fuerte: 'fuerte', tenue: 'tenue' }[a.k] || '') + '">' + esc(a.t) + (a.i !== undefined ? ' <button type="button" class="lnk" tabindex="-1" data-oc="' + a.i + '" title="Ocultar este aviso">ocultar</button>' : '') + '</li>'; }).join('');
+    art.querySelector('[data-av]').innerHTML = todos.filter(function (a) { return a.k !== 'fuerte'; }).map(function (a) { return '<li class="' + ({ err: 'err', ok: 'ok', fuerte: 'fuerte', tenue: 'tenue' }[a.k] || '') + '">' + esc(a.t) + (a.fv ? ' <button type="button" class="lnk" tabindex="-1" data-irfv>Cargar la fecha del viaje</button>' : '') + (a.i !== undefined ? ' <button type="button" class="lnk" tabindex="-1" data-oc="' + a.i + '" title="Ocultar este aviso">ocultar</button>' : '') + '</li>'; }).join('');
   }
   function render(todo) {
     var info = calcular();
@@ -440,7 +454,7 @@
     }
     if (f === 'tel' && p.tel) { var t = TEXTO.telefono(p.tel, ST.codpais); if (t) { p.tel = t.num; e.target.value = t.num; if (t.aviso) toast(t.aviso); } }
     if (/^(nacionalidad|ppEmisor|ciEmisor)$/.test(f)) { e.target.value = p[f]; if (p[f] && !PAISES[p[f]]) toast('Código de país desconocido: usá el de 3 letras (URY, ARG, BRA…)'); }
-    if (f === 'docUsar' || f === 'tipoManual' || f === 'infanteDe') { rehacer(); return; }
+    if (f === 'docUsar' || f === 'tipoManual' || f === 'infanteDe') { p[f] = f === 'infanteDe' ? (+e.target.value || 0) : e.target.value; rehacer(); return; }
     cambio();
   });
   $('paxs').addEventListener('click', function (e) {
@@ -458,6 +472,7 @@
       p.avisosF.forEach(function (a, k) { if (/nombres y cuáles apellidos/.test(a.t)) p.ocultos[k] = 1; });
       cambio(); return;
     }
+    if (b.hasAttribute('data-irfv')) { $('opc').open = true; var fv = $('fviaje'); fv.scrollIntoView({ block: 'center', behavior: 'smooth' }); fv.focus({ preventScroll: true }); return; }
     if (b.hasAttribute('data-oc')) { p.ocultos[+b.getAttribute('data-oc')] = 1; render(false); return; }
     if (b.hasAttribute('data-ver')) { var f = p.fotos[+b.getAttribute('data-ver')]; verImagen(f.lienzo && LIENZOS[f.lienzo] ? LIENZOS[f.lienzo] : null, f.mrz || f.foto); return; }
     if (b.hasAttribute('data-rel')) { zonaManual(b.getAttribute('data-rel'), p.id); return; }
@@ -472,7 +487,7 @@
       copiar(ls.join(lim.sep)).then(function () { ls.forEach(function (x) { ST.hechos[x] = 1; }); renderOut(); toast(S ? (ls.length === 1 ? '1 comando copiado' : ls.length + ' comandos copiados en una entrada (con §)') : (ls.length === 1 ? '1 línea copiada' : ls.length + ' líneas copiadas')); });
       return;
     }
-    if (b.hasAttribute('data-r')) { ST.reserva = b.getAttribute('data-r'); renderOut(); return; }
+    if (b.hasAttribute('data-r')) { ST.reserva = b.getAttribute('data-r'); if (ST.pax.some(function (q) { return ULT && ULT.orden.some(function (x) { return x.p.id === q.id && x.tipo === 'INF'; }); })) rehacer(); else renderOut(); return; }
     if (b.id === 'nomListos') {
       ULT.orden.forEach(function (x) { if (x.tipo !== 'INF' || x.adulto) { if (L(x.p.apellidos) && L(x.p.nombres)) ST.cargados[x.p.id] = 1; } });
       renderOut(); toast('Paso 2 habilitado'); return;
@@ -488,6 +503,7 @@
     // un solo mail o celular en el texto: vale para todos los pasajeros (también los cargados antes)
     var c = r.comun || {}, conMail = 0, conTel = 0;
     if (ST.pax.length > 1) ST.pax.forEach(function (p) {
+      if (CMD.tipoPax(p, refViaje()) === 'INF') return;   // los infantes no llevan contactos
       if (c.email && !p.email) { p.email = c.email; conMail++; }
       if (c.telefono && !p.tel) { var tt = TEXTO.telefono(c.telefono, ST.codpais); p.tel = tt ? tt.num : c.telefono; conTel++; }
     });
