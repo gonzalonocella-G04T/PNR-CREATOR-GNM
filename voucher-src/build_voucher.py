@@ -45,6 +45,41 @@ _b=_re.search(r"var RAW = \{(.*?)\n  \};",idx,_re.S)
 for code,city in _re.findall(r"\b([A-Z]{3}) ([^,/']+)(?:/[^,']*)?",_b.group(1)): apt[code]=city.strip()
 data='var AIRN='+json.dumps(air,ensure_ascii=False,separators=(',',':'))+';\nvar APTC='+json.dumps(apt,ensure_ascii=False,separators=(',',':'))+';\n'
 data+='var EXC_FOTOS='+json.dumps(exc,ensure_ascii=False)+';\n'+fotos+'\nvar SELLOS='+json.dumps(sellos,ensure_ascii=False,separators=(',',':'))+';\nvar OPERADORES='+json.dumps(ops,ensure_ascii=False)+';\nvar PAISES='+json.dumps(pmap,ensure_ascii=False)+';\n'
+# ---- versión celeste Hiperviajes: mismo voucher con los verdes cambiados por tonos celestes ----
+CEL=json.load(open(os.path.join(here,'celeste.json'),encoding='utf-8'))
+_PROPS=_re.compile(r'^(--.*|color|background.*|border.*|outline.*|box-shadow|text-shadow|fill|stroke|accent-color|caret-color|text-decoration.*)$')
+def _pinta(t):
+    t=_re.sub(r'#[0-9a-fA-F]{6}\b',lambda m:CEL['hex'].get(m.group(0).upper(),m.group(0)),t)
+    return _re.sub(r'rgba\((\d+,\d+,\d+),',lambda m:'rgba('+CEL['rgb'].get(m.group(1),m.group(1))+',',t)
+def css_celeste(css):
+    # Cada regla del voucher se repite bajo .c-hv con un nivel más de especificidad y solo con sus
+    # propiedades de color: así el celeste gana siempre y el orden entre reglas queda igual que en el verde.
+    css=_re.sub(r'/\*.*?\*/','',css,flags=_re.S); out=[]; i=0
+    while i<len(css):
+        j=css.find('{',i)
+        if j<0: break
+        sel=css[i:j].strip()
+        if sel.startswith('@'):  # bloques @media: no tienen colores del voucher
+            d=1; k=j+1
+            while d: d+=(css[k]=='{')-(css[k]=='}'); k+=1
+            i=k; continue
+        k=css.find('}',j); body=css[j+1:k]; i=k+1
+        if 'c-hv' in sel: continue
+        decl=[x for x in body.split(';') if ':' in x and _PROPS.match(x.split(':',1)[0].strip())]
+        if not decl: continue
+        sels=[]
+        for q in sel.split(','):
+            q=q.strip()
+            if q==':root': sels.append('.c-hv')
+            elif q.startswith(('.sheet','.v-')): sels.append('.c-hv'+q)
+            else: sels.append('.c-hv '+q)
+        out.append(','.join(sels)+'{'+';'.join(_pinta(x.strip()) for x in decl)+'}')
+    return '\n'.join(out)
+VCSS=rd(os.path.join(here,'voucher.css'))
+VCSS=VCSS+'\n/* ---------- versión celeste Hiperviajes (generado por build_voucher.py desde celeste.json) ---------- */\n'+css_celeste(VCSS)+'\n'
+data+='var HVC='+json.dumps(CEL,ensure_ascii=False,separators=(',',':'))+';\n'
+_verdes=sorted(set(h.upper() for h in _re.findall(r'#[0-9a-fA-F]{6}\b',rd(os.path.join(here,'voucher.css'))+rd(os.path.join(here,'app.js'))))-set(CEL['hex'])-{'#6B4E00','#8FD0E6','#B3261E','#BFE3EF','#F0C9C5','#F0D79A','#FDF1F0','#FFF6E0'})
+if _verdes: print('Aviso: colores sin tono celeste en celeste.json:',', '.join(_verdes))
 js=data+rd(os.path.join(here,'parse.js'))+rd(os.path.join(here,'app.js'))
 assert '</script' not in js.lower()
 import datetime
@@ -53,5 +88,5 @@ html=('<!doctype html>\n<html lang="es"><head><meta charset="utf-8"><meta name="
  '<title>Voucher de servicios · Hiperviajes</title><link rel="icon" href="vch-fav/favicon.ico?v=1" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="vch-fav/favicon-32.png?v=1"><link rel="icon" type="image/png" sizes="192x192" href="vch-fav/icon-192.png?v=1"><link rel="apple-touch-icon" href="vch-fav/apple-touch-icon.png?v=1"><meta name="theme-color" content="#19C0AA">'
  '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
  '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;1,500&family=Playfair+Display:ital,wght@1,700;1,800;1,900&family=Oswald:wght@500;600;700&display=swap">'
- '<style>'+rd(os.path.join(here,'voucher.css'))+'</style></head><body>'+rd(os.path.join(here,'body.html')).replace('__VERSION__',VERSION_TXT)+'<script>'+js+'</script></body></html>\n')
+ '<style>'+VCSS+'</style></head><body>'+rd(os.path.join(here,'body.html')).replace('__VERSION__',VERSION_TXT)+'<script>'+js+'</script></body></html>\n')
 open(os.path.join(root,'voucher.html'),'w',encoding='utf-8').write(html); print('voucher.html',len(html))

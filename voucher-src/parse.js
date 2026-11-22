@@ -341,7 +341,7 @@ function vuelosLibres(txt){
     var dl=/\b(llegada|arribo|arriba|llega|ida)\b/i.test(l)?'in':(/\b(salida|regreso|vuelta|sale|retorno)\b/i.test(l)?'out':'');
     var md=rest.match(/\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/);if(md){tk.f=md;rest=rest.replace(md[0],' ');}
     var mr=rest.match(/\b([A-Z]{3})\s*[-–\/>→]+\s*([A-Z]{3})\b/);if(mr){tk.r=mr;rest=rest.replace(mr[0],' ');}
-    var mt=rest.match(/\b(\d{1,2})[:.](\d{2})\s*(?:hs?\.?)?/i);if(mt){tk.t=mt;rest=rest.replace(mt[0],' ');var mt2=rest.match(/\b(\d{1,2})[:.](\d{2})\s*(?:hs?\.?)?/i);if(mt2){tk.t2=mt2;rest=rest.replace(mt2[0],' ');}}
+    var mt=rest.match(/\b(\d{1,2})[:.](\d{2})\s*(?:hs?\.?(?![A-Za-z0-9]))?/i);if(mt){tk.t=mt;rest=rest.replace(mt[0],' ');var mt2=rest.match(/\b(\d{1,2})[:.](\d{2})\s*(?:hs?\.?(?![A-Za-z0-9]))?/i);if(mt2){tk.t2=mt2;rest=rest.replace(mt2[0],' ');}}
     if(ca)tk.v=[null,ca.c,ca.n];else{var mv=rest.match(/\b([A-Z]{2}|[A-Z]\d|\d[A-Z])\s?(\d{1,4})\b/);if(mv){tk.v=mv;rest=rest.replace(mv[0],' ');}}
     var letras=rest.replace(/\b(vuelos?|vlo|hs|hrs|horas?|sale|salida|llega|llegada|arribo|ida|regreso|vuelta|retorno|de|del|a|al|el|la|en|con|y|nro|n°|aeropuerto|horario)\b/gi,'').replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g,'');
     var n=Object.keys(tk).length;
@@ -577,7 +577,11 @@ function parseServicios(txt){
   svs.forEach(function(x){ // un "servicio" con vuelo es un traslado
     if(x.tipo!=='exc'||!x.raw||!(RE_VU.test(x.raw)||codAerolinea(x.raw))||/excursi|tour|visita|paseo|city|entrada|ticket/i.test(x.raw))return;
     var dir=/\b(llegada|arribo|llega|in)\b/i.test(x.raw)?'in':(/\b(salida|regreso|sale|out|retorno)\b/i.test(x.raw)?'out':(x.f&&iso(x.f)===fmax&&fmax!==fmin?'out':'in'));
-    x.tipo=dir;x.kind=/privad/i.test(x.raw)?'privado':(/regular|compartid/i.test(x.raw)?'regular':kind);x.from=dir==='in'?'Aeropuerto':'__HOTEL__';x.to=dir==='in'?'__HOTEL__':'Aeropuerto';delete x.titulo;});
+    x.tipo=dir;x.kind=/privad/i.test(x.raw)?'privado':(/regular|compartid/i.test(x.raw)?'regular':kind);x.from=dir==='in'?'Aeropuerto':'__HOTEL__';x.to=dir==='in'?'__HOTEL__':'Aeropuerto';delete x.titulo;x.deVuelo=true;});
+  // Si el pedido ya trae ese traslado (mismo sentido, ese día), la línea del vuelo solo aporta el vuelo: no suma otro traslado.
+  // El IN puede caer al día siguiente del vuelo (nocturno o conexión) y el OUT la noche anterior (vuelo de madrugada).
+  svs=svs.filter(function(x){if(!x.deVuelo||!x.f)return true;var k=iso(x.f),k2=iso(sumarDias(x.f,x.tipo==='in'?1:-1));
+    return !svs.some(function(y){if(y.deVuelo||y.tipo!==x.tipo||!y.f)return false;var ky=iso(y.f);return ky===k||ky===k2;});});
   svs.forEach(function(x){if(x.from==='__HOTEL__')x.from=hoteles[0]||'Hotel';if(x.to==='__HOTEL__')x.to=hoteles[0]||'Hotel';});
   hoteles.forEach(function(h){
     var i0=rawL.indexOf(h),det=[],noches=null,j,l2;

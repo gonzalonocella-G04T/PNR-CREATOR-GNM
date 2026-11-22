@@ -1,5 +1,16 @@
 var REMOTE='https://raw.githubusercontent.com/gonzalonocella-G04T/PNR-CREATOR-GNM/main/';
-var HV_LOGO='img/hiperviajes-slogan-teal.png',state={logoPos:'auto',ver:'dig',v:null,opLogo:null,hvLogo:null};
+var HV_LOGO='img/hiperviajes-slogan-teal.png',state={logoPos:'auto',ver:'dig',col:'verde',v:null,opLogo:null,hvLogo:null};
+try{if(localStorage.getItem('vch-color')==='celeste')state.col='celeste';}catch(e){}
+/* Versión celeste Hiperviajes: el voucher es el mismo; se cambian los verdes por los tonos de celeste.json
+   (las reglas CSS .c-hv las arma build_voucher.py; acá se pintan los colores que van dentro del HTML y los logos). */
+function hvPaint(h){
+  if(state.col!=='celeste'||typeof HVC==='undefined')return h;
+  h=h.replace('class="sheet ','class="sheet c-hv ');
+  h=h.replace(/#[0-9a-fA-F]{6}\b/g,function(c){return HVC.hex[c.toUpperCase()]||c;});
+  h=h.replace(/rgba\((\d+,\d+,\d+),/g,function(m,t){return 'rgba('+(HVC.rgb[t]||t)+',';});
+  Object.keys(HVC.img).forEach(function(k){h=h.split(k).join(HVC.img[k]);});
+  return h;
+}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function ciudadAp(c){if(!c)return '';var d=typeof ciudadPorCodigo==='function'?ciudadPorCodigo(c):null,a=typeof APTC!=='undefined'?APTC[c]:'';
   if(d&&d.x&&a&&d.c.indexOf(c)>=0&&a.indexOf('/')<0&&norm(a).replace(/[^A-Z]/g,'').indexOf(norm(d.n).replace(/[^A-Z]/g,''))<0&&!d.a.some(function(z){return norm(z)===norm(a);}))return a; // REC es Recife aunque el destino sea Porto de Galinhas
@@ -154,7 +165,7 @@ function render(){
       return '<div class="r'+(fo?' exc':'')+'">'+(fo?'<div class="strip">'+im(fo,'','')+'<div class="fade"></div></div>':'')+chip+'<div class="vl"></div><div class="bd">'+body+'</div></div>';
     }).join('');
     var ob=$('obs').value.trim();
-    st.innerHTML='<div class="sheet v-dig2" id="sheet">'+
+    st.innerHTML=hvPaint('<div class="sheet v-dig2" id="sheet">'+
       '<div class="hero">'+(foto?im(foto,'ph','').replace('<img','<img style="object-position:center '+(state.fotoUp||!dest||dest.y==null?40:Math.round(dest.y*100))+'%"'):'')+(abajo?'':'<div class="veil"></div><div class="logos">'+LOGOS+'</div>')+
       '<svg class="wave" viewBox="0 0 610 70" preserveAspectRatio="none"><path d="M0 18C120 52 230 62 340 44S520 4 610 22V70H0Z" fill="#cfeee7" opacity=".85"/><path d="M0 40C140 66 260 70 360 56S520 26 610 40V70H0Z" fill="#f4fbfa"/></svg></div>'+
       (abajo?'<div class="logos-below">'+LOGOS+'</div>':'')+'<div class="mid"><svg class="deco" viewBox="0 0 610 300" preserveAspectRatio="none"><path d="M0 40C60 70 90 140 40 200S0 280 0 300Z" fill="#d7efea" opacity=".7"/><path d="M610 20C540 60 520 120 570 170S610 250 610 300Z" fill="#d7efea" opacity=".7"/></svg>'+
@@ -165,8 +176,8 @@ function render(){
       PREST+(ob?'<div class="ob" contenteditable>'+esc(ob)+'</div>':'')+CONT+'<div class="bye"><b contenteditable>¡Buen viaje!</b><span contenteditable>Gracias por elegirnos</span></div>'+'</div>'+
       '<div class="foot"><svg viewBox="0 0 610 90" preserveAspectRatio="none"><path d="M0 22C150 2 300 4 420 16S560 34 610 20V90H0Z" fill="#bfe6de"/><path d="M0 40C140 20 290 22 420 34S560 50 610 36V90H0Z" fill="url(#fg)"/><defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2aa192"/><stop offset="1" stop-color="#14766b"/></linearGradient></defs></svg>'+
       '<div class="vft"><i></i>'+SV(TICKET,'tk')+'<span>VOUCHER DE SERVICIO</span><i></i></div></div>'+
-      (dest&&dest.cr?'<div class="cr">Foto: '+esc(dest.cr)+'</div>':'')+'</div>';
-    document.querySelectorAll('.seg button').forEach(function(b){b.classList.toggle('on',b.dataset.v===state.ver);});
+      (dest&&dest.cr?'<div class="cr">Foto: '+esc(dest.cr)+'</div>':'')+'</div>');
+    marcarBotones();
     ajustarLogos();
     return;
   }
@@ -174,10 +185,10 @@ function render(){
   var obs=$('obs').value.trim();
   var html='<div class="sheet '+cls+'" id="sheet">'+head+hero+intro+'<div class="body">'+pax+v.items.map(itemHtml).join('')+PREST+CONT+
     '<div class="obs" contenteditable>'+esc(obs)+'</div>'+'<div class="bye"><b contenteditable>¡Buen viaje!</b><span contenteditable>Gracias por elegirnos</span></div>'+'</div><div class="ft"><span>Hiperviajes</span><span>Voucher de servicios</span></div></div>';
-  st.innerHTML=html;
+  st.innerHTML=hvPaint(html);
   ajustarLogos();
   var du=st.querySelector('img.duo');if(du)duotono(du);
-  document.querySelectorAll('.seg button').forEach(function(b){b.classList.toggle('on',b.dataset.v===state.ver);});
+  marcarBotones();
 }
 /* ---- Integración automática de logos según la foto ---- */
 function tintWhite(img,cb){
@@ -196,9 +207,9 @@ function ajustarLogos(){
   var sh=$('sheet');if(!sh)return;var hero=sh.querySelector('.hero'),veil=sh.querySelector('.hero .veil'),hvI=sh.querySelector('.hvlogo'),opI=sh.querySelector('.oplogo');
   if(!hero||!veil)return;
   var mode=state.logoPos,ph=hero.querySelector('img.ph'),posY=(state.v&&state.v.dest&&state.v.dest.y!=null&&!state.fotoUp)?state.v.dest.y:(state.ver==='dig'?.4:.5);
-  function setHv(f){if(hvI&&!state.hvUpload)hvI.src=f;}
+  function setHv(f){if(hvI&&!state.hvUpload)hvI.src=hvPaint(f);}
   if(mode==='oscuro'){
-    veil.style.background='linear-gradient(180deg,rgba(6,35,33,.74) 0%,rgba(6,35,33,.5) 45%,rgba(6,35,33,0) 92%)';
+    veil.style.background=hvPaint('linear-gradient(180deg,rgba(6,35,33,.74) 0%,rgba(6,35,33,.5) 45%,rgba(6,35,33,0) 92%)');
     if(state.hvUpload&&hvI)tintWhite(hvI,function(u){if(u)hvI.src=u;});else setHv('img/hiperviajes-slogan-white.png');
     if(opI){var go=function(){tintWhite(opI,function(u){if(u){opI.src=u;opI.style.background='none';}});};if(opI.complete&&opI.naturalWidth)go();else opI.addEventListener('load',go,{once:true});}
     return;
@@ -381,7 +392,8 @@ function capturar(){
   var sel=window.getSelection&&window.getSelection();if(sel)sel.removeAllRanges();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
   return cargarH2C().then(function(){return window.html2canvas(s,{scale:2,useCORS:true,backgroundColor:'#fff'});});
 }
-function nombreArchivo(){return 'voucher-'+(state.v&&state.v.destNombre||'servicios').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9]+/g,'-').toLowerCase()+'-'+(state.ver==='ink'?'imprimir':'digital')+'.png';}
+function nombreArchivo(){return 'voucher-'+(state.v&&state.v.destNombre||'servicios').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9]+/g,'-').toLowerCase()+'-'+(state.ver==='ink'?'imprimir':'digital')+(state.col==='celeste'?'-celeste':'')+'.png';}
+function marcarBotones(){document.querySelectorAll('.seg button').forEach(function(b){b.classList.toggle('on',b.dataset.v?b.dataset.v===state.ver:b.dataset.c===state.col);});}
 function aviso(btn,txt,ms){var t=btn.dataset.t||btn.textContent;btn.dataset.t=t;btn.textContent=txt;clearTimeout(btn._t);btn._t=setTimeout(function(){btn.textContent=t;},ms||2500);}
 function exportarPNG(){
   capturar().then(function(c){var a=document.createElement('a');a.download=nombreArchivo();a.href=c.toDataURL('image/png');document.body.appendChild(a);a.click();a.remove();})
@@ -430,7 +442,9 @@ function init(){
   $('fotof').onchange=function(){cargarLogo(this,'fotoUp','fotoUpOk');};
   $('hvf').onchange=function(){cargarLogo(this,'hvLogo','hvUpload');};
   $('obs').oninput=function(){if(state.v)render();};
-  document.querySelectorAll('.seg button').forEach(function(b){b.onclick=function(){state.ver=b.dataset.v;if(state.v)render();else document.querySelectorAll('.seg button').forEach(function(x){x.classList.toggle('on',x.dataset.v===state.ver);});};});
+  document.querySelectorAll('.seg button[data-v]').forEach(function(b){b.onclick=function(){state.ver=b.dataset.v;if(state.v)render();else marcarBotones();};});
+  document.querySelectorAll('.seg button[data-c]').forEach(function(b){b.onclick=function(){state.col=b.dataset.c;try{localStorage.setItem('vch-color',state.col);}catch(e){}if(state.v)render();else marcarBotones();};});
+  marcarBotones();
   $('lpos').onchange=function(){state.logoPos=this.value;state.autoAbajo=false;if(state.v)render();};
   $('prn').onclick=function(){window.print();};
   $('png').onclick=exportarPNG;
