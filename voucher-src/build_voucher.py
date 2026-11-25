@@ -85,7 +85,7 @@ assert '</script' not in js.lower()
 import datetime
 VERSION_TXT=(datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)-datetime.timedelta(hours=3)).strftime('%d/%m %H:%M')
 html=('<!doctype html>\n<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
- '<title>Voucher de servicios · Hiperviajes</title><link rel="icon" href="vch-fav/favicon.ico?v=1" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="vch-fav/favicon-32.png?v=1"><link rel="icon" type="image/png" sizes="192x192" href="vch-fav/icon-192.png?v=1"><link rel="apple-touch-icon" href="vch-fav/apple-touch-icon.png?v=1"><meta name="theme-color" content="#19C0AA">'
+ '<title>Voucher de servicios · Hiperviajes</title><link rel="icon" href="vch-fav/favicon.ico?v=1" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="vch-fav/favicon-32.png?v=1"><link rel="icon" type="image/png" sizes="192x192" href="vch-fav/icon-192.png?v=1"><link rel="apple-touch-icon" href="vch-fav/apple-touch-icon.png?v=1"><meta name="theme-color" content="#59B9BE">'
  '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
  '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;1,500&family=Playfair+Display:ital,wght@1,700;1,800;1,900&family=Oswald:wght@500;600;700&display=swap">'
  '<style>'+VCSS+'</style></head><body>'+rd(os.path.join(here,'body.html')).replace('__VERSION__',VERSION_TXT)+'<script>'+js+'</script></body></html>\n')

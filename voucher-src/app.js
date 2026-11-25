@@ -1,5 +1,5 @@
 var REMOTE='https://raw.githubusercontent.com/gonzalonocella-G04T/PNR-CREATOR-GNM/main/';
-var HV_LOGO='img/hiperviajes-slogan-teal.png',state={logoPos:'auto',ver:'dig',col:'verde',v:null,opLogo:null,hvLogo:null};
+var HV_LOGO='img/hv-plano.png',state={logoPos:'auto',ver:'dig',col:'verde',v:null,opLogo:null,hvLogo:null};
 try{if(localStorage.getItem('vch-color')==='celeste')state.col='celeste';}catch(e){}
 /* Versión celeste Hiperviajes: el voucher es el mismo; se cambian los verdes por los tonos de celeste.json
    (las reglas CSS .c-hv las arma build_voucher.py; acá se pintan los colores que van dentro del HTML y los logos). */
@@ -135,12 +135,12 @@ function render(){
     intro='';
   }else{
     hero='';
-    intro='<div class="ihd"><div class="lgs">'+im(state.hvUpload?hv:'img/hiperviajes-slogan-print.png','lg','Hiperviajes')+(hasOp?'<i></i>'+opHtml('lg2'):'')+'</div>'+
+    intro='<div class="ihd"><div class="lgs">'+im(state.hvUpload?hv:'img/hv-plano-imprimir.png','lg','Hiperviajes')+(hasOp?'<i></i>'+opHtml('lg2'):'')+'</div>'+
       '<div class="row"><div class="tt"><small><i></i>VOUCHER DE SERVICIOS<i></i></small><b contenteditable style="font-size:'+((v.destNombre||'').length>22?10:(v.destNombre||'').length>14?12.5:15.5)+'mm">'+esc(titleCase(v.destNombre||''))+'</b>'+
-      '<svg class="sw" viewBox="0 0 300 16" preserveAspectRatio="none"><path d="M6 12C80 3 210 1 294 8" fill="none" stroke="url(#swg)" stroke-width="3.2" stroke-linecap="round"/><defs><linearGradient id="swg" x1="0" x2="1"><stop offset="0" stop-color="#0D6B5E"/><stop offset="1" stop-color="#3FA37C"/></linearGradient></defs></svg>'+
+      '<svg class="sw" viewBox="0 0 300 16" preserveAspectRatio="none"><path d="M6 12C80 3 210 1 294 8" fill="none" stroke="url(#swg)" stroke-width="3.2" stroke-linecap="round"/><defs><linearGradient id="swg" x1="0" x2="1"><stop offset="0" stop-color="#24686D"/><stop offset="1" stop-color="#409FA5"/></linearGradient></defs></svg>'+
       (v.pais?'<span><svg viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0113 0c0 4.8-6.5 11-6.5 11z" fill="currentColor"/><circle cx="12" cy="10" r="2.4" fill="#fff"/></svg><em contenteditable>'+esc(v.pais.toUpperCase())+'</em></span>':'')+'</div>'+
       '</div>'+ // sin sello en la versión para imprimir: no suma y compite con el título
-      '<svg class="iw" viewBox="0 0 600 24" preserveAspectRatio="none"><path d="M0 14C100 2 200 2 300 12S500 24 600 8" fill="none" stroke="#0D6B5E" stroke-width="1.2" opacity=".55"/><path d="M0 19C110 9 210 9 310 17S500 26 600 14" fill="none" stroke="#0D6B5E" stroke-width=".8" opacity=".35"/></svg></div>';
+      '<svg class="iw" viewBox="0 0 600 24" preserveAspectRatio="none"><path d="M0 14C100 2 200 2 300 12S500 24 600 8" fill="none" stroke="#24686D" stroke-width="1.2" opacity=".55"/><path d="M0 19C110 9 210 9 310 17S500 26 600 14" fill="none" stroke="#24686D" stroke-width=".8" opacity=".35"/></svg></div>';
   }
   if(state.ver==='dig'){
     var n=v.items.length;
@@ -152,7 +152,7 @@ function render(){
     var PIN='<path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0113 0c0 4.8-6.5 11-6.5 11z" fill="currentColor" stroke="none"/><circle cx="12" cy="10" r="2.4" fill="#fff" stroke="none"/>';
     var TICKET='<g transform="rotate(-35 12 12)"><path d="M2.5 8h19v2.6a1.6 1.6 0 000 2.8V16h-19v-2.6a1.6 1.6 0 000-2.8z"/><path d="M15 8.5v7" stroke-dasharray="1.4 1.6"/></g>';
     var rows=v.items.map(function(it,idx){
-      var bg='linear-gradient(135deg,#1F8A7C,#0F5F55)',fg='#fff';
+      var bg='linear-gradient(135deg,#2F878D,#205D60)',fg='#fff';
       var fch=it.f?('<b>'+it.f.d+' '+MESES[it.f.m-1]+'</b>'+(it.tipo==='hotel'&&it.co?'<em>al '+it.co.d+' '+MESES[it.co.m-1]+'</em>':'')+'<span>'+it.f.y+'</span>'):'<b>—</b>';
       var chip='<div class="chip" style="background:'+bg+';color:'+fg+'">'+SV(CAL,'cal')+'<div>'+fch+'</div></div>';
       var tit=it.titulo||'',main=tit,sub='';
@@ -167,14 +167,14 @@ function render(){
     var ob=$('obs').value.trim();
     st.innerHTML=hvPaint('<div class="sheet v-dig2" id="sheet">'+
       '<div class="hero">'+(foto?im(foto,'ph','').replace('<img','<img style="object-position:center '+(state.fotoUp||!dest||dest.y==null?40:Math.round(dest.y*100))+'%"'):'')+(abajo?'':'<div class="veil"></div><div class="logos">'+LOGOS+'</div>')+
-      '<svg class="wave" viewBox="0 0 610 70" preserveAspectRatio="none"><path d="M0 18C120 52 230 62 340 44S520 4 610 22V70H0Z" fill="#cfeee7" opacity=".85"/><path d="M0 40C140 66 260 70 360 56S520 26 610 40V70H0Z" fill="#f4fbfa"/></svg></div>'+
-      (abajo?'<div class="logos-below">'+LOGOS+'</div>':'')+'<div class="mid"><svg class="deco" viewBox="0 0 610 300" preserveAspectRatio="none"><path d="M0 40C60 70 90 140 40 200S0 280 0 300Z" fill="#d7efea" opacity=".7"/><path d="M610 20C540 60 520 120 570 170S610 250 610 300Z" fill="#d7efea" opacity=".7"/></svg>'+
+      '<svg class="wave" viewBox="0 0 610 70" preserveAspectRatio="none"><path d="M0 18C120 52 230 62 340 44S520 4 610 22V70H0Z" fill="#d1edef" opacity=".85"/><path d="M0 40C140 66 260 70 360 56S520 26 610 40V70H0Z" fill="#f4fcfb"/></svg></div>'+
+      (abajo?'<div class="logos-below">'+LOGOS+'</div>':'')+'<div class="mid"><svg class="deco" viewBox="0 0 610 300" preserveAspectRatio="none"><path d="M0 40C60 70 90 140 40 200S0 280 0 300Z" fill="#d8eeef" opacity=".7"/><path d="M610 20C540 60 520 120 570 170S610 250 610 300Z" fill="#d8eeef" opacity=".7"/></svg>'+
       '<div class="tit"><div class="kick"><i></i><span>VOUCHER DE SERVICIOS</span><i></i></div><b contenteditable style="font-size:'+((v.destNombre||'').length>23?42:(v.destNombre||'').length>19?48:(v.destNombre||'').length>14?58:64)+'px">'+esc(v.destNombre||'')+'</b>'+
       (v.pais?'<div class="ctry">'+SV(PIN,'pin')+'<span contenteditable>'+esc(v.pais.toUpperCase())+'</span></div>':'')+'</div>'+
       '<div class="card">'+rows+'</div>'+
       '<div class="px">'+SV(PEOPLE,'pp')+'<span class="k">PASAJEROS</span><i></i><div class="nm" contenteditable>'+(v.pax.length?v.pax.map(function(x){return '<span class="pn">'+esc(x)+'</span>';}).join('<em>|</em><wbr>'):'<span class="ph">Nombre y apellido</span>')+'</div>'+(v.npax&&v.npax!==v.pax.length?'<span class="cnt">'+v.npax+' PAX</span>':'')+'</div>'+
       PREST+(ob?'<div class="ob" contenteditable>'+esc(ob)+'</div>':'')+CONT+'<div class="bye"><b contenteditable>¡Buen viaje!</b><span contenteditable>Gracias por elegirnos</span></div>'+'</div>'+
-      '<div class="foot"><svg viewBox="0 0 610 90" preserveAspectRatio="none"><path d="M0 22C150 2 300 4 420 16S560 34 610 20V90H0Z" fill="#bfe6de"/><path d="M0 40C140 20 290 22 420 34S560 50 610 36V90H0Z" fill="url(#fg)"/><defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2aa192"/><stop offset="1" stop-color="#14766b"/></linearGradient></defs></svg>'+
+      '<div class="foot"><svg viewBox="0 0 610 90" preserveAspectRatio="none"><path d="M0 22C150 2 300 4 420 16S560 34 610 20V90H0Z" fill="#c1e5e7"/><path d="M0 40C140 20 290 22 420 34S560 50 610 36V90H0Z" fill="url(#fg)"/><defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#59bbbf"/><stop offset="1" stop-color="#287378"/></linearGradient></defs></svg>'+
       '<div class="vft"><i></i>'+SV(TICKET,'tk')+'<span>VOUCHER DE SERVICIO</span><i></i></div></div>'+
       (dest&&dest.cr?'<div class="cr">Foto: '+esc(dest.cr)+'</div>':'')+'</div>');
     marcarBotones();
@@ -209,8 +209,8 @@ function ajustarLogos(){
   var mode=state.logoPos,ph=hero.querySelector('img.ph'),posY=(state.v&&state.v.dest&&state.v.dest.y!=null&&!state.fotoUp)?state.v.dest.y:(state.ver==='dig'?.4:.5);
   function setHv(f){if(hvI&&!state.hvUpload)hvI.src=hvPaint(f);}
   if(mode==='oscuro'){
-    veil.style.background=hvPaint('linear-gradient(180deg,rgba(6,35,33,.74) 0%,rgba(6,35,33,.5) 45%,rgba(6,35,33,0) 92%)');
-    if(state.hvUpload&&hvI)tintWhite(hvI,function(u){if(u)hvI.src=u;});else setHv('img/hiperviajes-slogan-white.png');
+    veil.style.background=hvPaint('linear-gradient(180deg,rgba(12,34,35,.74) 0%,rgba(12,34,35,.5) 45%,rgba(12,34,35,0) 92%)');
+    if(state.hvUpload&&hvI)tintWhite(hvI,function(u){if(u)hvI.src=u;});else setHv('img/hv-plano-blanco.png');
     if(opI){var go=function(){tintWhite(opI,function(u){if(u){opI.src=u;opI.style.background='none';}});};if(opI.complete&&opI.naturalWidth)go();else opI.addEventListener('load',go,{once:true});}
     return;
   }
@@ -219,7 +219,7 @@ function ajustarLogos(){
     var a0=.86+.13*s,a1=.5+.45*s,a2=.12+.38*s;
     veil.style.height=(60+16*s)+'%';
     veil.style.background='linear-gradient(180deg,rgba(255,255,255,'+a0+') 0%,rgba(255,255,255,'+a1+') 45%,rgba(255,255,255,'+a2+') 78%,rgba(255,255,255,0) 100%)';
-    setHv(s>.3?'img/hiperviajes-slogan-dark.png':'img/hiperviajes-slogan-teal.png');
+    setHv(s>.3?'img/hv-plano-oscuro.png':'img/hv-plano.png');
   }
   if(mode==='claro'){apply(1);return;}
   if(!ph){apply(.2);return;}
@@ -228,14 +228,14 @@ function ajustarLogos(){
 }
 function duotono(img){
   function go(){try{var c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;var x=c.getContext('2d');x.drawImage(img,0,0);
-    var d=x.getImageData(0,0,c.width,c.height),p=d.data,D=[10,79,70],L=[244,250,248];
+    var d=x.getImageData(0,0,c.width,c.height),p=d.data,D=[27,77,80],L=[244,250,250];
     for(var i=0;i<p.length;i+=4){var l=(0.2126*p[i]+0.7152*p[i+1]+0.0722*p[i+2])/255;l=Math.pow(l,1.15);p[i]=D[0]+(L[0]-D[0])*l;p[i+1]=D[1]+(L[1]-D[1])*l;p[i+2]=D[2]+(L[2]-D[2])*l;}
     x.putImageData(d,0,0);img.onload=null;img.src=c.toDataURL('image/png');img.classList.add('ok');}catch(e){img.classList.add('ok');}}
   if(img.complete&&img.naturalWidth)go();else img.addEventListener('load',go,{once:true});
 }
 function listaItems(){
   var box=$('items');if(!box)return;if(!state.v){box.innerHTML='';return;}
-  box.innerHTML='<label>Servicios en el voucher</label>'+state.v.items.map(function(it,i){var f=it.f?(it.f.d+' '+MESES[it.f.m-1]):'s/f';return '<div class="itm"><input type="checkbox" id="it'+i+'" '+(it.off?'':'checked')+'><label for="it'+i+'">'+f+' · '+esc(it.titulo)+(it.man?' <i style="color:#6b8c88;font-style:normal">(a mano)</i>':'')+'</label>'+(it.man||it.tipo==='hotel'?'':'<button type="button" class="ed" data-ed="'+i+'" title="Pasar al formulario para corregirlo">✎ Editar</button>')+'</div>';}).join('');
+  box.innerHTML='<label>Servicios en el voucher</label>'+state.v.items.map(function(it,i){var f=it.f?(it.f.d+' '+MESES[it.f.m-1]):'s/f';return '<div class="itm"><input type="checkbox" id="it'+i+'" '+(it.off?'':'checked')+'><label for="it'+i+'">'+f+' · '+esc(it.titulo)+(it.man?' <i style="color:#6c8b8d;font-style:normal">(a mano)</i>':'')+'</label>'+(it.man||it.tipo==='hotel'?'':'<button type="button" class="ed" data-ed="'+i+'" title="Pasar al formulario para corregirlo">✎ Editar</button>')+'</div>';}).join('');
   state.v.items.forEach(function(it,i){$('it'+i).onchange=function(){it.off=!this.checked;render();};});
   [].forEach.call(box.querySelectorAll('[data-ed]'),function(b){b.onclick=function(){var it=state.v.items[+b.getAttribute('data-ed')];
     state.ocultos[claveItem(it)]=1;state.manual.push(itemAManual(it));state.mEdit=state.manual.length-1;mLista();mCargar(state.manual[state.mEdit]);$('mAdd').textContent='Guardar cambios';$('mCancel').hidden=false;generar();};});
