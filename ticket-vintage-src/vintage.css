@@ -144,8 +144,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Inter",Arial
 .info .v .sn{font-weight:500;color:var(--mut);font-size:13px}
 .brand{display:inline-block;text-align:center}
 .brand img{display:block;width:200px;height:auto;margin:0 auto}
-.brand .slogan{font:600 10.5px/1 Inter,Arial,sans-serif;letter-spacing:2.4px;color:#34959B;margin-top:7px;white-space:nowrap}
-.brand.sm img{width:175px}.brand.sm .slogan{font-size:9.5px;letter-spacing:2px}
+.brand .slogan{font:700 10px/1 Inter,Arial,sans-serif;letter-spacing:.8px;color:#018282;margin-top:6px;white-space:nowrap}
+.brand.sm img{width:175px}.brand.sm .slogan{font-size:9px;letter-spacing:.6px}
 .h-logo .brand{display:block}.top-logo{height:34px}
 
 .ph-col{position:relative}.ph-cr{position:absolute;right:8px;bottom:6px;font:500 10px Inter,Arial,sans-serif;color:#FFFFFF;text-shadow:0 1px 3px rgba(0,0,0,.7)}
