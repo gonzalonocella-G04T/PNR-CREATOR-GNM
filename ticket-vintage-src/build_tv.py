@@ -1,4 +1,6 @@
 # Arma ticket-vintage.html (página independiente). No modifica index.html ni los archivos de la herramienta actual.
+# Necesita archivos de /home/claude/hv/ que no están en el repositorio: para cambios en esta carpeta usar patch_tv.py.
+# pass.js y pass-img.js (diseño Boarding pass) salen de index.html con pass_from_index.py.
 import re, base64, os
 H='/home/claude/hv/'
 ui=open(H+'ui2.js',encoding='utf-8').read()
@@ -7,6 +9,7 @@ logo='data:image/png;base64,'+base64.b64encode(open(H+'logo.png','rb').read()).d
 js=(open(H+'logos.js').read()+open(H+'pimg.js').read()+open(H+'apx.js',encoding='utf-8').read()
     +open(H+'app.js',encoding='utf-8').read().replace('__LOGO__',open(H+'logo.b64').read().strip().split(',')[-1])
     +'\n'+wide+'\n'+open('sellos.js',encoding='utf-8').read()+(open('fotos.js',encoding='utf-8').read() if os.path.exists('fotos.js') else '')+open('pdflines.js').read()+open('ticket.js',encoding='utf-8').read()
+    +open('pass-img.js',encoding='utf-8').read()+open('pass.js',encoding='utf-8').read()
     +open('vintage.js',encoding='utf-8').read().replace('__LOGOHV__',logo))
 assert '</script' not in js.lower()
 css=open('vintage.css',encoding='utf-8').read()

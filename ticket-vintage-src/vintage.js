@@ -9,7 +9,19 @@
   var CABINS = ['Economy', 'Premium Economy', 'Business', 'Primera'];
   var CAB_ES = { 'Economy': 'Económica', 'Premium Economy': 'Premium Economy', 'Business': 'Business', 'Primera': 'Primera' };
   var MESC = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
-  var st = { r: null, file: '', sel: {}, mode: 'joint', dest: '', photos: [], err: '', lib: '', libData: {}, libErr: {} };
+  /* equipaje elegido a mano (para cuando el boleto no lo trae o lo trae mal): se muestra igual en todos los tramos.
+     t: texto del desplegable · v / v2: cómo se lee en el boleto (renglón principal y detalle; en el boarding pass, seguidos) */
+  var BAGS = [
+    { k: 'p', t: 'Solo artículo personal o mochila', v: 'Solo artículo personal', v2: 'o mochila' },
+    { k: 'm', t: 'Solo equipaje de mano y artículo personal', v: 'Equipaje de mano', v2: '+ artículo personal' },
+    { k: 'd', t: 'Solo equipaje despachado de 23 kg y artículo personal', v: 'Despachado de 23 kg', v2: '+ artículo personal' },
+    { k: 'dm', t: 'Equipaje despachado de 23 kg, equipaje de mano y artículo personal', v: 'Despachado de 23 kg', v2: '+ mano y artículo personal' }
+  ];
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  /* diseño: 'vintage' (el de siempre) o 'pass' (boarding pass como el de Tu Itinerario); el navegador recuerda el último */
+  var st = { r: null, file: '', sel: {}, mode: 'joint', dest: '', photos: [], err: '', lib: '', libData: {}, libErr: {}, bagOpt: '',
+    design: lsGet('tv_design') === 'pass' ? 'pass' : 'vintage', bpHdr: lsGet('tv_bp_hdr') !== '0', bpStub: lsGet('tv_bp_stub') !== '0' };
   if (typeof APX !== 'undefined') { Object.keys(HV.AP).forEach(function (c) { HV.AP[c].cur = true; }); Object.keys(APX).forEach(function (tz) { APX[tz].split(';').forEach(function (e) { var p = e.split('|'); if (!HV.AP[p[0]]) HV.AP[p[0]] = { c: p[1], n: p[2] || '', tz: tz }; }); }); }
 
   function $(id) { return document.getElementById(id); }
@@ -26,10 +38,16 @@
     var f = P.map(function (p) { return first(p.edit); });
     return P.map(function (p, i) { var w = String(p.edit || '').split(' '); return f.filter(function (x) { return x === f[i]; }).length > 1 && w.length > 2 ? w[0] + ' ' + w[1] : f[i]; });
   }
-  function P0bag() {
-    var P = selPax(); if (!P.length) return '';
-    if (!P.every(showBags)) return 'No figura en el boleto: escribilo si querés mostrarlo';
+  /* primera opción del desplegable de equipaje: lo que trae el boleto, o aviso de que no figura */
+  function autoBagLabel() {
+    var P = selPax(); if (!P.length) return 'Del boleto';
+    if (!P.every(showBags)) return 'No figura en el boleto (no se muestra)';
     var s = st.r.segs[0], b = s.bags[keyOf(s.bags, P[0].name)]; return 'Del boleto: ' + bagTxt(b).replace('|', ' ');
+  }
+  /* equipaje elegido a mano: { v, v2, t } o null si se usa el del boleto */
+  function bagManual() {
+    if (st.bagOpt === 'otro') { var x = String(st.bag || '').trim(); return x ? { v: x, v2: '', t: x } : null; }
+    return BAGS.filter(function (b) { return b.k === st.bagOpt; })[0] || null;
   }
   function selPax() { return st.r ? st.r.pax.filter(function (p) { return st.sel[p.name]; }) : []; }
   function surname(n) { var w = String(n || '').trim().split(/\s+/); return w.length > 1 ? w[w.length - 1] : ''; }
@@ -93,7 +111,7 @@
   /* ---------- preparación ---------- */
   function prepare(r) {
     showErr('');
-    st.r = r; st.sel = {}; st.photos = []; st.lib = ''; st.greet = ''; st.bag = '';
+    st.r = r; st.sel = {}; st.photos = []; st.lib = ''; st.greet = ''; st.bag = ''; st.bagOpt = '';
     r.pax.forEach(function (p) { st.sel[p.name] = true; p.edit = p.display; p.tk = p.tickets.join(', '); });
     r.segs.forEach(function (s) { if (s.cabin == null) s.cabin = ''; });
     st.dest = guessDest(r); st.destAuto = st.dest; st.destCode = guessDestCode(r); st.stamp = ''; st.oj = openJaw(r); if (st.oj) { st.dest = st.oj.map(function (c) { return city(c).toUpperCase(); }).join(' / '); st.destAuto = st.dest; }
@@ -188,7 +206,7 @@
       if (!s.cabin) m.push('Vuelo ' + tag + ': falta la cabina.');
     });
     if (!st.dest.trim()) m.push('Falta el destino.');
-    var le = !st.photos.length && curLib(); if (le && !st.libData[le.f] && !st.libErr[le.f]) m.push('Cargando la foto de ' + le.n + '…');
+    var le = st.design !== 'pass' && !st.photos.length && curLib(); if (le && !st.libData[le.f] && !st.libErr[le.f]) m.push('Cargando la foto de ' + le.n + '…');
     return m;
   }
   function segDur(s) { var a = utc(s.depDate, s.depTime, s.from.code), b = utc(s.arrDate, s.arrTime, s.to.code); return a != null && b != null ? b - a : s.durMin; }
@@ -221,7 +239,7 @@
   function docHTML(P) {
     var r = st.r, J = journeys(r.segs), many = P.length > 1;
     var tickets = P.map(function (p) { return { n: p.edit, t: p.tk }; }), sn = shortNames(P);
-    var seatOk = P.every(showSeats), bagMan = String(st.bag || '').trim(), bagOk = !bagMan && P.every(showBags);
+    var seatOk = P.every(showSeats), bagMan = bagManual(), bagOk = !bagMan && P.every(showBags);
     var locAl = r.airlineLocs.filter(function (a) { return a.loc && a.loc !== r.gdsLoc; });
     var h = '<div class="tv-doc">';
     // encabezado
@@ -244,7 +262,7 @@
         var sameBag = bagOk && P.every(function (p) { var a = s.bags[keyOf(s.bags, p.name)], b = s.bags[keyOf(s.bags, P[0].name)]; return a.pcs === b.pcs && a.kg === b.kg; });
         h += '<div class="seg"><div class="seg-top"><div class="al">' + wideLogo(s.al, 30) + '</div><div class="fn">' + esc(s.al + ' ' + s.fn) + (s.opBy && !new RegExp(s.opBy.split(' ')[0], 'i').test(U.alInfo(s.al).name) ? '<div class="op">Operado por ' + esc(s.opBy) + '</div>' : '') + '</div>' +
           '<div class="info"><div class="lab2">CABINA</div><div class="v">' + esc(CAB_ES[s.cabin] || s.cabin) + '</div></div>' +
-          (bagMan ? '<div class="info bag-man"><div class="lab2">EQUIPAJE</div><div class="v">' + esc(bagMan) + '</div></div>' : '') +
+          (bagMan ? '<div class="info bag-man' + (bagMan.v2 ? ' bag-opt' : '') + '"><div class="lab2">EQUIPAJE</div><div class="v">' + esc(bagMan.v) + (bagMan.v2 ? '<div class="v2">' + esc(bagMan.v2) + '</div>' : '') + '</div></div>' : '') +
           (bagOk ? '<div class="info"><div class="lab2">EQUIPAJE</div><div class="v">' + (sameBag ? esc(bag[0]) + '<div class="v2">' + esc(bag[1]) + '</div>' : P.map(function (p) { return esc(first(p.edit)) + ': ' + esc(bagTxt(s.bags[keyOf(s.bags, p.name)]).split('|')[0]); }).join('<br>')) + '</div></div>' : '') +
           (seatOk ? '<div class="info"><div class="lab2">' + (many ? 'ASIENTOS' : 'ASIENTO') + '</div><div class="v">' + seats + '</div></div>' : '') + '</div>' +
           '<div class="seg-route"><div class="pt"><div class="code">' + esc(s.from.code) + '</div><div class="cty">' + esc(city(s.from.code).toUpperCase()) + '</div><div class="dt">' + fdate(s.depDate) + '</div><div class="tm">' + esc(s.depTime) + '</div></div>' +
@@ -261,6 +279,57 @@
     h += '<div class="note">Horarios locales de cada ciudad.</div></div>';
     return h;
   }
+  /* ---------- diseño Boarding pass: la misma pieza que el boarding pass turquesa de Tu Itinerario (pass.js),
+     con pasajeros, boletos, código de reserva, cabina, equipaje, asientos y saludo ---------- */
+  function opShown(s) { try { return !!s.opBy && !new RegExp(s.opBy.split(' ')[0], 'i').test(U.alInfo(s.al).name); } catch (e) { return !!s.opBy; } }
+  function passDocHTML(P) {
+    var r = st.r, many = P.length > 1, PB = TVPASS.PB, F = TVPASS.F, lab = TVPASS.pbLab, segs = r.segs;
+    var it = { tzo: {}, segs: segs.map(function (s) { return { al: s.al, fn: s.fn, from: s.from.code, to: s.to.code, dep: s.depTime, arr: s.arrTime, date: s.depDate, arrDate: s.arrDate, cs: opShown(s), opName: s.opBy || '' }; }) };
+    var calc = HV.compute(it);
+    var seatOk = P.every(showSeats), bagMan = bagManual(), bagOk = !bagMan && P.every(showBags);
+    var locAl = r.airlineLocs.filter(function (a) { return a.loc && a.loc !== r.gdsLoc; });
+    var greet = (st.mode !== 'indiv' && String(st.greet || '').trim()) || autoGreeting(P);
+    var resp = (many ? 'Recuerden que cuentan' : 'Recordá que contás') + ' con nuestro respaldo antes, durante y después del viaje.';
+    var INK = PB.INK, MUT = PB.MUT;
+    // pasajeros con su boleto + código de reserva (colores del boarding pass verde: el armado los pasa al turquesa)
+    var col = function (L) {
+      return '<table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr><td style="padding:0 0 2px">' + lab(many ? 'Pasajeros' : (/a$/i.test(first(P[0].edit)) ? 'Pasajera' : 'Pasajero')) + '</td><td style="padding:0 0 2px 26px">' + lab(L.length > 1 || /,/.test(L[0].tk) ? 'Nº de billetes' : 'Nº de billete') + '</td></tr>' +
+        L.map(function (p) { return '<tr><td style="' + F + 'padding:1px 0;font-size:14px;font-weight:bold;color:' + INK + ';white-space:nowrap;line-height:1.35">' + esc(p.edit) + '</td><td style="' + F + 'padding:1px 0 1px 26px;font-size:14px;color:' + INK + ';white-space:nowrap;line-height:1.35">' + esc(p.tk) + '</td></tr>'; }).join('') + '</table>';
+    };
+    var half = P.length >= 6 ? Math.ceil(P.length / 2) : P.length, groups = [P.slice(0, half)].concat(P.length > half ? [P.slice(half)] : []);
+    it.whoHTML = '<table width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#FFFFFF" style="border-collapse:separate;background:#FFFFFF;border:1px solid #DCF3F1;border-radius:10px;margin:0 0 12px"><tr>' +
+      groups.map(function (g, i) { return '<td style="padding:10px ' + (i < groups.length - 1 ? 8 : 16) + 'px 10px 16px;vertical-align:top">' + col(g) + '</td>'; }).join('') + TVPASS.pbSep() +
+      '<td width="210" style="width:210px;padding:10px 16px;vertical-align:top">' + lab('Código de reserva') +
+      '<div style="' + F + 'font-size:21px;font-weight:bold;color:' + INK + ';letter-spacing:1px;line-height:1.25;white-space:nowrap">' + esc(r.gdsLoc) + '</div>' +
+      (locAl.length ? '<div style="' + F + 'font-size:11.5px;color:' + MUT + ';line-height:1.35">' + locAl.map(function (a) { return esc((a.al || a.name) + ' ' + a.loc); }).join(' · ') + '</div>' : '') + '</td></tr></table>';
+    var item = function (l, v, wrap) { return '<td style="' + F + 'padding:0 24px 0 0;vertical-align:middle;font-size:12.5px;color:' + INK + ';line-height:1.35;' + (wrap ? '' : 'white-space:nowrap') + '"><span style="font-size:9.5px;letter-spacing:1px;color:' + PB.LBL + ';text-transform:uppercase;white-space:nowrap">' + l + '</span>&nbsp;&nbsp;' + v + '</td>'; };
+    var o = { hv: true, urls: '', cs: true, tot: false, hdr: st.bpHdr, stub: st.bpStub,
+      // franja debajo de cada vuelo: cabina, equipaje y asientos
+      extra: function (c) {
+        var s = segs[c.i], t = '';
+        if (!s) return '';
+        if (s.cabin) t += item('Cabina', '<b>' + esc(CAB_ES[s.cabin] || s.cabin) + '</b>');
+        if (bagMan) t += item('Equipaje', '<b>' + esc(bagMan.v + (bagMan.v2 ? ' ' + bagMan.v2 : '')) + '</b>', true);
+        else if (bagOk) {
+          var b0 = s.bags[keyOf(s.bags, P[0].name)], same = P.every(function (p) { var b = s.bags[keyOf(s.bags, p.name)]; return b.pcs === b0.pcs && b.kg === b0.kg; });
+          t += item('Equipaje', same ? '<b>' + esc(bagTxt(b0).replace('|', ' ')) + '</b>' : P.map(function (p) { return '<span style="white-space:nowrap">' + esc(first(p.edit)) + ' <b>' + esc(bagTxt(s.bags[keyOf(s.bags, p.name)]).split('|')[0]) + '</b></span>'; }).join(' &nbsp;·&nbsp; '), true);
+        }
+        if (seatOk) t += item(many ? 'Asientos' : 'Asiento', P.map(function (p) { return '<span style="white-space:nowrap">' + (many ? esc(first(p.edit)) + ' ' : '') + '<b>' + esc(s.seats[keyOf(s.seats, p.name)]) + '</b></span>'; }).join(' &nbsp;·&nbsp; '), true);
+        return t ? '<table cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tr>' + t + '</tr></table>' : '';
+      },
+      // talón: el saludo al pasajero en lugar de "¿Lo hacemos realidad?"
+      msg: function (w, extra) {
+        return '<div style="' + extra + ';text-align:center"><div style="display:inline-block;max-width:' + w + 'px;font-family:\'Dancing Script\',cursive;font-weight:700;font-size:' + (greet.length > 26 ? 23 : 27) + 'px;line-height:1.15;color:#245356;padding:0 6px 5px;border-bottom:2px solid #24757A;transform:rotate(-4deg)">' + esc(greet) + '</div></div>';
+      },
+      // pie del cuerpo: respaldo (y el saludo, si no va el talón)
+      foot: '<div style="' + F + 'font-size:12.5px;color:' + INK + ';line-height:1.4;padding:8px 2px 0">' +
+        (st.bpStub ? '' : '<span style="font-family:\'Dancing Script\',cursive;font-weight:700;font-size:22px;color:#245356">' + esc(greet) + '</span>&nbsp;&nbsp; ') + esc(resp) + '</div>' };
+    return '<div class="tv-doc bp">' + TVPASS.html(it, calc, o) + '</div>';
+  }
+  function docFor(P) {
+    if (st.design !== 'pass') return docHTML(P);
+    try { return passDocHTML(P); } catch (e) { return '<div class="tv-doc bp"><div class="bp-wait">Completá los datos que faltan (a la izquierda) para ver el boarding pass.</div></div>'; }
+  }
   function docs() {
     var P = st.r.pax.filter(function (p) { return st.sel[p.name]; });
     return st.mode === 'indiv' ? P.map(function (p) { return [p]; }) : [P];
@@ -268,17 +337,23 @@
 
   /* ---------- revisión ---------- */
   function reviewHTML() {
-    var r = st.r, h = '';
+    var r = st.r, h = '', bp = st.design === 'pass', noBag = !st.bagOpt && !selPax().every(showBags);
     h += '<div class="rv-sec"><div class="rv-h">Documento leído</div><div class="rv-meta">' + esc(st.file) + ' · formato <b>' + esc(r.format) + '</b></div></div>';
+    h += '<div class="rv-sec"><div class="rv-h">Diseño</div><div class="seg-ctl" role="group"><button type="button" data-design="vintage"' + (bp ? '' : ' aria-pressed="true"') + '>Ticket Vintage</button><button type="button" data-design="pass"' + (bp ? ' aria-pressed="true"' : '') + '>Boarding pass</button></div>' +
+      (bp ? '<label class="chk"><input type="checkbox" data-bp="hdr"' + (st.bpHdr ? ' checked' : '') + '> Encabezado «Tu Itinerario by Hiperviajes»</label><label class="chk"><input type="checkbox" data-bp="stub"' + (st.bpStub ? ' checked' : '') + '> Talón con código de barras y saludo</label>' : '') + '</div>';
     h += '<div class="rv-sec"><div class="rv-h">Reserva</div><label>Código de reserva<input data-f="gds" value="' + esc(r.gdsLoc || '') + '"></label>' +
       (r.airlineLocs.length ? '<div class="rv-meta">Localizador de aerolínea: ' + r.airlineLocs.map(function (a) { return esc((a.al || a.name) + ' ' + a.loc); }).join(' · ') + '</div>' : '') +
-      '<label>Destino (sello y encabezado)<input data-f="dest" value="' + esc(st.dest) + '"></label>' + stampSel() +
-      '<label>Equipaje <span class="opt">opcional · reemplaza lo del boleto en todos los tramos</span><input data-f="bag" list="bagSug" value="' + esc(st.bag || '') + '" placeholder="' + esc(P0bag()) + '"><datalist id="bagSug"><option value="Solo equipaje de mano"><option value="Mochila o bolso de mano"><option value="Mano 10 kg + 1 valija de 23 kg"><option value="Mano 10 kg + 2 valijas de 23 kg"><option value="1 valija de 23 kg en bodega"></datalist></label>' +
-      '<label>Saludo final<input data-f="greet" value="' + esc(st.greet || '') + '" placeholder="' + esc(autoGreeting(selPax())) + '"></label></div>';
+      '<label>' + (bp ? 'Destino (nombre del archivo)' : 'Destino (sello y encabezado)') + '<input data-f="dest" value="' + esc(st.dest) + '"></label>' + (bp ? '' : stampSel()) +
+      '<label>Equipaje <span class="opt">(igual en todos los tramos)</span><select data-f="bagopt"' + (noBag ? ' class="soft"' : '') + '><option value=""' + (st.bagOpt ? '' : ' selected') + '>' + esc(autoBagLabel()) + '</option>' +
+      BAGS.map(function (b) { return '<option value="' + b.k + '"' + (st.bagOpt === b.k ? ' selected' : '') + '>' + esc(b.t) + '</option>'; }).join('') +
+      '<option value="otro"' + (st.bagOpt === 'otro' ? ' selected' : '') + '>Otro (escribirlo)</option></select></label>' +
+      (noBag ? '<div class="rv-meta">El boleto no trae el equipaje: elegí una opción para mostrarlo.</div>' : '') +
+      (st.bagOpt === 'otro' ? '<label>Equipaje (texto)<input data-f="bag" value="' + esc(st.bag || '') + '" placeholder="Ej.: 2 valijas de 23 kg y equipaje de mano"></label>' : '') +
+      '<label>' + (bp ? 'Saludo (en el talón)' : 'Saludo final') + '<input data-f="greet" value="' + esc(st.greet || '') + '" placeholder="' + esc(autoGreeting(selPax())) + '"></label></div>';
     h += '<div class="rv-sec"><div class="rv-h">Pasajeros</div>';
     r.pax.forEach(function (p, i) {
       h += '<div class="rv-pax"><label class="chk"><input type="checkbox" data-sel="' + i + '"' + (st.sel[p.name] ? ' checked' : '') + '> Incluir</label><label>Nombre<input data-pn="' + i + '" value="' + esc(p.edit) + '"></label><label>Boleto(s)<input data-pt="' + i + '" value="' + esc(p.tk) + '"' + (p.tk ? '' : ' class="miss" placeholder="No figura en el PDF"') + '></label>' +
-        '<div class="rv-meta">Asiento: ' + (showSeats(p) ? 'se muestra' : 'no se muestra (no está en todos los tramos)') + ' · Equipaje: ' + (showBags(p) ? 'se muestra' : 'no se muestra (no figura claro en todos los tramos)') + '</div></div>';
+        '<div class="rv-meta">Asiento: ' + (showSeats(p) ? 'se muestra' : 'no se muestra (no está en todos los tramos)') + ' · Equipaje: ' + (bagManual() ? 'el elegido arriba' : showBags(p) ? 'se muestra' : 'no se muestra (no figura claro en todos los tramos)') + '</div></div>';
     });
     if (r.pax.length > 1) h += '<div class="seg-ctl" role="group"><button type="button" data-mode="joint"' + (st.mode === 'joint' ? ' aria-pressed="true"' : '') + '>Un documento conjunto</button><button type="button" data-mode="indiv"' + (st.mode === 'indiv' ? ' aria-pressed="true"' : '') + '>Uno por pasajero</button></div>';
     h += '</div><div class="rv-sec"><div class="rv-h">Vuelos</div>';
@@ -290,7 +365,8 @@
         '<div class="rv-row"><label class="w5">Sale<input type="date" data-s="' + i + '" data-k="depDate" value="' + esc(s.depDate || '') + '"></label><label class="w3">Hora<input type="time" data-s="' + i + '" data-k="depTime" value="' + esc(s.depTime || '') + '"></label></div><div class="rv-row"><label class="w5">Llega<input type="date" data-s="' + i + '" data-k="arrDate" value="' + esc(s.arrDate || '') + '"></label><label class="w3">Hora<input type="time" data-s="' + i + '" data-k="arrTime" value="' + esc(s.arrTime || '') + '"></label></div>' +
         (s.fareBrand && !s.cabin ? '<div class="rv-meta">El documento solo indica la tarifa "' + esc(s.fareBrand) + '": elegí la cabina.</div>' : '') + '</div>';
     });
-    h += '</div><div class="rv-sec"><div class="rv-h">Foto del destino <span class="opt">opcional</span></div><div class="rv-meta">Una foto se muestra al costado de todos los vuelos; dos fotos (ida y vuelta) van una por tramo.</div>' +
+    h += '</div>';
+    if (!bp) h += '<div class="rv-sec"><div class="rv-h">Foto del destino <span class="opt">opcional</span></div><div class="rv-meta">Una foto se muestra al costado de todos los vuelos; dos fotos (ida y vuelta) van una por tramo.</div>' +
       libSel() + '<label class="file">Elegir foto(s) propia(s)<input type="file" id="ph" accept="image/*" multiple></label>' + (st.photos.length ? ' <button type="button" class="lnk" id="phClr">Quitar fotos</button>' : '') + '</div>';
     return h;
   }
@@ -320,7 +396,7 @@
     $('issues').hidden = !m.length;
     ['cppng', 'dlpng', 'dlpdf'].forEach(function (id) { $(id).disabled = !!m.length; });
     var D = docs();
-    $('preview').innerHTML = D.length ? D.map(function (P, i) { return '<div class="pv-wrap"><div class="pv" data-i="' + i + '">' + docHTML(P) + '</div></div>'; }).join('') : '';
+    $('preview').innerHTML = D.length ? D.map(function (P, i) { return '<div class="pv-wrap"><div class="pv" data-i="' + i + '">' + docFor(P) + '</div></div>'; }).join('') : '';
     fitDest($('preview')); fitPreview();
     if (document.fonts && !renderPreview.f) { renderPreview.f = 1; document.fonts.ready.then(function () { fitDest($('preview')); fitPreview(); }); }
   }
@@ -339,7 +415,7 @@
   function fitPreview() {
     [].forEach.call(document.querySelectorAll('.pv-wrap'), function (w) {
       var d = w.querySelector('.tv-doc'); if (!d) return;
-      var sc = Math.min(1, (w.clientWidth - 2) / 1100); d.style.transform = 'scale(' + sc + ')'; w.style.height = Math.ceil(d.offsetHeight * sc) + 'px';
+      var sc = Math.min(1, (w.clientWidth - 2) / (d.offsetWidth || 1100)); d.style.transform = 'scale(' + sc + ')'; w.style.height = Math.ceil(d.offsetHeight * sc) + 'px';
     });
   }
   function bind() {
@@ -350,7 +426,7 @@
       else if (t.dataset.f === 'dest') { st.dest = t.value.toUpperCase(); var o = rv.querySelector('select[data-f="stamp"] option'); if (o) o.textContent = autoLabel(autoStamp()); }
       else if (t.dataset.f === 'greet') st.greet = t.value;
       else if (t.dataset.f === 'bag') st.bag = t.value;
-      else if (t.dataset.f === 'stamp' || t.dataset.f === 'lib') return;
+      else if (t.dataset.f === 'stamp' || t.dataset.f === 'lib' || t.dataset.f === 'bagopt' || t.dataset.bp) return;
       else if (t.dataset.pn != null) r.pax[+t.dataset.pn].edit = t.value;
       else if (t.dataset.pt != null) r.pax[+t.dataset.pt].tk = t.value;
       else if (t.dataset.s != null) {
@@ -364,6 +440,8 @@
       var t = e.target;
       if (t.dataset.f === 'stamp') { st.stamp = t.value; renderPreview(); }
       if (t.dataset.f === 'lib') { st.lib = t.value; renderAll(); }
+      if (t.dataset.f === 'bagopt') { st.bagOpt = t.value; renderAll(); if (t.value === 'otro') { var bi = rv.querySelector('input[data-f="bag"]'); if (bi) bi.focus(); } }
+      if (t.dataset.bp) { st[t.dataset.bp === 'hdr' ? 'bpHdr' : 'bpStub'] = t.checked; lsSet(t.dataset.bp === 'hdr' ? 'tv_bp_hdr' : 'tv_bp_stub', t.checked ? '1' : '0'); renderPreview(); }
       if (t.dataset.sel != null) { st.sel[st.r.pax[+t.dataset.sel].name] = t.checked; renderPreview(); }
       if (t.dataset.k === 'cabin' || t.dataset.s != null) { renderAll(); }
       if (t.id === 'ph') {
@@ -374,6 +452,7 @@
     rv.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       if (b.dataset.mode) { st.mode = b.dataset.mode; renderAll(); }
+      if (b.dataset.design) { st.design = b.dataset.design; lsSet('tv_design', st.design); renderAll(); }
       if (b.id === 'phClr') { st.photos = []; renderAll(); }
     });
     var dp = $('drop'), fi = $('file');
@@ -393,7 +472,7 @@
   /* ---------- exportación ---------- */
   function capture(i) {
     return loadScript(H2C).then(function () { return document.fonts ? document.fonts.ready : null; }).then(function () {
-      var host = $('cap'); host.innerHTML = docHTML(docs()[i]);
+      var host = $('cap'); host.innerHTML = docFor(docs()[i]);
       var el = host.querySelector('.tv-doc');
       fitDest(host); inlineSvgs(el);
       var imgs = el.querySelectorAll('img');

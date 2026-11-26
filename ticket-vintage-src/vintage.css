@@ -166,3 +166,12 @@ body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Inter",Arial
 .big.dest.oj{font-size:30px;line-height:1.05}
 /* destino: ancho del texto para ajustar la letra */
 .big.dest{display:inline-block;white-space:nowrap}
+
+/* equipaje elegido del desplegable: renglón principal y detalle */
+.info.bag-man.bag-opt .v{max-width:175px}
+.info.bag-man .v .v2{font-size:12px;line-height:1.25;margin-top:1px;white-space:normal}
+.panel select.soft{border-color:#E0A23B}
+
+/* diseño Boarding pass: toma el ancho de la pieza */
+.tv-doc.bp{width:max-content;padding:22px}
+.tv-doc.bp .bp-wait{width:700px;padding:40px;text-align:center;color:var(--mut);font-size:16px}
